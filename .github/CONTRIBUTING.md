@@ -92,5 +92,5 @@ To run all unit tests run the following command:
 make test
 ```
 
-Please make sure that your change doesn't cause any 
+Please make sure that your change doesn't cause any
 of the unit tests to fail.
