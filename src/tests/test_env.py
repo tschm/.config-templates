@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+
 @pytest.fixture
 def project_root():
     """Fixture that provides the project root directory.
