@@ -18,9 +18,7 @@ def test_env_file_exists():
     assert env_file_path.exists(), ".env file does not exist in project root"
 
 
-@pytest.mark.parametrize(
-    "folder_key", ["MARIMO_FOLDER", "SOURCE_FOLDER", "TESTS_FOLDER"]
-)
+@pytest.mark.parametrize("folder_key", ["MARIMO_FOLDER", "SOURCE_FOLDER", "TESTS_FOLDER"])
 def test_folder_exists(env_content, project_root, folder_key):
     """Tests that the folder path specified in the .env file exists.
 
