@@ -1,0 +1,13 @@
+{
+    "extends": [
+        "config:recommended",
+        ":enablePreCommit",
+        ":automergeMinor",
+        ":dependencyDashboard",
+        ":semanticCommits"
+    ],
+    "enabledManagers": [
+        "pre-commit",
+        "github-actions"
+    ]
+}
