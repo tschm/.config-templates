@@ -33,7 +33,7 @@ For those new to contributing, check out Github's
 [guide](https://help.github.com/articles/using-pull-requests/).
 
 Once you've made your pull request, a member of the
-development team will assign themselves to review it. 
+development team will assign themselves to review it.
 You might have a few
 back-and-forths with your reviewer before it is accepted, 
 which is completely normal.
