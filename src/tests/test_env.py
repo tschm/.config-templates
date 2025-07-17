@@ -1,7 +1,8 @@
 """Tests for the .env file and the paths it points to."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 
 def test_env_file_exists():
