@@ -35,19 +35,19 @@ For those new to contributing, check out Github's
 Once you've made your pull request, a member of the
 development team will assign themselves to review it.
 You might have a few
-back-and-forths with your reviewer before it is accepted, 
+back-and-forths with your reviewer before it is accepted,
 which is completely normal.
-Your pull request will trigger continuous integration tests 
+Your pull request will trigger continuous integration tests
 for many different
-Python versions and different platforms. If these tests start failing, 
+Python versions and different platforms. If these tests start failing,
 please
 fix your code and send another commit, which will re-trigger the tests.
 
 If you'd like to add a new feature, please do propose your
-change on a Github issue, to make sure 
+change on a Github issue, to make sure
 that your priorities align with ours.
 
-If you'd like to contribute code but don't know where to start, 
+If you'd like to contribute code but don't know where to start,
 try one of the
 following:
 
@@ -63,19 +63,18 @@ A license is added to new files automatically as a pre-commit hook.
 ## Code style
 
 We use black and ruff to enforce our Python coding style.
-Before sending us a pull request, navigate to the project root
-and run
+Before sending us a pull request, navigate to the project root and run
 
 ```bash
 make fmt
 ```
 
-to make sure that your changes abide by our style conventions. 
+to make sure that your changes abide by our style conventions.
 Please fix any errors that are reported before sending the pull request.
 
 ## Writing unit tests
 
-Most code changes will require new unit tests. 
+Most code changes will require new unit tests.
 Even bug fixes require unit tests,
 since the presence of bugs usually indicates insufficient tests.
 When adding tests, try to find a file in which your tests should belong;
