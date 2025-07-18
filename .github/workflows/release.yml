@@ -28,6 +28,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write  # Needed to create releases
+
 jobs:
   tag:
     name: Create Git Tag
@@ -45,7 +48,6 @@ jobs:
 
   build:
     name: Build with Hatch
-    if: ${{ hashFiles('pyproject.toml') != '' }}
     runs-on: ubuntu-latest
     needs: tag
     steps:
@@ -54,17 +56,29 @@ jobs:
         with:
           fetch-depth: 0  # Ensure full history and tags available
 
+      - name: Check if pyproject.toml exists
+        id: check_file
+        run: |
+          if [ -f "pyproject.toml" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set up Python
+        if: steps.check_file.outputs.exists == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Install Hatch
+        if: steps.check_file.outputs.exists == 'true'
         run: |
           pip install --upgrade pip
           pip install hatch
 
       - name: Set version from tag in pyproject.toml
+        if: steps.check_file.outputs.exists == 'true'
         run: |
           version=${{ github.event.inputs.tag }}
           version=${version#v}
@@ -73,10 +87,47 @@ jobs:
           rm pyproject.toml.bak
 
       - name: Build Package
+        if: steps.check_file.outputs.exists == 'true'
         run: hatch build
 
       - name: Upload dist/
+        if: steps.check_file.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [tag, build]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure full history and tags available
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+        continue-on-error: true  # Continue even if there are no artifacts (no pyproject.toml)
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if dist directory exists and has files
+          if [ -d "dist" ] && [ "$(ls -A dist)" ]; then
+            # Create release with assets
+            gh release create ${{ github.event.inputs.tag }} \
+              --title "${{ github.event.inputs.tag }}" \
+              --generate-notes \
+              dist/*
+          else
+            # Create release without assets
+            gh release create ${{ github.event.inputs.tag }} \
+              --title "${{ github.event.inputs.tag }}" \
+              --generate-notes
+          fi
