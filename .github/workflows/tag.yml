@@ -13,7 +13,7 @@ on:
 
 jobs:
   build:
-    #needs: tagging
+    if: github.repository != 'tschm/.config-templates'
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Permission to write to repository contents (for creating releases)
@@ -31,6 +31,7 @@ jobs:
 
   # Job to publish the built package to PyPI
   publish:
+    if: github.repository != 'tschm/.config-templates'
     needs: build  # This job depends on the tag job
     runs-on: ubuntu-latest
     environment: release  # Use the release environment
