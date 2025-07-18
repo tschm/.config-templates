@@ -126,7 +126,7 @@ jobs:
 
       - name: Create GitHub Release with artifacts
         if: steps.check_dist.outputs.has_files == 'true'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2.3.2
         with:
           tag_name: ${{ github.event.inputs.tag }}
           name: ${{ github.event.inputs.tag }}
