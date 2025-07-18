@@ -130,13 +130,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ steps.check_dist.outputs.has_dist }}" = "true" ]; then
-            gh release create "${{ github.ref_name }}" \
-              --title "${{ github.ref_name }}" \
+            gh release create "${{ github.event.inputs.tag }}" \
+              --title "${{ github.event.inputs.tag }}" \
               --generate-notes \
               dist/*
           else
-            gh release create "${{ github.ref_name }}" \
-              --title "${{ github.ref_name }}" \
+            gh release create "${{ github.event.inputs.tag }}" \
+              --title "${{ github.event.inputs.tag }}" \
               --generate-notes
           fi
 
@@ -149,7 +149,7 @@ jobs:
       - name: Check if dist artifact exists
         id: check_artifact
         run: |
-          if gh release view "${{ github.ref_name }}" >/dev/null 2>&1; then
+          if gh release view "${{ github.event.inputs.tag }}" >/dev/null 2>&1; then
             echo "result=true" >> $GITHUB_OUTPUT
           else
             echo "result=false" >> $GITHUB_OUTPUT
