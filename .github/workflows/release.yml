@@ -47,64 +47,64 @@ jobs:
           git tag ${{ github.event.inputs.tag }}
           git push origin ${{ github.event.inputs.tag }}
 
-build:
-  name: Build with Hatch
-  runs-on: ubuntu-latest
-  needs: tag
-  outputs:
-    built: ${{ steps.set_output.outputs.built }}
-  steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+  build:
+    name: Build with Hatch
+    runs-on: ubuntu-latest
+    needs: tag
+    outputs:
+      built: ${{ steps.set_output.outputs.built }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Check if pyproject.toml exists
-      id: check_file
-      run: |
-        if [ -f "pyproject.toml" ]; then
-          echo "exists=true" >> $GITHUB_OUTPUT
-        else
-          echo "exists=false" >> $GITHUB_OUTPUT
-        fi
+      - name: Check if pyproject.toml exists
+        id: check_file
+        run: |
+          if [ -f "pyproject.toml" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
 
-    - name: Set up Python
-      if: steps.check_file.outputs.exists == 'true'
-      uses: actions/setup-python@v5
-      with:
-          python-version: '3.12'
+      - name: Set up Python
+        if: steps.check_file.outputs.exists == 'true'
+        uses: actions/setup-python@v5
+        with:
+            python-version: '3.12'
 
-    - name: Install Hatch
-      if: steps.check_file.outputs.exists == 'true'
-      run: |
-        pip install --upgrade pip
-        pip install hatch
+      - name: Install Hatch
+        if: steps.check_file.outputs.exists == 'true'
+        run: |
+          pip install --upgrade pip
+          pip install hatch
 
-    - name: Set version from tag in pyproject.toml
-      if: steps.check_file.outputs.exists == 'true'
-      run: |
-        version=${{ github.event.inputs.tag }}
-        version=${version#v}
-        echo "Setting version to $version"
-        sed -i.bak "s/^version = .*/version = \"$version\"/" pyproject.toml
-        rm pyproject.toml.bak
+      - name: Set version from tag in pyproject.toml
+        if: steps.check_file.outputs.exists == 'true'
+        run: |
+          version=${{ github.event.inputs.tag }}
+          version=${version#v}
+          echo "Setting version to $version"
+          sed -i.bak "s/^version = .*/version = \"$version\"/" pyproject.toml
+          rm pyproject.toml.bak
 
-    - name: Build Package
-      if: steps.check_file.outputs.exists == 'true'
-      run: hatch build
+      - name: Build Package
+        if: steps.check_file.outputs.exists == 'true'
+        run: hatch build
 
-    - name: Upload dist/
-      if: steps.check_file.outputs.exists == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: dist
-        path: dist/
+      - name: Upload dist/
+        if: steps.check_file.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
 
-    - name: Set build output
-      id: set_output
-      run: |
-        echo "built=${{ steps.check_file.outputs.exists }}" >> $GITHUB_OUTPUT
-
+      - name: Set build output
+        id: set_output
+        run: |
+          echo "built=${{ steps.check_file.outputs.exists }}" >> $GITHUB_OUTPUT
+  
 
   release:
     name: Create GitHub Release
