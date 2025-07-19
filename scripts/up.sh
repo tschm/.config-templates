@@ -20,6 +20,7 @@ main() {
 
   echo "🧹 Removing update script from extracted files..."
   rm -f "${EXTRACTED_DIR}/scripts/up.sh"
+  rm -f "${EXTRACTED_DIR}/action.yml"
 
   echo "📂 Copying files to working directory..."
   cp -Rf "${EXTRACTED_DIR}/." .

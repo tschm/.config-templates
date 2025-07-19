@@ -1,0 +1,36 @@
+name: 'Sync Config Templates'
+description: 'Sync configuration templates into a project and create a pull request if needed'
+author: 'Thomas Schmelzer'
+inputs:
+  branch:
+    description: 'Branch to sync changes to'
+    default: 'sync/update-configs'
+    required: false
+  commit-message:
+    description: 'Commit message for sync'
+    default: 'chore: sync config files from .config-templates'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    #- name: Make script executable
+    #  run: chmod +x ./scripts/up.sh
+    #  shell: bash
+
+    - name: Run config sync
+      run: ./scripts/up.sh --yes
+      shell: bash
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v6
+      with:
+        commit-message: "chore: sync config files from .config-templates"
+        branch: sync/update-configs
+        title: "chore: sync config files from .config-templates"
+        body: |
+          This PR updates config files from [tschm/.config-templates](https://github.com/tschm/.config-templates).
+        delete-branch: true
