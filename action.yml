@@ -51,16 +51,3 @@ runs:
         git status --short || true
       shell: bash
 
-    # Override the token for create-pull-request action using the PAT secret
-    - name: Create Pull Request (override token)
-      uses: peter-evans/create-pull-request@v6
-      with:
-        token: ${{ secrets.PAT_TOKEN }}          # Use PAT token here
-        commit-message:
-          chore: sync config files from .config-templates
-        branch: sync/update-configs
-        title:
-          chore: sync config files from .config-templates
-        body: |
-          This PR updates config files from [tschm/.config-templates](https://github.com/tschm/.config-templates).
-        delete-branch: true
