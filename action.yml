@@ -15,14 +15,40 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Copy sync script into workspace
+    - name: Ensure Git repository
       run: |
-        cp "${{ github.action_path }}/scripts/up.sh" ./up.sh
-        chmod +x ./up.sh
+        git rev-parse --is-inside-work-tree > /dev/null || {
+          echo "❌ Not in a git repository"
+          exit 1
+        }
       shell: bash
 
-    - name: Run config sync
-      run: ./up.sh --yes
+    - name: Download and apply templates
+      run: |
+        set -euo pipefail
+
+        REPO_URL="https://github.com/tschm/.config-templates"
+        TEMP_DIR="$(mktemp -d)"
+        trap 'rm -rf "$TEMP_DIR"' EXIT
+
+        echo "📥 Downloading template archive..."
+        curl -sSL -o templates.zip "$REPO_URL/archive/refs/heads/main.zip"
+
+        echo "📦 Extracting..."
+        unzip -q templates.zip -d "$TEMP_DIR"
+        rm -f templates.zip
+
+        EXTRACTED_DIR="${TEMP_DIR}/.config-templates-main"
+
+        echo "🧹 Removing internal files..."
+        rm -f "${EXTRACTED_DIR}/scripts/up.sh"
+        rm -f "${EXTRACTED_DIR}/action.yml"
+
+        echo "📂 Copying to working directory..."
+        cp -Rf "${EXTRACTED_DIR}/." .
+
+        echo "✅ Sync complete. Changed files:"
+        git status --short || true
       shell: bash
 
     - name: Create Pull Request
