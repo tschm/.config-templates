@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script: update.sh
+# Script: up.sh
 # Description: Safely updates config files from GitHub without branch switching
 # Author: Thomas Schmelzer
 
