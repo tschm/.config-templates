@@ -17,7 +17,7 @@ main() {
   #[ -d "$EXTRACTED_DIR" ] || exit 1
 
   #updated=0
-  cp -Rf EXTRACTED_DIR/. .
+  cp -Rf $EXTRACTED_DIR/. .
   git status
 
   #while IFS= read -r -d '' file; do
