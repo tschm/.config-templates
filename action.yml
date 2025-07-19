@@ -41,7 +41,6 @@ runs:
         EXTRACTED_DIR="${TEMP_DIR}/.config-templates-main"
 
         echo "🧹 Removing internal files..."
-        rm -f "${EXTRACTED_DIR}/scripts/up.sh"
         rm -f "${EXTRACTED_DIR}/action.yml"
 
         echo "📂 Copying to working directory..."
