@@ -1,7 +1,6 @@
 # Contributing
 
-This file is part of the tschm/.config-templates repository 
-(https://github.com/tschm/.config-templates).
+This file is part of the tschm/.config-templates repository.
 
 This document is a guide to contributing to the project.
 
