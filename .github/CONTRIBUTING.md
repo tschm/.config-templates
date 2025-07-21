@@ -1,5 +1,8 @@
 # Contributing
 
+This file is part of the tschm/.config-templates repository 
+(https://github.com/tschm/.config-templates).
+
 This document is a guide to contributing to the project.
 
 We welcome all contributions. You don't need to be an expert (in optimization)

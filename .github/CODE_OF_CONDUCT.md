@@ -1,5 +1,8 @@
 # Code of Conduct
 
+This file is part of the tschm/.config-templates repository 
+(https://github.com/tschm/.config-templates).
+
 ## Our Pledge
 
 In the interest of fostering an open and welcoming environment, we as
