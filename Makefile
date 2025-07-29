@@ -16,10 +16,11 @@ endif
 SOURCE_FOLDER ?= src
 TESTS_FOLDER ?= src/tests
 MARIMO_FOLDER ?= book/marimo
+OPTIONS ?=
 
 .DEFAULT_GOAL := help
 
-.PHONY: help verify install fmt lint test build check marimo clean docs
+.PHONY: help verify install fmt lint deptry test build check marimo clean docs pyproject
 
 ##@ Development Setup
 
@@ -44,6 +45,10 @@ lint: uv ## Run linters only
 
 check: lint test ## Run all checks (lint and test)
 	@printf "$(GREEN)All checks passed!$(RESET)\n"
+
+deptry: uv ## Run deptry (use OPTIONS="--your-options" to pass options)
+	@printf "$(BLUE)Running deptry...$(RESET)\n"
+	@uvx deptry $(SOURCE_FOLDER) $(OPTIONS)
 
 ##@ Testing
 
@@ -94,6 +99,19 @@ marimo: uv ## Start a Marimo server (use FILE=filename.py to specify a file)
 
 	@printf "$(BLUE)Start Marimo server with $(MARIMO_FOLDER)/$(FILE)...$(RESET)\n"
 	@uvx marimo edit --sandbox $(MARIMO_FOLDER)/$(FILE)
+
+##@ Configuration
+
+pyproject: ## Generate pyproject.toml from template
+	@printf "$(BLUE)Generating pyproject.toml from template...$(RESET)\n"
+	@if [ -f pyproject.toml ]; then \
+		echo "⚠️ pyproject.toml already exists. Backing up to pyproject.toml.bak"; \
+		cp pyproject.toml pyproject.toml.bak; \
+	fi
+	@cp pyproject.toml.template pyproject.toml
+	@printf "$(GREEN)pyproject.toml generated from template.$(RESET)\n"
+	@printf "$(BLUE)Remember to replace placeholders (indicated by <>) with your project-specific values.$(RESET)\n"
+	@printf "$(BLUE)See pyproject.toml.README.md for more information.$(RESET)\n"
 
 ##@ Help
 
