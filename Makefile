@@ -100,19 +100,6 @@ marimo: uv ## Start a Marimo server (use FILE=filename.py to specify a file)
 	@printf "$(BLUE)Start Marimo server with $(MARIMO_FOLDER)/$(FILE)...$(RESET)\n"
 	@uvx marimo edit --sandbox $(MARIMO_FOLDER)/$(FILE)
 
-##@ Configuration
-
-pyproject: ## Generate pyproject.toml from template
-	@printf "$(BLUE)Generating pyproject.toml from template...$(RESET)\n"
-	@if [ -f pyproject.toml ]; then \
-		echo "⚠️ pyproject.toml already exists. Backing up to pyproject.toml.bak"; \
-		cp pyproject.toml pyproject.toml.bak; \
-	fi
-	@cp pyproject.toml.template pyproject.toml
-	@printf "$(GREEN)pyproject.toml generated from template.$(RESET)\n"
-	@printf "$(BLUE)Remember to replace placeholders (indicated by <>) with your project-specific values.$(RESET)\n"
-	@printf "$(BLUE)See pyproject.toml.README.md for more information.$(RESET)\n"
-
 ##@ Help
 
 help: ## Display this help message
