@@ -51,9 +51,10 @@ jobs:
           git push origin ${{ github.event.inputs.tag }}
 
   build:
-    name: Build with Hatch
+    name: Build
     runs-on: ubuntu-latest
     needs: tag
+    if: ${{ hashFiles('pyproject.toml') != '' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
