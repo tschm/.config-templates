@@ -80,7 +80,7 @@ jobs:
           hatch build
 
           echo "Uploading dist/"
-          tar -cf dist.tar dist
+          #tar -cf dist.tar dist
 
       - name: Upload dist artifact
         # not tested at runtime!
@@ -88,7 +88,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist.tar
+          path: dist
 
   release:
     name: Create GitHub Release
@@ -103,15 +103,15 @@ jobs:
           path: dist
         continue-on-error: true
 
-      - name: Extract dist.tar
-        run: |
-          if [[ -f dist/dist.tar ]]; then
-            echo "Extracting dist.tar"
-            tar -xf dist/dist.tar -C dist
-            rm dist/dist.tar
-          else
-            echo "No dist.tar found; skipping extract"
-          fi
+      #- name: Extract dist.tar
+      #  run: |
+      #    if [[ -f dist/dist.tar ]]; then
+      #      echo "Extracting dist.tar"
+      #      tar -xf dist/dist.tar -C dist
+      #      rm dist/dist.tar
+      #    else
+      #      echo "No dist.tar found; skipping extract"
+      #    fi
 
       - name: Create GitHub Release with artifacts
         uses: softprops/action-gh-release@v2.3.2
@@ -143,8 +143,6 @@ jobs:
             echo "should_publish=false" >> $GITHUB_OUTPUT
           else
             echo "should_publish=true" >> $GITHUB_OUTPUT
-            tar -xf dist/dist.tar -C dist
-            rm dist/dist.tar
           fi
 
       - name: Publish to PyPI
