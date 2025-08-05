@@ -79,34 +79,16 @@ jobs:
 
           hatch build
 
-      - name: Upload dist/ if exists
-        run: |
-          if [ -d dist ]; then
-            echo "Uploading dist/"
-            tar -cf dist.tar dist
-          else
-            echo "dist/ directory not found. Skipping upload."
-            exit 0
-          fi
-        shell: bash
+          echo "Uploading dist/"
+          tar -cf dist.tar dist
 
       - name: Upload dist artifact
-        if: hashFiles('dist.tar') != ''
+        # not tested at runtime!
+        if: hashFiles('pyproject.toml') != ''
         uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist.tar
-
-      - name: Upload fallback files
-        # Upload Python sources if dist/ was not built (e.g. pyproject.toml missing or build failed)
-        if: hashFiles('dist.tar') == ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: |
-            src/tests/**/*.py
-            notebooks/**/*.py
-            book/marimo/**/*.py
 
   release:
     name: Create GitHub Release
@@ -124,13 +106,24 @@ jobs:
         with:
           name: dist
           path: dist
+        continue-on-error: true
 
       - name: Extract dist.tar if present
-        if: hashFiles('dist/dist.tar') != ''
+        continue-on-error: true
         run: |
-          echo "Extracting dist.tar"
-          tar -xf dist/dist.tar -C dist
-          rm dist/dist.tar
+          if [[ -f dist/dist.tar ]]; then
+            echo "Extracting dist.tar"
+            tar -xf dist/dist.tar -C dist
+            rm dist/dist.tar
+          else
+            echo "No dist.tar found; skipping extract"
+          fi
+
+      - name: Warn if no artifacts found
+        run: |
+          if [[ ! -d dist || -z "$(ls -A dist)" ]]; then
+            echo "::warning::No files found in dist/. Release will be created without artifacts."
+          fi
 
       - name: Create GitHub Release with artifacts
         uses: softprops/action-gh-release@v2.3.2
@@ -152,9 +145,20 @@ jobs:
         with:
           name: dist
           path: dist
+        continue-on-error: true
+
+      - name: Check if dist contains artifacts
+        id: check_dist
+        run: |
+          if [[ ! -d dist || -z "$(ls -A dist)" ]]; then
+            echo "::warning::No artifacts found in dist/. Skipping PyPI publish."
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          else
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Publish to PyPI
-        if: hashFiles('pyproject.toml') != ''
+        if: steps.check_dist.outputs.should_publish == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
