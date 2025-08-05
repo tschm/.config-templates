@@ -48,7 +48,7 @@ def docstring(root_dir: Path) -> str:
 
     """
     # Read the README.md file
-    with open(root_dir / "README.md") as f:
+    with open(root_dir / "README.md", encoding="utf-8") as f:
         content = f.read()
 
     # Extract Python code blocks (assuming they are in triple backticks)
