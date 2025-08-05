@@ -105,8 +105,8 @@ jobs:
           name: dist
           path: |
             src/tests/**/*.py
-            notebooks/*.py
-            book/marimo/*.py
+            notebooks/**/*.py
+            book/marimo/**/*.py
 
   release:
     name: Create GitHub Release
