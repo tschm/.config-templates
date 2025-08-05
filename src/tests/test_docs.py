@@ -75,7 +75,7 @@ def docstring(project_root: Path) -> str:
     combines them into a single docstring that can be processed by doctest.
 
     Args:
-        root_dir: Path to the project root directory
+        project_root: Path to the project root directory
 
     Returns:
         str: A docstring containing all Python code examples from README.md
