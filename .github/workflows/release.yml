@@ -103,16 +103,6 @@ jobs:
           path: dist
         continue-on-error: true
 
-      #- name: Extract dist.tar
-      #  run: |
-      #    if [[ -f dist/dist.tar ]]; then
-      #      echo "Extracting dist.tar"
-      #      tar -xf dist/dist.tar -C dist
-      #      rm dist/dist.tar
-      #    else
-      #      echo "No dist.tar found; skipping extract"
-      #    fi
-
       - name: Create GitHub Release with artifacts
         uses: softprops/action-gh-release@v2.3.2
         with:
@@ -138,8 +128,8 @@ jobs:
       - name: Check if dist contains artifacts
         id: check_dist
         run: |
-          if [[ ! -d dist || -z "$(ls -A dist)" ]]; then
-            echo "::warning::No artifacts found in dist/. Skipping PyPI publish."
+          if [[ ! -d dist ]]; then
+            echo "::warning::No folder dist/. Skipping PyPI publish."
             echo "should_publish=false" >> $GITHUB_OUTPUT
           else
             echo "should_publish=true" >> $GITHUB_OUTPUT
