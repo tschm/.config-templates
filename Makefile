@@ -31,7 +31,11 @@ uv:
 install: uv ## Install all dependencies using uv
 	@printf "$(BLUE)Installing dependencies...$(RESET)\n"
 	@uv venv --clear --python 3.12
-	@uv sync --all-extras --frozen
+	@if [ -f "pyproject.toml" ]; then \
+		uv sync --all-extras --frozen; \
+	else \
+		printf "$(BLUE)No pyproject.toml found, skipping uv sync$(RESET)\n"; \
+	fi
 
 ##@ Code Quality
 
@@ -54,14 +58,19 @@ deptry: uv ## Run deptry (use OPTIONS="--your-options" to pass options)
 
 test: install ## Run all tests
 	@printf "$(BLUE)Running tests...$(RESET)\n"
+	@uv pip install pytest
 	@uv run pytest $(TESTS_FOLDER) --cov=$(SOURCE_FOLDER) --cov-report=term
 
 ##@ Building
 
 build: install ## Build the package
 	@printf "$(BLUE)Building package...$(RESET)\n"
-	@uv pip install hatch
-	@uv run hatch build
+	@if [ -f "pyproject.toml" ]; then \
+		uv pip install hatch; \
+		uv run hatch build; \
+	else \
+		printf "$(BLUE)No pyproject.toml found, skipping build$(RESET)\n"; \
+	fi
 
 ##@ Documentation
 
@@ -91,14 +100,10 @@ clean: ## Clean generated files and directories
 
 ##@ Marimo
 
-marimo: uv ## Start a Marimo server (use FILE=filename.py to specify a file)
-	@if [ -z "$(FILE)" ]; then \
-		echo "❌ FILE is required. Usage: make marimo FILE=demo.py" >&2; \
-		exit 1; \
-	fi
-
-	@printf "$(BLUE)Start Marimo server with $(MARIMO_FOLDER)/$(FILE)...$(RESET)\n"
-	@uvx marimo edit --sandbox $(MARIMO_FOLDER)/$(FILE)
+marimo: install ## Start a Marimo server
+	@printf "$(BLUE)Start Marimo server with $(MARIMO_FOLDER)...$(RESET)\n"
+	@uv run pip install marimo
+	@uv run marimo edit $(MARIMO_FOLDER)
 
 ##@ Help
 
