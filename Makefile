@@ -133,6 +133,86 @@ marimo: install ## Start a Marimo server
 	@uv pip install marimo
 	@uv run marimo edit $(MARIMO_FOLDER)
 
+marimushka: install ## Export Marimo notebooks to HTML
+	@printf "$(BLUE)Exporting notebooks from $(MARIMO_FOLDER)...$(RESET)\n"
+	mkdir -p _marimushka
+
+	@if [ ! -d "$(MARIMO_FOLDER)" ]; then \
+		printf "$(BLUE)Warning: Directory $(MARIMO_FOLDER) does not exist$(RESET)\n"; \
+	else \
+		py_files=$$(find "$(MARIMO_FOLDER)" -name "*.py" | tr '\n' ' '); \
+		if [ -z "$$py_files" ]; then \
+			printf "$(BLUE)No Python files found in $(MARIMO_FOLDER)$(RESET)\n"; \
+		else \
+			printf "$(BLUE)Found Python files: $$py_files$(RESET)\n"; \
+			for py_file in $$py_files; do \
+				printf "$(BLUE)Processing $$py_file...$(RESET)\n"; \
+				rel_path=$$(echo "$$py_file" | sed "s|^$(MARIMO_FOLDER)/||"); \
+				dir_path=$$(dirname "$$rel_path"); \
+				base_name=$$(basename "$$rel_path" .py); \
+				mkdir -p "_marimushka/$$dir_path"; \
+				uvx marimo export html --include-code --sandbox --output "_marimushka/$$dir_path/$$base_name.html" "$$py_file"; \
+			done; \
+			echo "<html><head><title>Marimo Notebooks</title></head><body><h1>Marimo Notebooks</h1><ul>" > _marimushka/index.html; \
+			find _marimushka -name "*.html" -not -path "*index.html" | sort | while read html_file; do \
+				rel_path=$$(echo "$$html_file" | sed "s|^_marimushka/||"); \
+				name=$$(basename "$$rel_path" .html); \
+				echo "<li><a href=\"$$rel_path\">$$name</a></li>" >> _marimushka/index.html; \
+			done; \
+			echo "</ul></body></html>" >> _marimushka/index.html; \
+		fi; \
+	fi
+
+	# Create .nojekyll file to prevent GitHub Pages from processing with Jekyll
+	touch _marimushka/.nojekyll
+
+# Build the combined book
+book: test docs marimushka
+
+	@echo "Building combined documentation..."
+	mkdir -p _book
+
+	# Copy API docs
+	@if [ -d _pdoc ]; then \
+		mkdir -p _book/pdoc; \
+		cp -r _pdoc/* _book/pdoc; \
+		echo '"API": "./pdoc/index.html"' > _book/links.json; \
+	else \
+		echo '{}' > _book/links.json; \
+	fi
+
+	# Copy coverage report
+	@if [ -d _tests/html-coverage ]; then \
+  		mkdir -p _book/tests/html-coverage; \
+		cp -r _tests/html-coverage/* _book/tests/html-coverage; \
+		jq '. + {"Coverage": "./tests/html-coverage/index.html"}' _book/links.json > _book/tmp && mv _book/tmp _book/links.json; \
+	fi
+
+	# Copy test report
+	@if [ -d _tests/html-report ]; then \
+  		mkdir -p _book/tests/html-report; \
+		cp -r _tests/html-report/* _book/tests/html-report; \
+		jq '. + {"Test Report": "./tests/html-report/report.html"}' _book/links.json > _book/tmp && mv _book/tmp _book/links.json; \
+	fi
+
+	# Copy marimushka report
+	@if [ -d _marimushka ]; then \
+		mkdir -p _book/marimushka; \
+		cp -r _marimushka/* _book/marimushka; \
+		jq '. + {"Notebooks": "./marimushka/index.html"}' _book/links.json > _book/tmp && mv _book/tmp _book/links.json; \
+		echo "Copied notebooks from $(MARIMO_FOLDER) to _book/marimushka"; \
+	fi
+
+	@echo "Generated links.json:"
+	@cat _book/links.json
+
+	@echo "Generating landing page with uvx minibook..."
+	uvx minibook@v0.0.16 --title $(BOOK_TITLE) --subtitle $(BOOK_SUBTITLE) --links "$$(cat _book/links.json)" --output "_book"
+
+	# Create .nojekyll file to prevent GitHub Pages from processing with Jekyll
+	touch "_book/.nojekyll"
+	echo "Created .nojekyll file"
+
 ##@ Help
 
 help: ## Display this help message
