@@ -52,7 +52,11 @@ check: lint test ## Run all checks (lint and test)
 
 deptry: uv ## Run deptry (use OPTIONS="--your-options" to pass options)
 	@printf "$(BLUE)Running deptry...$(RESET)\n"
-	@uvx deptry $(SOURCE_FOLDER) $(OPTIONS)
+	@if [ -f "pyproject.toml" ]; then \
+		uvx deptry $(SOURCE_FOLDER) $(OPTIONS); \
+	else \
+		printf "$(BLUE)No pyproject.toml found, skipping deptry$(RESET)\n"; \
+	fi
 
 ##@ Testing
 
