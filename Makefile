@@ -48,7 +48,7 @@ lint: uv ## Run linters only
 	@printf "$(BLUE)Running linters...$(RESET)\n"
 	@uvx pre-commit run --all-files
 
-check: lint test deptry test ## Run all checks (lint and test)
+check: lint fmt deptry test ## Run all checks (lint and test)
 	@printf "$(GREEN)All checks passed!$(RESET)\n"
 
 deptry: uv ## Run deptry (use OPTIONS="--your-options" to pass options)
