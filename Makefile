@@ -22,6 +22,7 @@ BOOK_LINKS := $(shell cat _book/links.json)
 .DEFAULT_GOAL := help
 
 .PHONY: help verify install fmt lint deptry test build check marimo clean docs book marimushka
+
 ##@ Development Setup
 
 uv:
