@@ -1,6 +1,8 @@
 # This workflow runs and tests all Marimo notebooks in the project
 # It creates a matrix of jobs, one for each notebook, and runs them in parallel
 name: "Marimo"
+permissions:
+  contents: read
 
 on:
   push
