@@ -7,7 +7,6 @@ BOLD := \033[1m
 GREEN := \033[32m
 RESET := \033[0m
 
-# Default values if not set in .env
 SOURCE_FOLDER := src
 TESTS_FOLDER := tests
 MARIMO_FOLDER := book/marimo
