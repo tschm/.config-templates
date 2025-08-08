@@ -35,7 +35,7 @@ jobs:
     needs: list-notebooks
     strategy:
       matrix:
-        notebook: ${{ fromJson(needs.parse-env.outputs.notebook-list) }}
+        notebook: ${{ fromJson(needs.list-notebooks.outputs.notebook-list) }}
     name: Run notebook ${{ matrix.notebook }}
     steps:
       # Check out the repository code
