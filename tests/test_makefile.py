@@ -7,7 +7,6 @@ This module contains pytest unit tests for individual Makefile tasks.
 Each test uses mocked outputs to validate the expected behavior of make targets.
 """
 
-import os
 import re
 from pathlib import Path
 
@@ -38,7 +37,7 @@ def makefile_content(project_root: Path) -> str:
         str: The content of the Makefile
     """
     try:
-        with open(project_root / "Makefile", "r", encoding="utf-8") as f:
+        with open(project_root / "Makefile", encoding="utf-8") as f:
             return f.read()
     except Exception as e:
         pytest.fail(f"Failed to read Makefile: {e}")
@@ -116,33 +115,41 @@ def test_marimo_target_exists(makefile_content: str):
 
 def test_install_target_checks_pyproject_toml(makefile_content: str):
     """Test that the 'install' target checks for pyproject.toml."""
-    assert "if [ -f \"pyproject.toml\" ]" in makefile_content, "Install target should check for pyproject.toml"
-    assert "No pyproject.toml found, skipping" in makefile_content, "Install target should handle missing pyproject.toml"
+    assert 'if [ -f "pyproject.toml" ]' in makefile_content, "Install target should check for pyproject.toml"
+    assert "No pyproject.toml found, skipping" in makefile_content, (
+        "Install target should handle missing pyproject.toml"
+    )
 
 
 def test_test_target_creates_readme_if_missing(makefile_content: str):
     """Test that the 'test' target creates README.md if missing."""
-    assert "if [ ! -f \"README.md\" ]" in makefile_content, "Test target should check for README.md"
-    assert "echo \"# Hello World\" > README.md" in makefile_content, "Test target should create README.md if missing"
+    assert 'if [ ! -f "README.md" ]' in makefile_content, "Test target should check for README.md"
+    assert 'echo "# Hello World" > README.md' in makefile_content, "Test target should create README.md if missing"
 
 
 def test_build_target_checks_pyproject_toml(makefile_content: str):
     """Test that the 'build' target checks for pyproject.toml."""
-    assert "if [ -f \"pyproject.toml\" ]" in makefile_content, "Build target should check for pyproject.toml"
-    assert "No pyproject.toml found, skipping build" in makefile_content, "Build target should handle missing pyproject.toml"
+    assert 'if [ -f "pyproject.toml" ]' in makefile_content, "Build target should check for pyproject.toml"
+    assert "No pyproject.toml found, skipping build" in makefile_content, (
+        "Build target should handle missing pyproject.toml"
+    )
 
 
 def test_docs_target_checks_pyproject_toml(makefile_content: str):
     """Test that the 'docs' target checks for pyproject.toml."""
-    assert "if [ -f \"pyproject.toml\" ]" in makefile_content, "Docs target should check for pyproject.toml"
-    assert "No pyproject.toml found, skipping docs" in makefile_content, "Docs target should handle missing pyproject.toml"
+    assert 'if [ -f "pyproject.toml" ]' in makefile_content, "Docs target should check for pyproject.toml"
+    assert "No pyproject.toml found, skipping docs" in makefile_content, (
+        "Docs target should handle missing pyproject.toml"
+    )
 
 
 def test_marimo_target_checks_directory_exists(makefile_content: str):
     """Test that the 'marimo' target checks if the directory exists."""
-    assert "if [ ! -d \"$(MARIMO_FOLDER)\" ]" in makefile_content, "Marimo target should check if directory exists"
+    assert 'if [ ! -d "$(MARIMO_FOLDER)" ]' in makefile_content, "Marimo target should check if directory exists"
     # The exact command might vary, so we'll check for the concept rather than exact syntax
-    assert "not found" in makefile_content and "MARIMO_FOLDER" in makefile_content, "Marimo target should handle missing directory"
+    assert "not found" in makefile_content and "MARIMO_FOLDER" in makefile_content, (
+        "Marimo target should handle missing directory"
+    )
 
 
 def test_check_target_runs_lint_and_test(makefile_content: str):
@@ -160,8 +167,22 @@ def test_phony_targets_declared(makefile_content: str):
     phony_targets = phony_line.group(0).split(":")[1].strip().split()
 
     # Check that all important targets are declared as phony
-    important_targets = ["help", "uv", "install", "fmt", "lint", "deptry", "test",
-                         "build", "docs", "marimushka", "book", "clean", "check", "marimo"]
+    important_targets = [
+        "help",
+        "uv",
+        "install",
+        "fmt",
+        "lint",
+        "deptry",
+        "test",
+        "build",
+        "docs",
+        "marimushka",
+        "book",
+        "clean",
+        "check",
+        "marimo",
+    ]
 
     for target in important_targets:
         assert target in phony_targets, f"Target '{target}' should be declared as .PHONY"
