@@ -67,4 +67,3 @@ jobs:
         run: |
           uv run "${{ matrix.notebook }}"
         shell: bash
-
