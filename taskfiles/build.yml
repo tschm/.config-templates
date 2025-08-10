@@ -4,9 +4,7 @@ tasks:
   uv:
     desc: Install uv and uvx
     cmds:
-      - printf "${BLUE}[INFO] Installing uv and uvx${RESET}\n";
-      - curl -sSf https://astral.sh/uv/install.sh | sh > /dev/null 2>&1 || (echo "${RED}Installation failed!${RESET}" >&2; exit 1)
-      - printf "${BLUE}[INFO] uv installation completed${RESET}\n";
+      - curl -sSf https://astral.sh/uv/install.sh | sh
   
   install:
     desc: Install all dependencies using uv
