@@ -3,7 +3,7 @@ version: '3'
 tasks:
   docs:
     desc: Build documentation using pdoc
-    deps: [build:install]
+    deps: [":build:install"]
     cmds:
       - |
         if [ -f "pyproject.toml" ]; then
@@ -17,7 +17,7 @@ tasks:
   
   marimushka:
     desc: Export Marimo notebooks to HTML
-    deps: [build:install]
+    deps: [":build:install"]
     cmds:
       - printf "${BLUE}[INFO] Exporting notebooks from {{.MARIMO_FOLDER}}...${RESET}\n"
       - |
@@ -56,7 +56,7 @@ tasks:
   
   book:
     desc: Build the companion book with test results and notebooks
-    deps: [test:test, docs, marimushka]
+    deps: [":test:test", docs, marimushka]
     cmds:
       - printf "${BLUE}[INFO] Building combined documentation...${RESET}\n"
       - |
@@ -118,7 +118,7 @@ tasks:
   
   marimo:
     desc: Start a Marimo server
-    deps: [build:install]
+    deps: [":build:install"]
     cmds:
       - printf " ${BLUE}[INFO] Start Marimo server with {{.MARIMO_FOLDER}}...${RESET}\n"
       - |

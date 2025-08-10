@@ -3,21 +3,21 @@ version: '3'
 tasks:
   fmt:
     desc: Run code formatters using uvx and ruff
-    deps: [build:uv]
+    deps: [":build:uv"]
     cmds:
       - printf "${BLUE}[INFO] Running formatters...${RESET}\n"
       - uvx ruff format .
   
   lint:
     desc: Run pre-commit hooks using uvx and pre-commit
-    deps: [build:uv]
+    deps: [":build:uv"]
     cmds:
       - printf "${BLUE}[INFO] Running linters...${RESET}\n"
       - uvx pre-commit run --all-files
   
   deptry:
     desc: Run deptry to check for dependency issues
-    deps: [build:uv]
+    deps: [":build:uv"]
     cmds:
       - |
         if [ -f "pyproject.toml" ]; then
