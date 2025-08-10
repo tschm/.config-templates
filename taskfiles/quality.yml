@@ -7,28 +7,22 @@ includes:
 
 
 tasks:
-  #_ensure_uv:
-  #  desc: Ensure UV and UVX is available
-  #  cmds:
-  #    - task build:uv -s
-  #  internal: true
-
   fmt:
     desc: Format code using Ruff
-    deps: [build:uv]
     cmds:
+      - task build:uv -s
       - uvx ruff format .
 
   lint:
     desc: Run pre-commit hooks
-    deps: [build:uv]
     cmds:
+      - task build:uv -s
       - uvx pre-commit run --all-files
 
   deptry:
     desc: Check for dependency issues
-    deps: [build:uv]
     cmds:
+      - task build:uv -s
       - |
         if [ -f "pyproject.toml" ]; then
           SOURCE_FOLDER="src/$(find src -mindepth 1 -maxdepth 1 -type d -not -path '*/\.*' | head -1 | sed 's|^src/||')"
