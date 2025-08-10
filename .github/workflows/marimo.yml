@@ -10,7 +10,7 @@ on:
 jobs:
   # Parse .env file and build a matrix of notebooks to test
   list-notebooks:
-    if: github.repository != 'tschm/.config-templates' && hashFiles('book/marimo/**') != ''
+    if: github.repository != 'tschm/.config-templates'
     runs-on: ubuntu-latest
     outputs:
       notebook-list: ${{ steps.notebooks.outputs.matrix }}

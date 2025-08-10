@@ -110,7 +110,7 @@ class TestTaskfile:
             "lint": "quality:lint",
             "deptry": "quality:deptry",
             "check": "quality:check",
-            "test": "test:test",
+            "test": "docs:test",
             "docs": "docs:docs",
             "marimushka": "docs:marimushka",
             "book": "docs:book",
@@ -164,7 +164,7 @@ class TestTaskfile:
         assert "Available tasks" in result.stdout, "Help information not displayed"
         # Check that it lists at least some common tasks
         assert "* docs:book:" in result.stdout or "* book:" in result.stdout, "Book task not listed"
-        assert "* test:test:" in result.stdout or "* test:" in result.stdout, "Test task not listed"
+        assert "* docs:test:" in result.stdout or "* test:" in result.stdout, "Test task not listed"
 
     def test_help_task(self):
         """Test that the help task runs and displays help."""
@@ -275,11 +275,11 @@ class TestTaskfile:
         # Create a minimal test directory structure
         self.create_tests_structure()
 
-        result = self.run_task("test", check=False)
+        result = self.run_task("docs:test", check=False)
         assert "Running tests" in result.stdout, f"Test message not found in output: {result.stdout}"
 
         # Test with no source folder
-        result = self.run_task("test", check=False)
+        result = self.run_task("docs:test", check=False)
         assert "No valid source folder structure found" in result.stdout or "Running tests" in result.stdout, (
             f"Unexpected output: {result.stdout}"
         )

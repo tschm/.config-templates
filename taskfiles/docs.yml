@@ -45,7 +45,6 @@ tasks:
   
   marimushka:
     desc: Export Marimo notebooks to HTML
-    deps: [_ensure_env]
     cmds:
       - task build:install -s
       - printf "${BLUE}[INFO] Exporting notebooks from {{.MARIMO_FOLDER}}...${RESET}\n"

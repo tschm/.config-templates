@@ -19,14 +19,29 @@ permissions:
     contents: read
 
 jobs:
-  # Job: Dependencies
-  # Purpose: Checks the project's dependency health using deptry
-  Analysis:
+  check_pyproject:
+    name: Check pyproject.toml presence
     runs-on: ubuntu-latest
-    # Only run if pyproject.toml exists
-    if: hashFiles('pyproject.toml') != ''
+    outputs:
+      pyproject_exists: ${{ steps.check_file.outputs.exists }}
     steps:
-      # Check out the repository code
+      - uses: actions/checkout@v4
+
+      - name: Check for pyproject.toml
+        id: check_file
+        run: |
+          if [ -f "pyproject.toml" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  deptry_analysis:
+    name: Run deptry if pyproject.toml exists
+    needs: check_pyproject
+    runs-on: ubuntu-latest
+    if: needs.check_pyproject.outputs.pyproject_exists == 'true'
+    steps:
       - uses: actions/checkout@v4
 
       - name: Install uv
@@ -39,5 +54,4 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run deptry
-        run: |
-          task quality:deptry
+        run: task quality:deptry
