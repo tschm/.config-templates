@@ -1,31 +1,33 @@
 version: '3'
 
 includes:
-  build: ./build.yml
+  build:
+    taskfile: ./build.yml
+    internal: true
+
 
 tasks:
-  _ensure_uv:
-    desc: Ensure UV and UVX is available
-    cmds:
-      - task build:uv -s
-      - echo $PATH
-    private: true
+  #_ensure_uv:
+  #  desc: Ensure UV and UVX is available
+  #  cmds:
+  #    - task build:uv -s
+  #  internal: true
 
   fmt:
     desc: Format code using Ruff
-    deps: [_ensure_uv]
+    deps: [build:uv]
     cmds:
       - uvx ruff format .
 
   lint:
     desc: Run pre-commit hooks
-    deps: [_ensure_uv]
+    deps: [build:uv]
     cmds:
       - uvx pre-commit run --all-files
 
   deptry:
     desc: Check for dependency issues
-    deps: [_ensure_uv]
+    deps: [build:uv]
     cmds:
       - |
         if [ -f "pyproject.toml" ]; then
