@@ -8,6 +8,7 @@ tasks:
     desc: Ensure UV and UVX is available
     cmds:
       - task build:uv -s
+      - echo $PATH
     private: true
 
   fmt:
