@@ -52,10 +52,6 @@ tasks:
         if [ ! -d "{{.MARIMO_FOLDER}}" ]; then
           printf "${YELLOW}[WARN] Directory '{{.MARIMO_FOLDER}}' does not exist. Skipping marimushka.${RESET}\n"
         else
-          if ! command -v uvx >/dev/null 2>&1; then
-            printf "${RED}[ERROR] 'uvx' not found. Please install 'uvx' to export Marimo notebooks.${RESET}\n"
-            exit 1
-          fi
           mkdir -p _marimushka
           py_files=$(find "{{.MARIMO_FOLDER}}" -name "*.py" | tr '\n' ' ')
           if [ -z "$py_files" ]; then
@@ -86,13 +82,6 @@ tasks:
     desc: Build the companion book with test results and notebooks
     cmds:
       - printf "${BLUE}[INFO] Building combined documentation...${RESET}\n"
-      - |
-        # Check if jq is installed
-        if ! command -v jq &> /dev/null; then
-          printf "${RED}[ERROR] jq is not installed. Please install jq to build the book.${RESET}\n"
-          printf "${BLUE}[INFO] You can install jq with: brew install jq (macOS) or apt-get install jq (Linux)${RESET}\n"
-          exit 1
-        fi
       - printf "${BLUE}[INFO] Delete the _book folder...${RESET}\n"
       - rm -rf _book
       - printf "${BLUE}[INFO] Create empty _book folder...${RESET}\n"

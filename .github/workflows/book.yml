@@ -30,6 +30,7 @@ jobs:
       name: github-pages  # 👈 this is the critical missing piece
 
     permissions:
+      contents: read
       pages: write            # Permission to deploy to Pages
       id-token: write         # Permission to verify deployment origin
 
