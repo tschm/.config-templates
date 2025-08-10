@@ -29,8 +29,8 @@ jobs:
 
       - name: Lint
         run: |
-          make lint
+          task lint
 
       - name: Format
         run: |
-          make fmt
+          task fmt
