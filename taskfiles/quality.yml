@@ -5,7 +5,7 @@ includes:
 
 tasks:
   _ensure_uv:
-    desc: Ensure UV is available
+    desc: Ensure UV and UVX is available
     cmds:
       - task build:uv -s
     private: true

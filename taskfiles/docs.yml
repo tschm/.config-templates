@@ -1,9 +1,18 @@
 version: '3'
 
+includes:
+  build: ./build.yml
+
 tasks:
+  _ensure_env:
+    desc: Ensure env is available
+    cmds:
+      - task build:install -s
+    private: true
+
   docs:
     desc: Build documentation using pdoc
-    deps: [":build:install"]
+    deps: [_ensure_env]
     cmds:
       - |
         if [ -f "pyproject.toml" ]; then
@@ -17,7 +26,7 @@ tasks:
   
   marimushka:
     desc: Export Marimo notebooks to HTML
-    deps: [":build:install"]
+    deps: [_ensure_env]
     cmds:
       - printf "${BLUE}[INFO] Exporting notebooks from {{.MARIMO_FOLDER}}...${RESET}\n"
       - |
