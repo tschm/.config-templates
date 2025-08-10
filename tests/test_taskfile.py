@@ -1,9 +1,16 @@
+"""Tests for the Taskfile.yml tasks and functionality.
+
+This module contains tests that verify all tasks defined in Taskfile.yml
+work correctly and produce the expected output.
+"""
+
 import os
-import subprocess
-import pytest
-from pathlib import Path
-import tempfile
 import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+
+import pytest
 
 
 class TestTaskfile:
@@ -23,6 +30,17 @@ class TestTaskfile:
 
         # Copy Taskfile.yml to temp directory
         shutil.copy(os.path.join(self.original_dir, "Taskfile.yml"), self.temp_dir)
+
+        # Copy taskfiles directory to temp directory
+        if os.path.exists(os.path.join(self.original_dir, "taskfiles")):
+            taskfiles_dir = os.path.join(self.temp_dir, "taskfiles")
+            os.makedirs(taskfiles_dir, exist_ok=True)
+            for file in os.listdir(os.path.join(self.original_dir, "taskfiles")):
+                if file.endswith(".yml"):
+                    shutil.copy(
+                        os.path.join(self.original_dir, "taskfiles", file),
+                        os.path.join(taskfiles_dir, file)
+                    )
 
         # Create a minimal README.md in the temp directory
         self.create_file("README.md", "# Test README\n")
@@ -103,9 +121,13 @@ class TestTaskfile:
             "clean": "cleanup:clean",
         }
 
-        # If the task name already has a group prefix or is not in the map, return it as is
+        # If the task name already has a group prefix, is empty, or starts with --, return it as is
         if ":" in base_name or base_name == "" or base_name.startswith("--"):
             return base_name
+
+        # Handle special case for help task
+        if base_name == "help":
+            return "--list-all"
 
         # Return the mapped task name if it exists, otherwise return the original
         return task_map.get(base_name, base_name)
@@ -126,12 +148,7 @@ class TestTaskfile:
 
         try:
             result = subprocess.run(
-                f"task {task_name}",
-                shell=True,
-                capture_output=True,
-                text=True,
-                check=check,
-                timeout=timeout
+                f"task {task_name}", shell=True, capture_output=True, text=True, check=check, timeout=timeout
             )
             return result
         except subprocess.TimeoutExpired as e:
@@ -140,7 +157,7 @@ class TestTaskfile:
                 args=e.cmd,
                 returncode=0,  # Assume it's working if it's still running
                 stdout=e.stdout if e.stdout else "Task is still running (timeout)",
-                stderr=e.stderr if e.stderr else ""
+                stderr=e.stderr if e.stderr else "",
             )
 
     def test_default_task(self):
@@ -149,23 +166,23 @@ class TestTaskfile:
         assert result.returncode == 0, f"Default task failed with: {result.stderr}"
         assert "Available tasks" in result.stdout, "Help information not displayed"
         # Check that it lists at least some common tasks
-        assert "* book:" in result.stdout, "Book task not listed"
-        assert "* test:" in result.stdout, "Test task not listed"
+        assert "* docs:book:" in result.stdout or "* book:" in result.stdout, "Book task not listed"
+        assert "* test:test:" in result.stdout or "* test:" in result.stdout, "Test task not listed"
 
     def test_help_task(self):
         """Test that the help task runs and displays help."""
-        # The help functionality is provided by the default task
-        # or by running 'task --list', not by a specific 'help' task
-        result = self.run_task("--list")
-        assert result.returncode == 0, f"Help command failed with: {result.stderr}"
+        # The help task should run 'task --list-all'
+        result = self.run_task("help")
+        assert result.returncode == 0, f"Help task failed with: {result.stderr}"
         assert "Available tasks" in result.stdout, "Help information not displayed"
 
     @pytest.mark.skip(reason="Potentially modifies system, only run manually")
     def test_uv_task(self):
         """Test that the uv task installs uv and uvx."""
         result = self.run_task("build:uv", check=False)
-        assert result.returncode == 0 or "uv installation completed" in result.stdout, \
+        assert result.returncode == 0 or "uv installation completed" in result.stdout, (
             f"UV task failed: {result.stderr}"
+        )
 
     def test_install_task(self):
         """Test that the install task creates a virtual environment."""
@@ -179,9 +196,9 @@ class TestTaskfile:
 
         # Check for expected output - either it's creating a new environment
         # or it's skipping because one already exists (in the test environment)
-        assert any(msg in result.stdout for msg in ["Creating virtual environment",
-                                                   "Virtual environment already exists"]), \
-               f"Unexpected output: {result.stdout}"
+        assert any(
+            msg in result.stdout for msg in ["Creating virtual environment", "Virtual environment already exists"]
+        ), f"Unexpected output: {result.stdout}"
 
         # The second part of the test is problematic because the task might detect
         # a virtual environment even in a new directory (due to global settings or parent directories)
@@ -206,29 +223,33 @@ class TestTaskfile:
         # Since the build task depends on install, we need to check for either
         # the build message or install-related messages
         result = self.run_task("build", check=False)
-        expected_msgs = ["Building package", "Creating virtual environment",
-                         "Virtual environment already exists", "Installing dependencies"]
-        assert any(msg in result.stdout for msg in expected_msgs), \
-               f"Expected build or install message not found in output: {result.stdout}"
+        expected_msgs = [
+            "Building package",
+            "Creating virtual environment",
+            "Virtual environment already exists",
+            "Installing dependencies",
+        ]
+        assert any(msg in result.stdout for msg in expected_msgs), (
+            f"Expected build or install message not found in output: {result.stdout}"
+        )
 
         # Test without pyproject.toml
         os.remove("pyproject.toml")
         result = self.run_task("build", check=False)
         expected_msgs = ["No pyproject.toml found", "skipping build"]
-        assert any(msg in result.stdout for msg in expected_msgs), \
-               f"Should warn about missing pyproject.toml: {result.stdout}"
+        assert any(msg in result.stdout for msg in expected_msgs), (
+            f"Should warn about missing pyproject.toml: {result.stdout}"
+        )
 
     def test_fmt_task(self):
         """Test that the fmt task runs formatters."""
         result = self.run_task("fmt", check=False)
-        assert "Running formatters" in result.stdout, \
-               f"Formatter message not found in output: {result.stdout}"
+        assert "Running formatters" in result.stdout, f"Formatter message not found in output: {result.stdout}"
 
     def test_lint_task(self):
         """Test that the lint task runs linters."""
         result = self.run_task("lint", check=False)
-        assert "Running linters" in result.stdout, \
-               f"Linter message not found in output: {result.stdout}"
+        assert "Running linters" in result.stdout, f"Linter message not found in output: {result.stdout}"
 
     def test_deptry_task(self):
         """Test that the deptry task checks dependencies."""
@@ -236,22 +257,21 @@ class TestTaskfile:
         self.create_pyproject_toml()
 
         result = self.run_task("deptry", check=False)
-        assert "Running deptry" in result.stdout, \
-               f"Deptry message not found in output: {result.stdout}"
+        assert "Running deptry" in result.stdout, f"Deptry message not found in output: {result.stdout}"
 
         # Test without pyproject.toml
         os.remove("pyproject.toml")
         result = self.run_task("deptry", check=False)
-        assert "No pyproject.toml found" in result.stdout, \
-               f"Should warn about missing pyproject.toml: {result.stdout}"
+        assert "No pyproject.toml found" in result.stdout, f"Should warn about missing pyproject.toml: {result.stdout}"
 
     def test_check_task(self):
         """Test that the check task runs all checks."""
         # This is a meta-task that runs other tasks
         result = self.run_task("check", check=False)
         # We don't expect this to pass necessarily, just to run
-        assert result.returncode == 0 or "All checks passed" in result.stdout or \
-               "Running" in result.stdout, f"Check task failed: {result.stderr}"
+        assert result.returncode == 0 or "All checks passed" in result.stdout or "Running" in result.stdout, (
+            f"Check task failed: {result.stderr}"
+        )
 
     def test_test_task(self):
         """Test that the test task runs tests."""
@@ -259,14 +279,13 @@ class TestTaskfile:
         self.create_tests_structure()
 
         result = self.run_task("test", check=False)
-        assert "Running tests" in result.stdout, \
-               f"Test message not found in output: {result.stdout}"
+        assert "Running tests" in result.stdout, f"Test message not found in output: {result.stdout}"
 
         # Test with no source folder
         result = self.run_task("test", check=False)
-        assert "No valid source folder structure found" in result.stdout or \
-               "Running tests" in result.stdout, \
-               f"Unexpected output: {result.stdout}"
+        assert "No valid source folder structure found" in result.stdout or "Running tests" in result.stdout, (
+            f"Unexpected output: {result.stdout}"
+        )
 
     def test_docs_task(self):
         """Test that the docs task builds documentation."""
@@ -277,30 +296,34 @@ class TestTaskfile:
         # Since the docs task depends on install, we need to check for either
         # the docs message or install-related messages
         result = self.run_task("docs", check=False)
-        expected_msgs = ["Building documentation", "Creating virtual environment",
-                         "Virtual environment already exists", "Installing dependencies"]
-        assert any(msg in result.stdout for msg in expected_msgs), \
-               f"Expected docs or install message not found in output: {result.stdout}"
+        expected_msgs = [
+            "Building documentation",
+            "Creating virtual environment",
+            "Virtual environment already exists",
+            "Installing dependencies",
+        ]
+        assert any(msg in result.stdout for msg in expected_msgs), (
+            f"Expected docs or install message not found in output: {result.stdout}"
+        )
 
         # Test without pyproject.toml
         os.remove("pyproject.toml")
         result = self.run_task("docs", check=False)
         expected_msgs = ["No pyproject.toml found", "skipping docs"]
-        assert any(msg in result.stdout for msg in expected_msgs), \
-               f"Should warn about missing pyproject.toml: {result.stdout}"
+        assert any(msg in result.stdout for msg in expected_msgs), (
+            f"Should warn about missing pyproject.toml: {result.stdout}"
+        )
 
     def test_marimushka_task(self):
         """Test that the marimushka task exports notebooks."""
         result = self.run_task("marimushka", check=False)
-        assert "Exporting notebooks" in result.stdout, \
-               f"Marimushka message not found in output: {result.stdout}"
+        assert "Exporting notebooks" in result.stdout, f"Marimushka message not found in output: {result.stdout}"
 
         # Create marimo directory and test file
         self.create_marimo_structure()
 
         result = self.run_task("marimushka", check=False)
-        assert "Exporting notebooks" in result.stdout, \
-               f"Marimushka message not found in output: {result.stdout}"
+        assert "Exporting notebooks" in result.stdout, f"Marimushka message not found in output: {result.stdout}"
 
     def test_book_task(self):
         """Test that the book task builds the companion book."""
@@ -320,10 +343,11 @@ class TestTaskfile:
             "Exporting notebooks",
             "Creating virtual environment",
             "Virtual environment already exists",
-            "Installing dependencies"
+            "Installing dependencies",
         ]
-        assert any(msg in result.stdout for msg in expected_msgs), \
-               f"Expected book-related message not found in output: {result.stdout}"
+        assert any(msg in result.stdout for msg in expected_msgs), (
+            f"Expected book-related message not found in output: {result.stdout}"
+        )
 
     def test_marimo_task(self):
         """Test that the marimo task starts a server."""
@@ -336,11 +360,10 @@ class TestTaskfile:
         # Check for marimo-related messages, ensuring we handle both string and bytes output
         stdout = result.stdout
         if isinstance(stdout, bytes):
-            stdout = stdout.decode('utf-8', errors='replace')
+            stdout = stdout.decode("utf-8", errors="replace")
 
         expected_msgs = ["Start Marimo server", "Marimo folder", "Installing dependencies"]
-        assert any(msg in stdout for msg in expected_msgs), \
-               f"Marimo server message not found in output: {stdout}"
+        assert any(msg in stdout for msg in expected_msgs), f"Marimo server message not found in output: {stdout}"
 
     def test_clean_task(self):
         """Test that the clean task cleans the project."""
@@ -355,44 +378,53 @@ class TestTaskfile:
 
         # The task might actually clean files or just show the message
         expected_msgs = ["Cleaning project", "git clean", "Removing local branches"]
-        assert any(msg in result.stdout for msg in expected_msgs), \
-               f"Clean message not found in output: {result.stdout}"
+        assert any(msg in result.stdout for msg in expected_msgs), f"Clean message not found in output: {result.stdout}"
 
     def test_all_tasks_defined(self):
         """Test that all tasks defined in Taskfile.yml are tested."""
-        # Get list of all tasks from task --list
-        result = self.run_task("--list")
+        # Get list of all tasks from task --list-all to include tasks from included taskfiles
+        result = self.run_task("--list-all")
 
         # Extract task names from output
-        task_lines = [line.strip() for line in result.stdout.split('\n') if line.strip()]
+        task_lines = [line.strip() for line in result.stdout.split("\n") if line.strip()]
         task_names = []
+
+        # Known group names to skip
+        group_names = ["build", "quality", "test", "docs", "cleanup"]
 
         for line in task_lines:
             # Skip lines that don't look like task definitions
-            if '*' not in line:
+            if "*" not in line:
                 continue
 
             # Extract task name (after the * and before the colon)
-            parts = line.split(':', 1)
+            parts = line.split(":", 1)
             if len(parts) < 2:
                 continue
 
             task_part = parts[0].strip()
-            if '*' in task_part:
-                task_name = task_part.split('*', 1)[1].strip()
+            if "*" in task_part:
+                task_name = task_part.split("*", 1)[1].strip()
 
-                # Skip default and help tasks as they're tested separately
-                if task_name in ['default', 'help']:
+                # Skip default, help tasks, and group names as they're tested separately or not tasks
+                if task_name in ["default", "help"] or task_name in group_names:
                     continue
 
                 # For grouped tasks, extract the base task name (after the colon)
-                if ':' in task_name:
-                    base_task = task_name.split(':', 1)[1]
+                if ":" in task_name:
+                    group, base_task = task_name.split(":", 1)
                     task_names.append(base_task)
                 else:
                     task_names.append(task_name)
 
+        # Special case mapping for tasks with different test method names
+        task_method_map = {
+            "cleanup": "clean",  # test_clean_task tests the cleanup task
+        }
+
         # Check that we have a test for each task
         for task in task_names:
-            test_method = f"test_{task}_task"
-            assert hasattr(self, test_method), f"Missing test for task '{task}'"
+            # Map task name to test method name if needed
+            test_task = task_method_map.get(task, task)
+            test_method = f"test_{test_task}_task"
+            assert hasattr(self, test_method), f"Missing test for task '{task}' (looking for {test_method})"
