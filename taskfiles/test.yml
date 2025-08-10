@@ -3,7 +3,7 @@ version: '3'
 tasks:
   test:
     desc: Run all tests
-    deps: [build:install]
+    deps: [":build:install"]
     cmds:
       - printf "${BLUE}[INFO] Running tests...${RESET}\n"
       - |
