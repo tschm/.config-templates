@@ -272,7 +272,7 @@ class TestTaskfile:
             "Running formatters",
             "Running linters",
             "Running deptry",
-            "No pyproject.toml found"
+            "No pyproject.toml found",
         ]
         assert result.returncode == 0 or any(msg in result.stdout for msg in expected_msgs), (
             f"Check task failed: {result.stderr}"
