@@ -37,10 +37,7 @@ class TestTaskfile:
             os.makedirs(taskfiles_dir, exist_ok=True)
             for file in os.listdir(os.path.join(self.original_dir, "taskfiles")):
                 if file.endswith(".yml"):
-                    shutil.copy(
-                        os.path.join(self.original_dir, "taskfiles", file),
-                        os.path.join(taskfiles_dir, file)
-                    )
+                    shutil.copy(os.path.join(self.original_dir, "taskfiles", file), os.path.join(taskfiles_dir, file))
 
         # Create a minimal README.md in the temp directory
         self.create_file("README.md", "# Test README\n")
