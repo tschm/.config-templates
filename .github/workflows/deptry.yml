@@ -28,6 +28,12 @@ jobs:
       # Check out the repository code
       - uses: actions/checkout@v4
 
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run deptry
         run: |
-          make deptry
+          task quality:deptry
