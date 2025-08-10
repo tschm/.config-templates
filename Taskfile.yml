@@ -35,9 +35,6 @@ includes:
   quality:
     taskfile: ./taskfiles/quality.yml
     desc: Code quality tasks for formatting, linting, and checking code
-  test:
-    taskfile: ./taskfiles/test.yml
-    desc: Testing tasks for running tests
   docs:
     taskfile: ./taskfiles/docs.yml
     desc: Documentation tasks for building docs, notebooks, and books
