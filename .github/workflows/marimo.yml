@@ -43,7 +43,7 @@ jobs:
 
   # Create one job per notebook using the matrix strategy for parallel execution
   test-notebooks:
-    if: github.repository != 'tschm/.config-templates' && hashFiles('book/marimo/**') != '' && needs.list-notebooks.outputs.notebook-list != '[]'
+    if: github.repository != 'tschm/.config-templates' && needs.list-notebooks.outputs.notebook-list != '[]'
     runs-on: ubuntu-latest
     needs: list-notebooks
     strategy:
