@@ -7,7 +7,6 @@ BOLD := \033[1m
 GREEN := \033[32m
 RESET := \033[0m
 
-#SOURCE_FOLDER := src/$(shell find src -mindepth 1 -maxdepth 1 -type d -not -path "*/\.*" | head -1 | sed 's|^src/||')
 TESTS_FOLDER := tests
 MARIMO_FOLDER := book/marimo
 OPTIONS ?=
@@ -52,7 +51,7 @@ deptry: uv ## Run deptry (use OPTIONS="--your-options" to pass options)
 	@printf "$(BLUE)Running deptry...$(RESET)\n"
 	@if [ -f "pyproject.toml" ]; then \
   		SOURCE_FOLDER="src/$$(find src -mindepth 1 -maxdepth 1 -type d -not -path '*/\.*' | head -1 | sed 's|^src/||')"; \
-		uvx deptry $(SOURCE_FOLDER) $(OPTIONS); \
+		uvx deptry $$SOURCE_FOLDER $(OPTIONS); \
 	else \
 		printf "$(BLUE)No pyproject.toml found, skipping deptry$(RESET)\n"; \
 	fi
@@ -68,13 +67,13 @@ test: install ## run all tests
 	fi
 
 	SOURCE_FOLDER="src/$$(find src -mindepth 1 -maxdepth 1 -type d -not -path '*/\.*' | head -1 | sed 's|^src/||')"; \
-	TESTS_FOLDER="tests"; \
-	if [ -z "$$SOURCE_FOLDER" ] || [ -z "$$TESTS_FOLDER" ]; then \
+	#TESTS_FOLDER="tests"; \
+	if [ -z "$$SOURCE_FOLDER" ] || [ -z "$(TESTS_FOLDER)" ]; then \
 		printf "$(BLUE)No valid source folder structure found, skipping tests$(RESET)\n"; \
 	else \
 		uv pip install pytest pytest-cov pytest-html && \
 		mkdir -p _tests/html-coverage _tests/html-report && \
-		uv run pytest $$TESTS_FOLDER \
+		uv run pytest $(TESTS_FOLDER) \
 			--cov=$$SOURCE_FOLDER \
 			--cov-report=term \
 			--cov-report=html:_tests/html-coverage \
@@ -100,7 +99,7 @@ docs: install ## Build documentation using pdoc
 	@if [ -f "pyproject.toml" ]; then \
 		SOURCE_FOLDER="src/$$(find src -mindepth 1 -maxdepth 1 -type d -not -path '*/\.*' | head -1 | sed 's|^src/||')"; \
   		uv pip install pdoc; \
-		uv run pdoc -o _pdoc $(SOURCE_FOLDER); \
+		uv run pdoc -o _pdoc $$SOURCE_FOLDER; \
 	else \
 		printf "$(BLUE)No pyproject.toml found, skipping docs$(RESET)\n"; \
 	fi
