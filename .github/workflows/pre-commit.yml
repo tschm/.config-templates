@@ -27,6 +27,10 @@ jobs:
       # Check out the repository code
       - uses: actions/checkout@v4
 
+      # install uv and task
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
       - name: Install Task
         uses: arduino/setup-task@v2
         with:
