@@ -43,9 +43,10 @@ runs:
 
         EXTRACTED_DIR="${TEMP_DIR}/.config-templates-main"
 
-        echo "🧹 Removing internal files..."
+        echo "🧹 Removing files not needed for client..."
         rm -f "${EXTRACTED_DIR}/action.yml"
-
+        rm -f "${EXTRACTED_DIR}/README.md"
+        
         echo "📂 Copying to working directory..."
         cp -Rf "${EXTRACTED_DIR}/." .
 
