@@ -36,6 +36,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # This installs Python and uv for faster dependency management
+      - name: Set up Python ${{ inputs.python-version }}
+        uses: astral-sh/setup-uv@v6  # Official action for setting up uv
+        with:
+          python-version: ${{ inputs.python-version }}  # Use the specified Python version
+
+
       # task is needed as we test the taskfiles
       - name: Install Task
         uses: arduino/setup-task@v2
