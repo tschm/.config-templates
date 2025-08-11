@@ -50,6 +50,9 @@ jobs:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build the virtual environment
+        run: uv venv
+
       - name: "Build the virtual environment for ${{ github.repository }}"
         if: hashFiles('pyproject.toml') != ''
         uses: tschm/cradle/actions/environment@v0.3.06
