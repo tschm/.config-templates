@@ -1,7 +1,7 @@
 # 🛠️ Config Templates
 
-[![CI Status](https://github.com/tschm/config-templates/workflows/CI/badge.svg)](https://github.com/tschm/config-templates/actions)
-[![Release](https://github.com/tschm/config-templates/workflows/Release%20Workflow/badge.svg)](https://github.com/tschm/config-templates/actions)
+[![CI Status](https://github.com/tschm/.config-templates/workflows/CI/badge.svg)](https://github.com/tschm/config-templates/actions)
+[![Release](https://github.com/tschm/.config-templates/workflows/Release%20Workflow/badge.svg)](https://github.com/tschm/config-templates/actions)
 
 A collection of reusable configuration templates for modern Python projects. 
 Save time and maintain consistency across your projects with these 
@@ -58,11 +58,11 @@ Run `task --list-all` to see all available tasks:
 
 We also provide a small [Makefile](Makefile) for convenience.
 
-
 ## 🧩 Usage Examples
 
 We recommend injecting the templates into your project using the 
-[GitHub Action](https://github.com/tschm/config-templates/actions) provided in this repository.
+[GitHub Action](https://github.com/tschm/config-templates/actions)
+provided in this repository.
 
 ### Manual Copy
 
@@ -108,7 +108,9 @@ jobs:
           title: 'chore: sync configuration templates'
           commit-message: 'chore: sync config files from config-templates'
           body: |
-            This PR updates configuration files from the [config-templates](https://github.com/tschm/config-templates) repository.
+            This PR updates configuration files from the 
+            [config-templates](https://github.com/tschm/.config-templates)
+            repository.
             
             - Automated PR created by GitHub Actions
 ```
