@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v4
 
       # This installs Python and uv for faster dependency management
-      - name: Set up Python ${{ inputs.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
         uses: astral-sh/setup-uv@v6  # Official action for setting up uv
         with:
           python-version: ${{ matrix.python-version }}  # Use the specified Python version
