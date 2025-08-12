@@ -8,6 +8,9 @@ _book
 _tests
 _marimushka
 
+# temp file used by Junie
+.output.txt
+
 quantstats.md
 
 # Byte-compiled / optimized / DLL files
