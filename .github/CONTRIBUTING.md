@@ -15,7 +15,6 @@ Before sending a pull request, make sure you do the following:
 and all tests pass.
 - [Write unit tests](#writing-unit-tests) for new functionality added.
 
-
 ## Building from source
 
 You'll need to build the project locally in order to start editing code.
