@@ -5,8 +5,9 @@ tasks:
     desc: Install uv and uvx
     cmds:
       # Download uv/uvx
-      - curl -sSf https://astral.sh/uv/install.sh | sh > /dev/null 2>&1 || (echo "${RED}Installation failed!${RESET}" >&2; exit 1)
-      - export PATH="$HOME/.cargo/bin:$PATH"
+      - curl -LsSf https://astral.sh/uv/install.sh | sh || { echo "${RED}Installation failed!${RESET}" >&2; exit 1; }
+      # Ensure uv binaries are on PATH
+      - export PATH="$HOME/.local/bin:$PATH"
 
   install:
     desc: Install all dependencies using uv
