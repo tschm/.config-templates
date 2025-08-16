@@ -220,14 +220,6 @@ class TestTaskfile:
         assert result.returncode == 0, f"Help task failed with: {result.stderr}"
         assert result.contains_message("Available tasks"), "Help information not displayed"
 
-    @pytest.mark.skip(reason="Potentially modifies system, only run manually")
-    def test_uv_task(self):
-        """Test that the uv task installs uv and uvx."""
-        result = self.run_task("build:uv", check=False)
-        assert result.returncode == 0 or result.contains_message("uv installation completed"), (
-            f"UV task failed: {result.stderr}"
-        )
-
     def test_install_task(self):
         """Test that the install task creates a virtual environment."""
         # We're in a temp directory, so .venv shouldn't exist yet
