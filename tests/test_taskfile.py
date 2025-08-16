@@ -3,6 +3,7 @@
 This module contains tests that verify all tasks defined in Taskfile.yml
 work correctly and produce the expected output.
 """
+
 import dataclasses
 import os
 import shutil
@@ -13,9 +14,11 @@ from subprocess import CompletedProcess
 
 import pytest
 
+
 @dataclasses.dataclass
 class Result:
     """Class for storing the result of a task."""
+
     result: CompletedProcess
 
     @property
@@ -44,7 +47,6 @@ class Result:
             True if the message is in stdout, False otherwise
         """
         return message in self.stdout
-
 
 
 class TestTaskfile:
@@ -190,9 +192,11 @@ class TestTaskfile:
         task_name = self.get_task_name(task_name)
 
         try:
-            result = Result(result = subprocess.run(
-                f"task {task_name}", shell=True, capture_output=True, text=True, check=check, timeout=timeout
-            ))
+            result = Result(
+                result=subprocess.run(
+                    f"task {task_name}", shell=True, capture_output=True, text=True, check=check, timeout=timeout
+                )
+            )
             return result
         except subprocess.TimeoutExpired as e:
             # For tasks that might hang (like servers)
@@ -232,8 +236,9 @@ class TestTaskfile:
 
         # Check for expected output - either it's creating a new environment
         # or it's skipping because one already exists (in the test environment)
-        assert (result.contains_message("Creating virtual environment...") or
-                result.contains_message("Virtual environment already exists")), f"Unexpected output: {result.stdout}"
+        assert result.contains_message("Creating virtual environment...") or result.contains_message(
+            "Virtual environment already exists"
+        ), f"Unexpected output: {result.stdout}"
 
         # The second part of the test is problematic because the task might detect
         # a virtual environment even in a new directory (due to global settings or parent directories)
@@ -279,7 +284,9 @@ class TestTaskfile:
     def test_fmt_task(self):
         """Test that the fmt task runs formatters."""
         result = self.run_task("fmt", check=False)
-        assert result.contains_message("Running formatters..."), f"Formatter message not found in output: {result.stdout}"
+        assert result.contains_message("Running formatters..."), (
+            f"Formatter message not found in output: {result.stdout}"
+        )
 
     def test_lint_task(self):
         """Test that the lint task runs linters."""
@@ -297,7 +304,9 @@ class TestTaskfile:
         # Test without pyproject.toml
         os.remove("pyproject.toml")
         result = self.run_task("deptry", check=False)
-        assert result.contains_message("No pyproject.toml found"), f"Should warn about missing pyproject.toml: {result.stdout}"
+        assert result.contains_message("No pyproject.toml found"), (
+            f"Should warn about missing pyproject.toml: {result.stdout}"
+        )
 
     def test_check_task(self):
         """Test that the check task runs all checks."""
@@ -326,9 +335,9 @@ class TestTaskfile:
 
         # Test with no source folder
         result = self.run_task("docs:test", check=False)
-        assert result.contains_message("No valid source folder structure found") or result.contains_message("Running tests..."), (
-            f"Unexpected output: {result.stdout}"
-        )
+        assert result.contains_message("No valid source folder structure found") or result.contains_message(
+            "Running tests..."
+        ), f"Unexpected output: {result.stdout}"
 
     def test_docs_task(self):
         """Test that the docs task builds documentation."""
@@ -360,13 +369,17 @@ class TestTaskfile:
     def test_marimushka_task(self):
         """Test that the marimushka task exports notebooks."""
         result = self.run_task("marimushka", check=False)
-        assert result.contains_message("Exporting notebooks from"), f"Marimushka message not found in output: {result.stdout}"
+        assert result.contains_message("Exporting notebooks from"), (
+            f"Marimushka message not found in output: {result.stdout}"
+        )
 
         # Create marimo directory and test file
         self.create_marimo_structure()
 
         result = self.run_task("marimushka", check=False)
-        assert result.contains_message("Exporting notebooks from"), f"Marimushka message not found in output: {result.stdout}"
+        assert result.contains_message("Exporting notebooks from"), (
+            f"Marimushka message not found in output: {result.stdout}"
+        )
 
     def test_book_task(self):
         """Test that the book task builds the companion book."""
@@ -401,7 +414,9 @@ class TestTaskfile:
         result = self.run_task("marimo", check=False, timeout=1)
 
         expected_msgs = ["Start Marimo server with", "Marimo folder", "Installing dependencies"]
-        assert any(result.contains_message(msg) for msg in expected_msgs), f"Marimo server message not found in output: {result.stdout}"
+        assert any(result.contains_message(msg) for msg in expected_msgs), (
+            f"Marimo server message not found in output: {result.stdout}"
+        )
 
     def test_clean_task(self):
         """Test that the clean task cleans the project."""
@@ -416,7 +431,9 @@ class TestTaskfile:
 
         # The task might actually clean files or just show the message
         expected_msgs = ["Cleaning project...", "git clean", "Removing local branches..."]
-        assert any(result.contains_message(msg) for msg in expected_msgs), f"Clean message not found in output: {result.stdout}"
+        assert any(result.contains_message(msg) for msg in expected_msgs), (
+            f"Clean message not found in output: {result.stdout}"
+        )
 
     def test_all_tasks_defined(self):
         """Test that all tasks defined in Taskfile.yml are tested."""
