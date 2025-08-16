@@ -23,6 +23,11 @@ class Result:
 
     @property
     def stdout(self):
+        """Get the standard output of the process.
+
+        Returns:
+            The standard output as a string, decoded if necessary
+        """
         stdout = self.result.stdout
         if isinstance(stdout, bytes):
             stdout = stdout.decode("utf-8", errors="replace")
@@ -31,10 +36,20 @@ class Result:
 
     @property
     def stderr(self):
+        """Get the standard error of the process.
+
+        Returns:
+            The standard error output
+        """
         return self.result.stderr
 
     @property
     def returncode(self):
+        """Get the return code of the process.
+
+        Returns:
+            The process return code
+        """
         return self.result.returncode
 
     def contains_message(self, message: str) -> bool:
