@@ -37,11 +37,13 @@ class Result:
     @property
     def stderr(self):
         """Get the standard error of the process.
-
         Returns:
             The standard error output
         """
-        return self.result.stderr
+        stderr = self.result.stderr
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8", errors="replace")
+        return stderr
 
     @property
     def returncode(self):
