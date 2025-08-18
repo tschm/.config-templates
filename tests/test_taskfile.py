@@ -30,7 +30,7 @@ class Result:
         """
         stdout = self.result.stdout
         assert isinstance(stdout, str)
-        #if isinstance(stdout, bytes):
+        # if isinstance(stdout, bytes):
         #    stdout = stdout.decode("utf-8", errors="replace")
 
         return stdout
@@ -44,7 +44,7 @@ class Result:
         """
         stderr = self.result.stderr
         assert isinstance(stderr, str)
-        #if isinstance(stderr, bytes):
+        # if isinstance(stderr, bytes):
         #    stderr = stderr.decode("utf-8", errors="replace")
         return stderr
 
@@ -212,6 +212,17 @@ class TestTaskfile:
         task_name = self.get_task_name(task_name)
 
         try:
+            cp = subprocess.run(
+                f"task {task_name}",
+                shell=True,
+                capture_output=True,
+                text=True,
+                check=check,
+                timeout=timeout,
+            )
+
+            return Result(result=cp)
+
             result = Result(
                 result=subprocess.run(
                     f"task {task_name}", shell=True, capture_output=True, text=True, check=check, timeout=timeout
@@ -220,11 +231,11 @@ class TestTaskfile:
             return result
         except subprocess.TimeoutExpired as e:
             # For tasks that might hang (like servers)
-            completed_process = subprocess.CompletedProcess(
+            completed_process = CompletedProcess(
                 args=e.cmd,
                 returncode=0,  # Assume it's working if it's still running
-                stdout=e.stdout if e.stdout else "Task is still running (timeout)",
-                stderr=e.stderr if e.stderr else "",
+                stdout=str(e.stdout) if e.stdout else "Task is still running (timeout)",
+                stderr=str(e.stderr) if e.stderr else "",
             )
             return Result(result=completed_process)
 
