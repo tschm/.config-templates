@@ -232,12 +232,6 @@ class TestTaskfile:
 
             return Result(result=cp)
 
-            result = Result(
-                result=subprocess.run(
-                    f"task {task_name}", shell=True, capture_output=True, text=True, check=check, timeout=timeout
-                )
-            )
-            return result
         except subprocess.TimeoutExpired as e:
             # For tasks that might hang (like servers)
             completed_process = CompletedProcess(
