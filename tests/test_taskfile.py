@@ -23,10 +23,13 @@ class Result:
 
     @property
     def stdout(self):
-        """Get the standard output of the process.
-
-        Returns:
-            The standard output as a string, decoded if necessary
+        """
+        Return the process standard output as a str.
+        
+        Ensures the underlying CompletedProcess.stdout is a string and returns it.
+        
+        Raises:
+            AssertionError: If the underlying stdout is not a str.
         """
         stdout = self.result.stdout
         assert isinstance(stdout, str)
@@ -37,10 +40,11 @@ class Result:
 
     @property
     def stderr(self):
-        """Get the standard error of the process.
-
+        """
+        Return the process standard error as a string.
+        
         Returns:
-            The standard error output
+            str: The process stderr from the underlying CompletedProcess. An AssertionError is raised if the stored stderr is not a string.
         """
         stderr = self.result.stderr
         assert isinstance(stderr, str)
@@ -198,15 +202,22 @@ class TestTaskfile:
         return task_map.get(base_name, base_name)
 
     def run_task(self, task_name, check=True, timeout=30):
-        """Run a task and return the process result.
-
-        Args:
-            task_name: Name of the task to run
-            check: Whether to check for successful exit code
-            timeout: Maximum time to wait for task completion
-
+        """
+        Run the named task via the system `task` command and return its process result.
+        
+        The provided task_name is first mapped through self.get_task_name() (so group-prefixed
+        names like "docs:build" may be returned). The task is executed with stdout/stderr
+        captured as text.
+        
+        Parameters:
+            task_name (str): Task identifier to run; may be a base name that is mapped to a grouped name.
+            check (bool): If True, subprocess.run will raise on non-zero exit (behavior forwarded to subprocess).
+            timeout (int | float): Seconds to wait for completion before treating the invocation as timed out.
+        
         Returns:
-            Result instance containing the process result
+            Result: A Result wrapping the subprocess.CompletedProcess for the executed task.
+            On timeout, returns a Result containing a CompletedProcess with returncode 0 and a brief
+            placeholder stdout indicating the task is still running.
         """
         # Get the appropriate task name with group prefix if needed
         task_name = self.get_task_name(task_name)
