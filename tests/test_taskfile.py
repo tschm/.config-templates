@@ -29,8 +29,9 @@ class Result:
             The standard output as a string, decoded if necessary
         """
         stdout = self.result.stdout
-        if isinstance(stdout, bytes):
-            stdout = stdout.decode("utf-8", errors="replace")
+        assert isinstance(stdout, str)
+        #if isinstance(stdout, bytes):
+        #    stdout = stdout.decode("utf-8", errors="replace")
 
         return stdout
 
@@ -42,8 +43,9 @@ class Result:
             The standard error output
         """
         stderr = self.result.stderr
-        if isinstance(stderr, bytes):
-            stderr = stderr.decode("utf-8", errors="replace")
+        assert isinstance(stderr, str)
+        #if isinstance(stderr, bytes):
+        #    stderr = stderr.decode("utf-8", errors="replace")
         return stderr
 
     @property
