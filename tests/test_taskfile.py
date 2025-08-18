@@ -23,11 +23,10 @@ class Result:
 
     @property
     def stdout(self):
-        """
-        Return the process standard output as a str.
-        
+        """Return the process standard output as a str.
+
         Ensures the underlying CompletedProcess.stdout is a string and returns it.
-        
+
         Raises:
             AssertionError: If the underlying stdout is not a str.
         """
@@ -40,11 +39,11 @@ class Result:
 
     @property
     def stderr(self):
-        """
-        Return the process standard error as a string.
-        
+        """Return the process standard error as a string.
+
         Returns:
-            str: The process stderr from the underlying CompletedProcess. An AssertionError is raised if the stored stderr is not a string.
+            str: The process stderr from the underlying CompletedProcess.
+                An AssertionError is raised if the stored stderr is not a string.
         """
         stderr = self.result.stderr
         assert isinstance(stderr, str)
@@ -202,18 +201,17 @@ class TestTaskfile:
         return task_map.get(base_name, base_name)
 
     def run_task(self, task_name, check=True, timeout=30):
-        """
-        Run the named task via the system `task` command and return its process result.
-        
+        """Run the named task via the system `task` command and return its process result.
+
         The provided task_name is first mapped through self.get_task_name() (so group-prefixed
         names like "docs:build" may be returned). The task is executed with stdout/stderr
         captured as text.
-        
+
         Parameters:
             task_name (str): Task identifier to run; may be a base name that is mapped to a grouped name.
             check (bool): If True, subprocess.run will raise on non-zero exit (behavior forwarded to subprocess).
             timeout (int | float): Seconds to wait for completion before treating the invocation as timed out.
-        
+
         Returns:
             Result: A Result wrapping the subprocess.CompletedProcess for the executed task.
             On timeout, returns a Result containing a CompletedProcess with returncode 0 and a brief
