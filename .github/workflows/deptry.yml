@@ -23,22 +23,14 @@ jobs:
     name: Check pyproject.toml presence
     runs-on: ubuntu-latest
     outputs:
-      pyproject_exists: ${{ steps.check_file.outputs.exists }}
+      pyproject_exists: ${{ steps.setup.outputs.pyproject_exists }}
     steps:
       - uses: actions/checkout@v5
 
-      # Use the composite action to render the project
-      - name: Render the project
+      # Use the composite action to setup the project and check for pyproject.toml
+      - name: Setup the project
+        id: setup
         uses: ./.github/actions/setup-project
-
-      - name: Check for pyproject.toml
-        id: check_file
-        run: |
-          if [ -f "pyproject.toml" ]; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
 
   deptry_analysis:
     name: Run deptry if pyproject.toml exists

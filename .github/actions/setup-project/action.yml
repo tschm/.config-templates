@@ -7,6 +7,11 @@ inputs:
     required: false
     default: '3.12'
 
+outputs:
+  pyproject_exists:
+    description: 'Flag indicating whether pyproject.toml exists'
+    value: ${{ steps.check_pyproject.outputs.exists }}
+
 runs:
   using: 'composite'
   steps:
@@ -41,3 +46,13 @@ runs:
         find . -depth -type d -name "*{{*}}*" -exec rm -rf {} +
         
         ls -R
+        
+    - name: Check for pyproject.toml
+      id: check_pyproject
+      shell: bash
+      run: |
+        if [ -f "pyproject.toml" ]; then
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
