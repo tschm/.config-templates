@@ -38,15 +38,21 @@ jobs:
 
       # Use the composite action to set up the project
       - name: Setup the project
+        id: setup
         uses: ./.github/actions/setup-project
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Install Python dependencies
-      - name: Install the environment
-        run: |
-          task build:install -s
-        shell: bash
+      #- name: Build the virtual environment
+      #  run: uv venv --python ${{ matrix.python-version }}
+
+      #- name: "Build the virtual environment for ${{ github.repository }}"
+      #  run: |
+      #    if [ -f "pyproject.toml" ]; then
+      #      uv sync --all-extras
+      #    else
+      #      echo "No pyproject.toml found, skipping package installation"
+      #    fi
 
       - name: "Run the tests"
         run: |

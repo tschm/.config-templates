@@ -60,10 +60,10 @@ jobs:
         uses: ./.github/actions/setup-project
 
       # Install Python dependencies
-      - name: Install the environment
-        run: |
-          task build:install -s
-        shell: bash
+      #- name: Install the environment
+      #  run: |
+      #    task build:install -s
+      #  shell: bash
 
       # Execute the notebook with the appropriate runner based on its content
       - name: Run notebook
