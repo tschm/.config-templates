@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v5
 
       # Use the composite action to render the project
-      - name: Render the project
+      - name: Setup the project
         uses: ./.github/actions/setup-project
 
       - name: Lint

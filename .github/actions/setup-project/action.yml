@@ -19,7 +19,7 @@ runs:
       uses: arduino/setup-task@v2
       with:
         version: 3.x
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        #repo-token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Render the project
       if: hashFiles('tests/resources/render.yml') != ''
