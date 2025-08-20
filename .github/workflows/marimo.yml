@@ -60,7 +60,7 @@ jobs:
         uses: ./.github/actions/setup-project
 
       # Install Python dependencies
-      - name: Install uv, uvx and the environment
+      - name: Install the environment
         run: |
           task build:install -s
         shell: bash

@@ -42,13 +42,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Build the virtual environment
-        run: uv venv
-
-      - name: "Build the virtual environment for ${{ github.repository }}"
-        if: hashFiles('pyproject.toml') != ''
-        run:
-          uv sync --all-extras
+      # Install Python dependencies
+      - name: Install the environment
+        run: |
+          task build:install -s
+        shell: bash
 
       - name: "Run the tests"
         run: |
