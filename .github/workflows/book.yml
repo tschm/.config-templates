@@ -56,19 +56,6 @@ jobs:
         run: |
           task docs:book
 
-      # Step 4: Display the structure of the artifacts directory
-      # This helps with debugging by showing what files were generated
-      - name: Inspect artifacts
-        shell: bash
-        run: |
-          # Check if tree is installed, otherwise use find/ls as fallback
-          if command -v tree &> /dev/null; then
-            tree _book  # Show directory structure in tree format
-          else
-            echo "tree command not found, using fallback:"
-            find _book -type f | sort
-          fi
-
       # Step 5: Package all artifacts for GitHub Pages deployment
       # This prepares the combined outputs for deployment by creating a single artifact
       - name: Upload static files as artifact

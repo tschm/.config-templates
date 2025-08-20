@@ -43,17 +43,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      #- name: Build the virtual environment
-      #  run: uv venv --python ${{ matrix.python-version }}
-
-      #- name: "Build the virtual environment for ${{ github.repository }}"
-      #  run: |
-      #    if [ -f "pyproject.toml" ]; then
-      #      uv sync --all-extras
-      #    else
-      #      echo "No pyproject.toml found, skipping package installation"
-      #    fi
-
       - name: "Run the tests"
         run: |
           uv pip install pytest
