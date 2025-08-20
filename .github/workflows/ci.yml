@@ -42,34 +42,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}  # Use the specified Python version
 
-
-      # task is needed as we test the taskfiles
-      - name: Install Task
-        uses: arduino/setup-task@v2
-        with:
-          version: 3.x
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Render the project
-        if: hashFiles('tests/resources/render.yml') != ''
-        run: |
-          pip install copier
-          
-          # Render the current folder in-place
-          copier copy . . \
-            --data-file ./tests/resources/render.yml \
-            --force \
-            --overwrite \
-            --quiet
-          
-          # Delete all remaining .jinja files
-          find . -type f -name "*.jinja" -exec rm -f {} +
-          
-          # Delete all folders that still contain {{ ... }}
-          find . -depth -type d -name "*{{*}}*" -exec rm -rf {} +
-          
-          ls -R 
-
       - name: Build the virtual environment
         run: uv venv
 

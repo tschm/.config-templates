@@ -27,28 +27,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v6
-
+      # Use the composite action to render the project
       - name: Render the project
-        if: hashFiles('tests/resources/render.yml') != ''
-        run: |
-          pip install copier
-          
-          # Render the current folder in-place
-          copier copy . . \
-            --data-file ./tests/resources/render.yml \
-            --force \
-            --overwrite \
-            --quiet
-          
-          # Delete all remaining .jinja files
-          find . -type f -name "*.jinja" -exec rm -f {} +
-          
-          # Delete all folders that still contain {{ ... }}
-          find . -depth -type d -name "*{{*}}*" -exec rm -rf {} +
-          
-          ls -R 
+        uses: ./.github/actions/setup-project
 
       - name: Check for pyproject.toml
         id: check_file
