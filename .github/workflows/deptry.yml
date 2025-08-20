@@ -40,11 +40,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install Task
-        uses: arduino/setup-task@v2
-        with:
-          version: 3.x
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      #- name: Install Task
+      #  uses: arduino/setup-task@v2
+      #  with:
+      #    version: 3.x
+      #    repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run deptry
         run: task quality:deptry
