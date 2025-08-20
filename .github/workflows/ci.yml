@@ -36,11 +36,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      # This installs Python and uv for faster dependency management
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: astral-sh/setup-uv@v6  # Official action for setting up uv
+      # Use the composite action to set up the project
+      - name: Setup the project
+        uses: ./.github/actions/setup-project
         with:
-          python-version: ${{ matrix.python-version }}  # Use the specified Python version
+          python-version: ${{ matrix.python-version }}
 
       - name: Build the virtual environment
         run: uv venv
