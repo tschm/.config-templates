@@ -20,7 +20,7 @@ pre-configured templates.
 
 ### Prerequisites
 
-All workflows and rely on [Task](https://taskfile.dev/). 
+All workflows rely on [Task](https://taskfile.dev/). 
 You can install it using one of the following methods:
   
 ```bash
