@@ -24,8 +24,8 @@ All workflows rely on [Task](https://taskfile.dev/).
 You can install it using one of the following methods:
   
 ```bash
-brew install go-task/tap/go-task        # macOS  
-sudo apt install task                   # Ubuntu/Debian  
+brew install go-task/tap/go-task        # macOS
+sudo snap install task --classic        # Ubuntu (Snap)
 ```
 
 In your CI workflow, add an installation step:  
