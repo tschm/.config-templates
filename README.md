@@ -20,9 +20,34 @@ pre-configured templates.
 
 ### Prerequisites
 
-- [Task](https://taskfile.dev/) - Task runner
-- [Python 3.12+](https://www.python.org/downloads/) - For Python-based tasks
-- [Git](https://git-scm.com/) - Version control
+All workflows rely on [Task](https://taskfile.dev/). 
+You can install it using one of the following methods:
+  
+```bash
+brew install go-task/tap/go-task        # macOS
+sudo snap install task --classic        # Ubuntu (Snap)
+```
+
+In your CI workflow, add an installation step:  
+
+```yaml
+name: Install Go Task CLI
+run: |
+  if ! command -v task &> /dev/null; then
+    curl -sSL https://raw.githubusercontent.com/go-task/task/v3/install.sh | sh
+  fi
+```
+
+or
+
+```yaml
+name: Install Go Task CLI
+uses: arduino/setup-task@v2
+with:
+  version: 3.x
+  # optional but recommended to avoid API rate limiting
+  repo-token: ${{ secrets.GITHUB_TOKEN }}
+```
 
 ### Installation
 
