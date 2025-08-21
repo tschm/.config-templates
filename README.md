@@ -44,7 +44,9 @@ or
 name: Install Go Task CLI
 uses: arduino/setup-task@v2
 with:
-version: 3.x
+  version: 3.x
+  # optional but recommended to avoid API rate limiting
+  repo-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ### Installation
