@@ -24,6 +24,32 @@ pre-configured templates.
 - [Python 3.12+](https://www.python.org/downloads/) - For Python-based tasks
 - [Git](https://git-scm.com/) - Version control
 
+- Go Task CLI (`task`):  
+  
+  ```bash
+  brew install go-task/tap/go-task        # macOS  
+  sudo apt install task                   # Ubuntu/Debian  
+  ```
+    
+  In your CI workflow, add an installation step:  
+
+```yaml
+  name: Install Go Task CLI
+  run: |
+    if ! command -v task &> /dev/null; then
+      curl -sSL https://raw.githubusercontent.com/go-task/task/v3/install.sh | sh
+    fi
+```
+
+or
+
+```yaml
+  name: Install Go Task CLI
+  uses: arduino/setup-task@v2
+  with:
+    version: 3.x
+```
+
 ### Installation
 
 ```bash
