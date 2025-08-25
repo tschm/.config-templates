@@ -30,7 +30,7 @@ sudo snap install task --classic        # Ubuntu (Snap)
 
 In your CI workflow, add an installation step:  
 
-```yaml
+```yaml 
 name: Install Go Task CLI
 run: |
   if ! command -v task &> /dev/null; then
