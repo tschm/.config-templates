@@ -124,7 +124,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Sync Config Templates
-        uses: tschm/config-templates@main
+        uses: tschm/.config-templates@main
         
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
