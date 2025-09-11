@@ -37,8 +37,7 @@
     - git config user.email "${GITLAB_USER_EMAIL:-gitlab-ci@example.com}"
 
     # Create and switch to a new branch
-    - git checkout -b "${BRANCH_NAME}"
-
+    - git checkout -B "${BRANCH_NAME}" || git switch "${BRANCH_NAME}"
     # Download and apply templates
     - |
       set -euo pipefail
