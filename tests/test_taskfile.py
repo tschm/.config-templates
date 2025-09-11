@@ -227,8 +227,9 @@ class TestTaskfile:
         # Mock responses for different tasks
         mock_responses = {
             "": "Available tasks for this project:\n* docs:book: Build the companion book\n* docs:test: Run tests",
-            "--list-all": ("Available tasks for this project:\n"
-                      "* docs:book: Build the companion book\n* docs:test: Run tests"),
+            "--list-all": (
+                "Available tasks for this project:\n* docs:book: Build the companion book\n* docs:test: Run tests"
+            ),
             "build:install": "Creating virtual environment...\nInstalling dependencies...",
             "build:build": "Building package..." if pyproject_exists else "No pyproject.toml found, skipping build",
             "build": "Building package..." if pyproject_exists else "No pyproject.toml found, skipping build",
