@@ -7,7 +7,6 @@ work correctly and produce the expected output.
 import dataclasses
 import os
 import shutil
-import tempfile
 from pathlib import Path
 from subprocess import CompletedProcess
 
@@ -31,9 +30,6 @@ class Result:
         """
         stdout = self.result.stdout
         assert isinstance(stdout, str)
-        # if isinstance(stdout, bytes):
-        #    stdout = stdout.decode("utf-8", errors="replace")
-
         return stdout
 
     @property
@@ -46,8 +42,6 @@ class Result:
         """
         stderr = self.result.stderr
         assert isinstance(stderr, str)
-        # if isinstance(stderr, bytes):
-        #    stderr = stderr.decode("utf-8", errors="replace")
         return stderr
 
     @property
@@ -75,7 +69,7 @@ class TestTaskfile:
     """Tests for tasks defined in Taskfile.yml."""
 
     @pytest.fixture(autouse=True)
-    def setup_and_teardown(self):
+    def setup_and_teardown(self, tmp_path):
         """Setup before each test and teardown after.
 
         This ensures tests don't interfere with each other.
@@ -83,51 +77,19 @@ class TestTaskfile:
         # Store original working directory
         self.original_dir = os.getcwd()
 
-        # Create a temporary directory for testing
-        self.temp_dir = tempfile.mkdtemp()
-
-        # Debug information is no longer needed
-
-        # Copy Taskfile.yml to temp directory
-        shutil.copy(os.path.join(self.original_dir, "Taskfile.yml"), self.temp_dir)
-
-        # Copy taskfiles directory from root to temp directory
-        taskfiles_dir = os.path.join(self.original_dir, "taskfiles")
-        if os.path.exists(taskfiles_dir):
-            dest_taskfiles_dir = os.path.join(self.temp_dir, "taskfiles")
-            os.makedirs(dest_taskfiles_dir, exist_ok=True)
-            for file in os.listdir(taskfiles_dir):
-                if file.endswith(".yml"):
-                    shutil.copy(os.path.join(taskfiles_dir, file), os.path.join(dest_taskfiles_dir, file))
-
-        # Copy .github directory to temp directory if it exists (for backward compatibility)
-        github_dir = os.path.join(self.original_dir, ".github")
-        if os.path.exists(github_dir):
-            dest_github_dir = os.path.join(self.temp_dir, ".github")
-            os.makedirs(dest_github_dir, exist_ok=True)
-
-            # Copy taskfiles from .github/taskfiles if they exist (for backward compatibility)
-            github_taskfiles_dir = os.path.join(github_dir, "taskfiles")
-            if os.path.exists(github_taskfiles_dir):
-                dest_github_taskfiles_dir = os.path.join(dest_github_dir, "taskfiles")
-                os.makedirs(dest_github_taskfiles_dir, exist_ok=True)
-                for file in os.listdir(github_taskfiles_dir):
-                    if file.endswith(".yml"):
-                        shutil.copy(
-                            os.path.join(github_taskfiles_dir, file), os.path.join(dest_github_taskfiles_dir, file)
-                        )
+        # copy Taskfile.yml to temp directory
+        shutil.copy(os.path.join(self.original_dir, "Taskfile.yml"), tmp_path)
+        # copy taskfiles directory from root to temp directory
+        shutil.copytree(os.path.join(self.original_dir, "taskfiles"), tmp_path / "taskfiles")
 
         # Change to temp directory
-        os.chdir(self.temp_dir)
+        os.chdir(tmp_path)
 
         # Run the test
         yield
 
         # Change back to original directory
         os.chdir(self.original_dir)
-
-        # Clean up temp directory
-        shutil.rmtree(self.temp_dir)
 
     def create_file(self, path, content):
         """Create a file with the given content.
@@ -299,9 +261,6 @@ class TestTaskfile:
         # Check that the task runs without errors and produces some output
         assert result.returncode == 0, f"Install task failed with: {result.stderr}"
         assert result.stdout, "Install task produced no output"
-
-        # Change back to the temp directory for other tests
-        os.chdir(self.temp_dir)
 
     def test_build_task(self):
         """Test that the build task builds the package."""
