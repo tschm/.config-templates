@@ -13,46 +13,41 @@
 #   variables:
 #     BRANCH_NAME: 'sync/update-configs'  # Optional: override default branch name
 #     COMMIT_MESSAGE: 'chore: sync config files from .config-templates'  # Optional: override default commit message
-
 .sync-config-templates:
-  stage: .pre
-  image: alpine:latest
+  stage: "test"
+  image: alpine:latest  # git preinstalled
   variables:
-    BRANCH_NAME: 'sync/update-configs'
+    BRANCH_NAME: sync/update-configs
     COMMIT_MESSAGE: 'chore: sync config files from .config-templates'
-    REPO_URL: 'https://gitlab.com/tschm/config-templates'
+    REPO_URL: https://github.com/tschm/.config-templates
+  before_script:
+    - apk add --no-cache git curl unzip bash
   script:
-    # Ensure we're in a git repository
     - |
+      set -euo pipefail
+
+      # Verify we're in a git repo
       git rev-parse --is-inside-work-tree > /dev/null || {
         echo "❌ Not in a git repository"
         exit 1
       }
 
-    # Install required tools
-    - apk add --no-cache git curl unzip
+      git config user.name "${GITLAB_USER_NAME:-GitLab CI}"
+      git config user.email "${GITLAB_USER_EMAIL:-gitlab-ci@example.com}"
+      git checkout -B "${BRANCH_NAME}" || git switch "${BRANCH_NAME}"
 
-    # Set up git user
-    - git config user.name "${GITLAB_USER_NAME:-GitLab CI}"
-    - git config user.email "${GITLAB_USER_EMAIL:-gitlab-ci@example.com}"
-
-    # Create and switch to a new branch
-    - git checkout -B "${BRANCH_NAME}" || git switch "${BRANCH_NAME}"
-    # Download and apply templates
-    - |
-      set -euo pipefail
-
+      # Download templates archive
       TEMP_DIR="$(mktemp -d)"
       trap 'rm -rf "$TEMP_DIR"' EXIT
 
       echo "📥 Downloading template archive..."
-      curl -sSL -o templates.zip "${REPO_URL}/-/archive/main/config-templates-main.zip"
+      curl -sSL -o "$TEMP_DIR/templates.zip" "${REPO_URL}/archive/refs/heads/main.zip"
 
       echo "📦 Extracting..."
-      unzip -q templates.zip -d "$TEMP_DIR"
-      rm -f templates.zip
+      unzip -q "$TEMP_DIR/templates.zip" -d "$TEMP_DIR"
 
-      EXTRACTED_DIR="${TEMP_DIR}/config-templates-main"
+      # Adjust for GitHub archive folder name
+      EXTRACTED_DIR="$(find $TEMP_DIR -maxdepth 1 -type d -name '*.config-templates*' | head -n 1)"
 
       echo "🧹 Removing files not needed for client..."
       rm -f "${EXTRACTED_DIR}/action.yml"
@@ -67,14 +62,14 @@
       echo "✅ Sync complete. Changed files:"
       git status --short || true
 
-    # Commit and push changes if there are any
-    - |
+      # Commit and push if there are changes
       if [[ -n "$(git status --porcelain)" ]]; then
         git add .
         git commit -m "${COMMIT_MESSAGE}"
-        git push -u origin "${BRANCH_NAME}" -o ci.skip
+        git push "https://oauth2:${GITLAB_API_TOKEN}@gitlab.com/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}.git" "${BRANCH_NAME}" -o ci.skip
 
-        # Create merge request if GitLab API token is available
+
+        # Create MR if token is set
         if [[ -n "${GITLAB_API_TOKEN:-}" ]]; then
           echo "Creating merge request..."
           curl --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
@@ -91,7 +86,3 @@
       else
         echo "No changes detected, nothing to commit"
       fi
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "web"'
-      when: manual
-      allow_failure: true
