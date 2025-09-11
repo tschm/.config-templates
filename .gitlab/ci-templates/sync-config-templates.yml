@@ -1,0 +1,97 @@
+# This file is part of the tschm/.config-templates repository
+# (https://github.com/tschm/.config-templates).
+#
+# GitLab CI/CD Template for Syncing Config Templates
+# Purpose: This template provides a job that syncs configuration templates into a project
+#
+# Usage:
+# include:
+#   - remote: 'https://gitlab.com/tschm/config-templates/-/raw/main/.gitlab/ci-templates/sync-config-templates.yml'
+#
+# sync-config-templates:
+#   extends: .sync-config-templates
+#   variables:
+#     BRANCH_NAME: 'sync/update-configs'  # Optional: override default branch name
+#     COMMIT_MESSAGE: 'chore: sync config files from .config-templates'  # Optional: override default commit message
+
+.sync-config-templates:
+  stage: .pre
+  image: alpine:latest
+  variables:
+    BRANCH_NAME: 'sync/update-configs'
+    COMMIT_MESSAGE: 'chore: sync config files from .config-templates'
+    REPO_URL: 'https://gitlab.com/tschm/config-templates'
+  script:
+    # Ensure we're in a git repository
+    - |
+      git rev-parse --is-inside-work-tree > /dev/null || {
+        echo "❌ Not in a git repository"
+        exit 1
+      }
+
+    # Install required tools
+    - apk add --no-cache git curl unzip
+
+    # Set up git user
+    - git config user.name "${GITLAB_USER_NAME:-GitLab CI}"
+    - git config user.email "${GITLAB_USER_EMAIL:-gitlab-ci@example.com}"
+
+    # Create and switch to a new branch
+    - git checkout -B "${BRANCH_NAME}" || git switch "${BRANCH_NAME}"
+    # Download and apply templates
+    - |
+      set -euo pipefail
+
+      TEMP_DIR="$(mktemp -d)"
+      trap 'rm -rf "$TEMP_DIR"' EXIT
+
+      echo "📥 Downloading template archive..."
+      curl -sSL -o templates.zip "${REPO_URL}/-/archive/main/config-templates-main.zip"
+
+      echo "📦 Extracting..."
+      unzip -q templates.zip -d "$TEMP_DIR"
+      rm -f templates.zip
+
+      EXTRACTED_DIR="${TEMP_DIR}/config-templates-main"
+
+      echo "🧹 Removing files not needed for client..."
+      rm -f "${EXTRACTED_DIR}/action.yml"
+      rm -f "${EXTRACTED_DIR}/README.md"
+      rm -f "${EXTRACTED_DIR}/.gitignore"
+      rm -rf "${EXTRACTED_DIR}/.github"
+      rm -rf "${EXTRACTED_DIR}/.devcontainer"
+
+      echo "📂 Copying to working directory..."
+      cp -Rf "${EXTRACTED_DIR}/." .
+
+      echo "✅ Sync complete. Changed files:"
+      git status --short || true
+
+    # Commit and push changes if there are any
+    - |
+      if [[ -n "$(git status --porcelain)" ]]; then
+        git add .
+        git commit -m "${COMMIT_MESSAGE}"
+        git push -u origin "${BRANCH_NAME}" -o ci.skip
+
+        # Create merge request if GitLab API token is available
+        if [[ -n "${GITLAB_API_TOKEN:-}" ]]; then
+          echo "Creating merge request..."
+          curl --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
+               --data "source_branch=${BRANCH_NAME}" \
+               --data "target_branch=${CI_DEFAULT_BRANCH}" \
+               --data "title=${COMMIT_MESSAGE}" \
+               --data "description=This MR updates configuration files from the config-templates repository." \
+               --data "remove_source_branch=true" \
+               "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests"
+        else
+          echo "GITLAB_API_TOKEN not set, skipping merge request creation"
+          echo "Please create a merge request manually from branch ${BRANCH_NAME}"
+        fi
+      else
+        echo "No changes detected, nothing to commit"
+      fi
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true

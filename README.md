@@ -3,34 +3,37 @@
 [![CI Status](https://github.com/tschm/.config-templates/workflows/CI/badge.svg)](https://github.com/tschm/config-templates/actions)
 [![Release](https://github.com/tschm/.config-templates/workflows/Release%20Workflow/badge.svg)](https://github.com/tschm/config-templates/actions)
 
-A collection of reusable configuration templates for modern Python projects. 
-Save time and maintain consistency across your projects with these 
+A collection of reusable configuration templates for modern Python projects.
+Save time and maintain consistency across your projects with these
 pre-configured templates.
 
 ## ✨ Features
 
 - 📦 **Task-based Workflows** - Organized task definitions using [Taskfile](https://taskfile.dev/)
-- 🚀 **CI/CD Templates** - Ready-to-use GitHub Actions workflows
+- 🚀 **CI/CD Templates** - Ready-to-use GitHub Actions and GitLab CI workflows
 - 🧪 **Testing Framework** - Comprehensive test setup with pytest
 - 📚 **Documentation** - Automated documentation generation
 - 🔍 **Code Quality** - Linting, formatting, and dependency checking
+- 📝 **Editor Configuration** - Cross-platform .editorconfig for consistent coding style
 - 📊 **Marimo Integration** - Interactive notebook support
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-All workflows rely on [Task](https://taskfile.dev/). 
+All workflows rely on [Task](https://taskfile.dev/).
 You can install it using one of the following methods:
-  
+
 ```bash
 brew install go-task/tap/go-task        # macOS
 sudo snap install task --classic        # Ubuntu (Snap)
 ```
 
-In your CI workflow, add an installation step:  
+#### GitHub Actions
 
-```yaml 
+In your GitHub Actions workflow, add an installation step:
+
+```yaml
 name: Install Go Task CLI
 run: |
   if ! command -v task &> /dev/null; then
@@ -47,6 +50,16 @@ with:
   version: 3.x
   # optional but recommended to avoid API rate limiting
   repo-token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+#### GitLab CI/CD
+
+In your GitLab CI/CD pipeline, add an installation step:
+
+```yaml
+# Install Task
+- curl -sL https://taskfile.dev/install.sh | sh
+- mv ./bin/task /usr/local/bin/task
 ```
 
 ### Installation
@@ -85,7 +98,7 @@ We also provide a small [Makefile](Makefile) for convenience.
 
 ## 🧩 Usage Examples
 
-We recommend injecting the templates into your project using the 
+We recommend injecting the templates into your project using the
 [GitHub Action](https://github.com/tschm/config-templates/actions)
 provided in this repository.
 
@@ -104,8 +117,8 @@ cp config-templates/Taskfile.yml .
 
 ### Using GitHub Action
 
-You can automatically sync these configuration 
-templates into your project using the GitHub Action provided 
+You can automatically sync these configuration
+templates into your project using the GitHub Action provided
 in this repository:
 
 ```yaml
@@ -122,10 +135,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Sync Config Templates
         uses: tschm/.config-templates@main
-        
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
@@ -133,10 +146,10 @@ jobs:
           title: 'chore: sync configuration templates'
           commit-message: 'chore: sync config files from config-templates'
           body: |
-            This PR updates configuration files from the 
+            This PR updates configuration files from the
             [config-templates](https://github.com/tschm/.config-templates)
             repository.
-            
+
             - Automated PR created by GitHub Actions
 ```
 
@@ -144,6 +157,38 @@ This action will:
 1. Download the latest templates from this repository
 2. Copy them to your project
 3. Create a pull request with the changes (if any)
+
+### Using GitLab CI/CD Template
+
+You can automatically sync these configuration templates into your GitLab project using the CI/CD template provided in this repository:
+
+```yaml
+# .gitlab-ci.yml
+include:
+  - remote: 'https://gitlab.com/tschm/config-templates/-/raw/main/.gitlab/ci-templates/sync-config-templates.yml'
+
+# Define a job that extends the template
+sync-config-templates:
+  extends: .sync-config-templates
+  variables:
+    # Optional: override default branch name
+    BRANCH_NAME: 'sync/update-configs'
+    # Optional: override default commit message
+    COMMIT_MESSAGE: 'chore: sync config files from config-templates'
+  # Run manually from GitLab UI or on schedule
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+```
+
+To set up scheduled runs, go to CI/CD > Schedules in your GitLab project and create a new schedule.
+
+This template will:
+1. Download the latest templates from this repository
+2. Copy them to your project
+3. Create a branch with the changes
+4. Optionally create a merge request if GITLAB_API_TOKEN is provided
 
 ## 📚 Documentation
 
