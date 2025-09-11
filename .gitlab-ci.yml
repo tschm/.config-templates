@@ -6,6 +6,7 @@
 #          to ensure code quality and compatibility across different environments.
 
 stages:
+  - sync
   - setup
   - lint
   - test
@@ -16,24 +17,31 @@ stages:
 variables:
   PYTHON_VERSION: "3.12"
 
-# Reusable template for setting up the environment
+include:
+  local: .gitlab/ci-templates/*.yml
+
+# Public job that can be triggered manually
+sync-config-templates:
+  stage: sync
+  extends: ".sync-config-templates"
+  rules:
+    - when: manual
+
+# -----------------------------
+# Setup Template
+# -----------------------------
 .setup_template: &setup_template
   before_script:
-    # Install uv
     - pip install uv
-    # Install Task
     - curl -sL https://taskfile.dev/install.sh | sh
     - mv ./bin/task /usr/local/bin/task
-    # Check for pyproject.toml
     - |
       if [ -f "pyproject.toml" ]; then
         export PYPROJECT_EXISTS=true
       else
         export PYPROJECT_EXISTS=false
       fi
-    # Create virtual environment
     - uv venv --python $PYTHON_VERSION
-    # Install dependencies if pyproject.toml exists
     - |
       if [ "$PYPROJECT_EXISTS" = "true" ]; then
         uv sync --all-extras
@@ -41,7 +49,9 @@ variables:
         echo "No pyproject.toml found, skipping package installation"
       fi
 
-# Setup job
+# -----------------------------
+# Setup Job
+# -----------------------------
 setup:
   stage: setup
   image: python:$PYTHON_VERSION
@@ -53,7 +63,9 @@ setup:
       - .venv/
     expire_in: 1 hour
 
-# Linting job
+# -----------------------------
+# Lint Job
+# -----------------------------
 lint:
   stage: lint
   image: python:$PYTHON_VERSION
@@ -66,13 +78,16 @@ lint:
     - task quality:lint
     - task quality:fmt
 
-# Testing job with matrix for multiple Python versions
+# -----------------------------
+# Test Jobs
+# -----------------------------
 .test_template: &test_template
   stage: test
   <<: *setup_template
   script:
     - uv pip install pytest
     - uv run pytest tests
+
 test:python-3.11:
   <<: *test_template
   image: python:3.11
@@ -85,7 +100,9 @@ test:python-3.13:
   <<: *test_template
   image: python:3.13
 
-# Build job
+# -----------------------------
+# Build Job
+# -----------------------------
 build:
   stage: build
   image: python:$PYTHON_VERSION
@@ -100,7 +117,9 @@ build:
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-# Documentation job with Pages deployment
+# -----------------------------
+# Docs Job
+# -----------------------------
 pages:
   stage: docs
   image: python:$PYTHON_VERSION
@@ -113,7 +132,6 @@ pages:
     - task docs:test
     - task docs:marimushka
     - task docs:book
-    # GitLab Pages expects the content to be in the public directory
     - mkdir -p public
     - cp -r _book/* public/ || echo "No _book directory found"
     - cp -r book/_build/* public/ || echo "No book/_build directory found"
@@ -124,10 +142,9 @@ pages:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-# Release jobs
-# These jobs are triggered manually when a tag is created
-
-# Create a release when a tag is pushed
+# -----------------------------
+# Release Jobs
+# -----------------------------
 release:tag:
   stage: release
   image: python:$PYTHON_VERSION
@@ -136,29 +153,23 @@ release:tag:
   rules:
     - if: $CI_COMMIT_TAG
 
-# Build the package for release
 release:build:
   stage: release
   image: python:$PYTHON_VERSION
   needs:
-    - release:tag
+    - job: release:tag
+      optional: true
   <<: *setup_template
   script:
     - |
       if [ -f "pyproject.toml" ]; then
-        # Extract version from tag (remove 'v' prefix if present)
         version=${CI_COMMIT_TAG#v}
         echo "Setting version to $version"
-        
-        # Update version in pyproject.toml
         sed -i.bak "s/^version = .*/version = \"$version\"/" pyproject.toml
         rm pyproject.toml.bak
-        
-        # Build the package
         task build:build
       else
         echo "No pyproject.toml found, skipping build"
-      fi
   artifacts:
     paths:
       - dist/
@@ -166,24 +177,19 @@ release:build:
   rules:
     - if: $CI_COMMIT_TAG
 
-# Publish to PyPI
 release:pypi:
   stage: release
   image: python:$PYTHON_VERSION
   needs:
-    - release:build
+    - job: release:build
+      optional: true
   script:
     - |
       if [ -d "dist" ]; then
         pip install twine
-        # Use CI/CD variables for PyPI credentials
-        # TWINE_USERNAME and TWINE_PASSWORD should be set in GitLab CI/CD variables
-        # For security, use masked variables in GitLab settings
         twine upload dist/*
       else
         echo "No dist directory found, skipping PyPI publish"
-      fi
   rules:
     - if: $CI_COMMIT_TAG
-    # Only run on protected tags in the main project (not forks)
     - if: $CI_PROJECT_NAMESPACE == $CI_PROJECT_ROOT_NAMESPACE
