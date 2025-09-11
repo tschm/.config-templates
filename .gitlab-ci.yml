@@ -69,15 +69,10 @@ lint:
 # Testing job with matrix for multiple Python versions
 .test_template: &test_template
   stage: test
-  needs:
-    - setup
-  dependencies:
-    - setup
   <<: *setup_template
   script:
     - uv pip install pytest
     - uv run pytest tests
-
 test:python-3.11:
   <<: *test_template
   image: python:3.11
