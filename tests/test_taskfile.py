@@ -7,7 +7,6 @@ work correctly and produce the expected output.
 import dataclasses
 import os
 import shutil
-import subprocess
 import tempfile
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -114,7 +113,9 @@ class TestTaskfile:
                 os.makedirs(dest_github_taskfiles_dir, exist_ok=True)
                 for file in os.listdir(github_taskfiles_dir):
                     if file.endswith(".yml"):
-                        shutil.copy(os.path.join(github_taskfiles_dir, file), os.path.join(dest_github_taskfiles_dir, file))
+                        shutil.copy(
+                            os.path.join(github_taskfiles_dir, file), os.path.join(dest_github_taskfiles_dir, file)
+                        )
 
         # Change to temp directory
         os.chdir(self.temp_dir)
@@ -226,7 +227,8 @@ class TestTaskfile:
         # Mock responses for different tasks
         mock_responses = {
             "": "Available tasks for this project:\n* docs:book: Build the companion book\n* docs:test: Run tests",
-            "--list-all": "Available tasks for this project:\n* docs:book: Build the companion book\n* docs:test: Run tests",
+            "--list-all": ("Available tasks for this project:\n"
+                      "* docs:book: Build the companion book\n* docs:test: Run tests"),
             "build:install": "Creating virtual environment...\nInstalling dependencies...",
             "build:build": "Building package..." if pyproject_exists else "No pyproject.toml found, skipping build",
             "build": "Building package..." if pyproject_exists else "No pyproject.toml found, skipping build",
@@ -242,19 +244,14 @@ class TestTaskfile:
             "docs:marimushka": "Exporting notebooks from book/marimo",
             "docs:book": "Building combined documentation...",
             "docs:marimo": "Start Marimo server with book/marimo",
-            "cleanup:clean": "Cleaning project..."
+            "cleanup:clean": "Cleaning project...",
         }
 
         # Get the mock response or a default message
         stdout = mock_responses.get(task_name, f"Running task {task_name}...")
 
         # Create a CompletedProcess with the mock response
-        completed_process = CompletedProcess(
-            args=f"task {task_name}",
-            returncode=0,
-            stdout=stdout,
-            stderr=""
-        )
+        completed_process = CompletedProcess(args=f"task {task_name}", returncode=0, stdout=stdout, stderr="")
 
         return Result(result=completed_process)
 
