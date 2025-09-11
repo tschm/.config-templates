@@ -262,7 +262,6 @@ class TestTaskfile:
         assert result.returncode == 0, f"Install task failed with: {result.stderr}"
         assert result.stdout, "Install task produced no output"
 
-
     def test_build_task(self):
         """Test that the build task builds the package."""
         # Create a mock pyproject.toml
