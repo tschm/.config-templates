@@ -122,7 +122,6 @@ templates into your project using the GitHub Action provided
 in this repository:
 
 ```yaml
-# .github/workflows/sync-configs.yml
 name: Sync Config Templates
 
 on:
@@ -145,6 +144,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.PAT_TOKEN }}
           branch: sync/update-configs
           title: 'chore: sync configuration templates'
           commit-message: 'chore: sync config files from config-templates'
@@ -152,8 +152,6 @@ jobs:
             This PR updates configuration files from the
             [config-templates](https://github.com/tschm/.config-templates)
             repository.
-
-            - Automated PR created by GitHub Actions
 ```
 
 This action will:
