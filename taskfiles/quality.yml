@@ -33,6 +33,8 @@ tasks:
 
   check:
     desc: Run all code quality checks
-    deps: ['build:uv', lint, fmt, deptry]
     cmds:
-      - printf "${GREEN}[INFO] All checks passed!${RESET}\n"
+      - task: fmt
+      - task: lint
+      - task: deptry
+      - cmd: printf "${GREEN}[INFO] All checks passed!${RESET}\n"
