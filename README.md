@@ -130,6 +130,9 @@ on:
     - cron: '0 0 * * 1'  # Weekly on Monday at midnight
   workflow_dispatch:  # Allow manual triggering
 
+permissions:
+  contents: write
+
 jobs:
   sync:
     runs-on: ubuntu-latest
