@@ -11,9 +11,19 @@ echo "export UV_LINK_MODE=copy" >> ~/.bashrc
 # Install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Create virtual environment and install all dependencies including dev and notebooks
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create virtual environment
 uv venv
-uv sync --all-extras
+
+# Sync dependencies if pyproject.toml exists
+if [ -f pyproject.toml ]; then
+    uv sync --all-extras
+fi
+
+# Install marimo
+uv pip install marimo
 
 # Initialize pre-commit hooks (in background to not block startup)
 nohup uv run pre-commit install > /dev/null 2>&1 &
