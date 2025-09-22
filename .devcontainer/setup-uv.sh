@@ -9,8 +9,10 @@ export UV_LINK_MODE=copy
 echo "export UV_VENV_CLEAR=1" >> ~/.bashrc
 echo "export UV_LINK_MODE=copy" >> ~/.bashrc
 
-# Install uv
+# Install uv (consider pinning via UV_INSTALL_VERSION or checksum)
 curl -LsSf https://astral.sh/uv/install.sh | sh
+# Ensure current shell sees uv (installer typically uses ~/.cargo/bin)
+export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
 
 # Create virtual environment
 uv venv
