@@ -17,7 +17,45 @@ pre-configured templates.
 - 📝 **Editor Configuration** - Cross-platform .editorconfig for consistent coding style
 - 📊 **Marimo Integration** - Interactive notebook support
 
-## 🚀 Getting Started
+## � Development Environment
+
+This repository includes a complete **Dev Container** configuration for seamless development experience in both **VS Code** and **GitHub Codespaces**.
+
+### What's Configured
+
+The `.devcontainer` setup provides:
+
+- 🐍 **Python 3.13** runtime environment
+- 🔧 **UV Package Manager** - Fast Python package installer and resolver
+- ⚡ **Task CLI** - For running project workflows
+- 🧪 **Pre-commit Hooks** - Automated code quality checks
+- 📊 **Marimo Integration** - Interactive notebook support with VS Code extension
+- 🔍 **Python Development Tools** - Pylance, Python extension, and optimized settings
+- 🚀 **Port Forwarding** - Port 8080 for development servers
+
+### Usage
+
+#### In VS Code
+1. Install the "Dev Containers" extension
+2. Open the repository in VS Code
+3. Click "Reopen in Container" when prompted
+4. The environment will automatically set up with all dependencies
+
+#### In GitHub Codespaces
+1. Navigate to the repository on GitHub
+2. Click the green "Code" button
+3. Select "Codespaces" tab
+4. Click "Create codespace on main" (or your branch)
+5. Your development environment will be ready in minutes
+
+The dev container automatically runs the initialization script that:
+- Installs UV package manager
+- Sets up Task CLI
+- Configures the Python virtual environment
+- Installs project dependencies
+- Sets up pre-commit hooks
+
+## �🚀 Getting Started
 
 ### Prerequisites
 
