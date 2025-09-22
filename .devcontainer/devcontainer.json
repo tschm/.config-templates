@@ -20,19 +20,10 @@
                 "marimo.pythonPath": ".venv/bin/python",
                 "marimo.marimoPath": ".venv/bin/marimo"
             },
-
             "extensions": [
                 "ms-python.python",
                 "ms-python.vscode-pylance",
-                "ms-python.pylint",
-                "marimo-team.vscode-marimo",
-                "marimo-ai.marimo-vscode"
-            ]
-            "extensions": [
-                "ms-python.python",
-                "ms-python.vscode-pylance",
-                "marimo-team.vscode-marimo",
-                "marimo-ai.marimo-vscode"
+                "marimo-team.vscode-marimo"
             ]
         }
     },
