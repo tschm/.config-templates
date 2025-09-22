@@ -220,6 +220,7 @@ The `.devcontainer` setup provides:
 - 📊 **Marimo Integration** - Interactive notebook support with VS Code extension
 - 🔍 **Python Development Tools** - Pylance, Python extension, and optimized settings
 - 🚀 **Port Forwarding** - Port 8080 for development servers
+- 🔐 **SSH Agent Forwarding** - Full Git functionality with your host SSH keys
 
 ### Usage
 
@@ -242,6 +243,15 @@ The dev container automatically runs the initialization script that:
 - Configures the Python virtual environment
 - Installs project dependencies
 - Sets up pre-commit hooks
+
+### VS Code Dev Container SSH Agent Forwarding
+
+Dev containers launched locally via VS code are configured with SSH agent forwarding to enable seamless Git operations:
+
+- **Mounts your SSH directory** - Your `~/.ssh` folder is mounted into the container
+- **Forwards SSH agent** - Your host's SSH agent is available inside the container
+- **Enables Git operations** - Push, pull, and clone using your existing SSH keys
+- **Works transparently** - No additional setup required in VS Code dev containers
 
 ## 🤝 Contributing
 
