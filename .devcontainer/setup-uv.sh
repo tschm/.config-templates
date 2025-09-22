@@ -25,5 +25,8 @@ fi
 # Install marimo
 uv pip install marimo
 
-# Initialize pre-commit hooks (in background to not block startup)
-nohup uv run pre-commit install > /dev/null 2>&1 &
+# Initialize pre-commit hooks if configured
+if [ -f .pre-commit-config.yaml ]; then
+  # uvx runs tools without requiring them in the project deps
+  uvx pre-commit install
+fi
