@@ -17,7 +17,7 @@ pre-configured templates.
 - 📝 **Editor Configuration** - Cross-platform .editorconfig for consistent coding style
 - 📊 **Marimo Integration** - Interactive notebook support
 
-## � Development Environment
+## 🖥️ Development Environment
 
 This repository includes a complete **Dev Container** configuration for seamless development experience in both **VS Code** and **GitHub Codespaces**.
 
@@ -55,7 +55,7 @@ The dev container automatically runs the initialization script that:
 - Installs project dependencies
 - Sets up pre-commit hooks
 
-## �🚀 Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
