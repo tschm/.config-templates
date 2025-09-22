@@ -41,7 +41,7 @@ tasks:
     cmds:
       - |
         if [ -f "pyproject.toml" ]; then
-          uvx hatch build
+          uvx hatch build || { printf "${RED}[ERROR] Build failed${RESET}\n"; exit 1; }
         else
           printf "${YELLOW}[WARN] No pyproject.toml found, skipping build${RESET}\n"
         fi
