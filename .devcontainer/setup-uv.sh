@@ -11,9 +11,6 @@ echo "export UV_LINK_MODE=copy" >> ~/.bashrc
 # Install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
 # Create virtual environment
 uv venv
 
