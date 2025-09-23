@@ -74,6 +74,7 @@ runs:
           item=$(echo "$item" | xargs)
           if [ -e "${EXTRACTED_DIR}/$item" ]; then
             mkdir -p "${FILTERED_DIR}/$(dirname "$item")"
+
             # Copy the included item to the filtered directory
             if [ -d "${EXTRACTED_DIR}/$item" ]; then
               cp -R "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$(dirname "$item")/"
