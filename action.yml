@@ -14,18 +14,20 @@ inputs:
     description: 'Commit message for sync'
     default: 'chore: sync config files from .config-templates'
     required: false
-  #include:
-  #  description: 'List of files and folders to include'
-  #  default: |
-  #    CODE_OF_CONDUCT.md
-  #    CONTRIBUTING.md
-  #    ruff.toml
-  #    Makefile
-  #    .pre-commit-config.yaml
-  #    .editorconfig
-  #    .gitignore
-  #    .github
-  #  required: false
+  include:
+    description: 'Comma-separated list of files and folders to include'
+    default: |
+      CODE_OF_CONDUCT.md
+      CONTRIBUTING.md
+      Makefile
+      .pre-commit-config.yaml
+      .editorconfig
+      .gitignore
+      .github
+      .devcontainer
+      taskfiles
+      Taskfile.yml
+    required: false
   exclude:
     description: 'List of files to exclude'
     default: |
@@ -49,36 +51,84 @@ runs:
         }
       shell: bash
 
-    - name: Download and apply templates
-      run: |
-        set -euo pipefail
+    - name: Try sparse checkout
+      uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+        ref: ${{ inputs.branch }}
+        sparse-checkout: |
+          ${{ inputs.include }}
+        sparse-checkout-cone-mode: true
 
-        REPO_URL="https://github.com/tschm/.config-templates"
-        TEMP_DIR="$(mktemp -d)"
-        FILTERED_DIR="$(mktemp -d)"
-        trap 'rm -rf "$TEMP_DIR" "$FILTERED_DIR"' EXIT
-
-        echo "📥 Downloading template archive..."
-        curl -sSL -o templates.zip "$REPO_URL/archive/refs/heads/main.zip"
-
-        echo "📦 Extracting..."
-        unzip -q templates.zip -d "$TEMP_DIR"
-        rm -f templates.zip
-
-        EXTRACTED_DIR="${TEMP_DIR}/.config-templates-main"
-        ls -all ${EXTRACTED_DIR}
-
-        # Remove excluded items
-        while IFS= read -r item; do
-          item="$(echo "$item" | xargs)"
-          [ -n "$item" ] && rm -rf "$EXTRACTED_DIR/$item"
-        done <<< "${{ inputs.exclude }}"
-
-        echo "📂 Copying to working directory..."
-        cp -Rf "${EXTRACTED_DIR}/." .
-
-        ls -all .
-
-        echo "✅ Sync complete. Changed files:"
-        git status --short || true
+    - name: Check
       shell: bash
+      run: |
+        ls -all
+
+#    - name: Download and apply templates
+#      run: |
+#        set -euo pipefail
+#
+#        REPO_URL="https://github.com/tschm/.config-templates"
+#        TEMP_DIR="$(mktemp -d)"
+#        FILTERED_DIR="$(mktemp -d)"
+#        trap 'rm -rf "$TEMP_DIR" "$FILTERED_DIR"' EXIT
+#
+#        echo "📥 Downloading template archive..."
+#        curl -sSL -o templates.zip "$REPO_URL/archive/refs/heads/main.zip"
+#
+#        echo "📦 Extracting..."
+#        unzip -q templates.zip -d "$TEMP_DIR"
+#        rm -f templates.zip
+#
+#        EXTRACTED_DIR="${TEMP_DIR}/.config-templates-main"
+#
+#        # Remove files not needed for client
+#        rm -f "${EXTRACTED_DIR}/action.yml"
+#        rm -f "${EXTRACTED_DIR}/README.md"
+#
+#        # Process include list if provided
+#        if [ -n "${{ inputs.include }}" ]; then
+#          echo "🔍 Processing include list..."
+#          IFS=',' read -ra INCLUDES <<< "${{ inputs.include }}"
+#          for item in "${INCLUDES[@]}"; do
+#            # Trim whitespace
+#            item=$(echo "$item" | xargs)
+#            if [ -e "${EXTRACTED_DIR}/$item" ]; then
+#              echo "  Including: $item"
+#              # Copy the included item to the filtered directory
+#              if [ -d "${EXTRACTED_DIR}/$item" ]; then
+#                mkdir -p "${FILTERED_DIR}/$(dirname "$item")"
+#                cp -R "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$(dirname "$item")/"
+#              else
+#                mkdir -p "${FILTERED_DIR}/$(dirname "$item")"
+#                cp "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$item"
+#              fi
+#            else
+#              echo "  Warning: Include item '$item' not found in template"
+#            fi
+#          done
+#          COPY_SOURCE="${FILTERED_DIR}"
+#        else
+#          # If no include list is specified, use the original extracted directory
+#          COPY_SOURCE="${EXTRACTED_DIR}"
+#        fi
+#
+#        # Process exclude list if provided
+#        if [ -n "${{ inputs.exclude }}" ]; then
+#          echo "🔍 Processing exclude list..."
+#          while IFS= read -r item; do
+#            item="$(echo "$item" | xargs)"
+#            if [ -n "$item" ]; then
+#              echo "  Excluding: $item"
+#              rm -rf "${COPY_SOURCE}/$item"
+#            fi
+#          done <<< "${{ inputs.exclude }}"
+#        fi
+#
+#        echo "📂 Copying to working directory..."
+#        cp -Rf "${COPY_SOURCE}/." .
+#
+#        echo "✅ Sync complete. Changed files:"
+#        git status --short || true
+#      shell: bash
