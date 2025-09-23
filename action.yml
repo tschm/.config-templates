@@ -78,8 +78,10 @@ runs:
       shell: bash
       run: |
         echo "📂 Copying template files into repo..."
-        mv -R .template-temp/* .
+        cp -R .template-temp/* .
+        rm -rf .template-temp
         ls -all .
+        tree .
 
     #- name: Show final synced files
     #  shell: bash
