@@ -61,21 +61,25 @@ runs:
 
     - name: Apply excludes
       if: ${{ inputs.exclude != '' }}
+      working-directory: .template-temp
       shell: bash
       run: |
+        ls -all .
         echo "🔍 Processing exclude list..."
         while IFS= read -r item; do
           item="$(echo "$item" | xargs)"
           [ -z "$item" ] && continue
           echo "  Excluding: $item"
-          rm -rf ".template-temp/$item"
+          rm -rf "$item"
         done <<< "${{ inputs.exclude }}"
+        ls -all .
 
     - name: Copy template files into target repo
       shell: bash
       run: |
         echo "📂 Copying template files into repo..."
-        cp -R .template-temp/. .
+        cp -R .template-temp/* .
+        ls -all .
 
     - name: Show final synced files
       shell: bash
