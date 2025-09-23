@@ -14,21 +14,22 @@ inputs:
     description: 'Commit message for sync'
     default: 'chore: sync config files from .config-templates'
     required: false
-  include:
-    description: 'List of files and folders to include'
-    default: |
-      CODE_OF_CONDUCT.md
-      CONTRIBUTING.md
-      ruff.toml
-      Makefile
-      .pre-commit-config.yaml
-      .editorconfig
-      .gitignore
-      .github
-    required: false
+  #include:
+  #  description: 'List of files and folders to include'
+  #  default: |
+  #    CODE_OF_CONDUCT.md
+  #    CONTRIBUTING.md
+  #    ruff.toml
+  #    Makefile
+  #    .pre-commit-config.yaml
+  #    .editorconfig
+  #    .gitignore
+  #    .github
+  #  required: false
   exclude:
     description: 'List of files to exclude'
     default: |
+      .git
       README.md
       LICENSE
       action.yml
