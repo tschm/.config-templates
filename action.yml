@@ -92,7 +92,7 @@ runs:
     - name: Commit and push changes
       shell: bash
       run: |
-        git checkout -B "${{ inputs.branch }}"
+        ## git checkout -B "${{ inputs.branch }}"
         git add -A
         if git diff --cached --quiet; then
           echo "✅ No changes to commit"
@@ -101,4 +101,4 @@ runs:
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git commit -m "${{ inputs.commit-message }}"
-        git push origin "${{ inputs.branch }}" --force
+        git push origin "HEAD:${{ inputs.branch }}" --force
