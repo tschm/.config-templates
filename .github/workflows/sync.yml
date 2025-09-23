@@ -1,102 +1,50 @@
 # This file is part of the tschm/.config-templates repository
 # (https://github.com/tschm/.config-templates).
 #
-name: 'Sync Config Templates'
-description: 'Sync configuration templates into a project and create a pull request if needed'
-author: 'Thomas Schmelzer'
+# Workflow: Sync
+# Purpose: This workflow synchronizes configuration files from the template repository
+#          to other repositories, creating a pull request with the changes.
+#
+# Trigger: This workflow runs manually via workflow_dispatch
+#
+# Components:
+#   - 📥 Checkout the target repository
+#   - 🔄 Sync configuration templates
+#   - 📝 Create a pull request with the changes
 
-inputs:
-  branch:
-    description: 'Branch to sync changes to'
-    default: 'sync/update-configs'
-    required: false
-  commit-message:
-    description: 'Commit message for sync'
-    default: 'chore: sync config files from .config-templates'
-    required: false
-  include:
-    description: 'Comma-separated list of files and folders to include (empty = include all)'
-    default: 'CODE_OF_CONDUCT.md,CONTRIBUTING.md,ruff.toml,Makefile,.pre-commit-config.yaml,.editorconfig,taskfiles,.gitignore'
-    required: false
-  exclude:
-    description: 'Comma-separated list of files and folders to exclude'
-    default: 'LICENSE,.github/workflows/sync.yml'
-    required: false
+name: SYNC
 
-runs:
-  using: "composite"
-  steps:
-    - name: Ensure Git repository
-      run: |
-        git rev-parse --is-inside-work-tree > /dev/null || {
-          echo "❌ Not in a git repository"
-          exit 1
-        }
-      shell: bash
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 1'  # Weekly on Monday at midnight
 
-    - name: Download and apply templates
-      run: |
-        set -euo pipefail
+permissions:
+  contents: write  # Needed to create releases
 
-        REPO_URL="https://github.com/tschm/.config-templates"
-        TEMP_DIR="$(mktemp -d)"
-        FILTERED_DIR="$(mktemp -d)"
-        trap 'rm -rf "$TEMP_DIR" "$FILTERED_DIR"' EXIT
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the target repo
+        uses: actions/checkout@v5
 
-        echo "📥 Downloading template archive..."
-        curl -sSL -o templates.zip "$REPO_URL/archive/refs/heads/main.zip"
+      - name: Sync config templates
+        uses: tschm/.config-templates@main
+        with:
+          branch: sync/update-configs
+          commit-message: sync config files from .config-templates
 
-        echo "📦 Extracting..."
-        unzip -q templates.zip -d "$TEMP_DIR"
-        rm -f templates.zip
-
-        EXTRACTED_DIR="${TEMP_DIR}/.config-templates-main"
-
-        # Parse includes
-        INCLUDES=()
-        if [ -n "${{ inputs.include }}" ]; then
-          IFS=',' read -ra INCLUDES <<< "${{ inputs.include }}"
-          # trim whitespace
-          INCLUDES=($(printf "%s\n" "${INCLUDES[@]}" | xargs))
-        fi
-
-        # Parse excludes
-        EXCLUDES=()
-        if [ -n "${{ inputs.exclude }}" ]; then
-          IFS=',' read -ra EXCLUDES <<< "${{ inputs.exclude }}"
-          # trim whitespace
-          EXCLUDES=($(printf "%s\n" "${EXCLUDES[@]}" | xargs))
-        fi
-
-        echo "🔍 Processing template files..."
-        COPY_SOURCE="$FILTERED_DIR"
-
-        # Copy only included items (minus excludes)
-        for item in "${INCLUDES[@]}"; do
-          if [ -e "${EXTRACTED_DIR}/$item" ]; then
-            echo "  Including: $item"
-            if [ -d "${EXTRACTED_DIR}/$item" ]; then
-              mkdir -p "${FILTERED_DIR}/$(dirname "$item")"
-              cp -R "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$(dirname "$item")/"
-            else
-              mkdir -p "${FILTERED_DIR}/$(dirname "$item")"
-              cp "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$item"
-            fi
-          else
-            echo "  ⚠️ Warning: Include item '$item' not found in template"
-          fi
-        done
-
-        for ex in "${EXCLUDES[@]}"; do
-          if [ -e "$FILTERED_DIR/$ex" ]; then
-            echo "  Removing excluded: $ex"
-            rm -rf "$FILTERED_DIR/$ex"
-          fi
-        done
-
-        echo "📂 Copying to working directory..."
-        cp -Rf "${FILTERED_DIR}/." .
-
-        echo "✅ Sync complete. Changed files:"
-        git status --short || true
-      shell: bash
+      # Override the token for create-pull-request action using the PAT secret
+      - name: Create Pull Request (override token)
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.PAT_TOKEN }}          # Use PAT token here
+          commit-message:
+            "chore: sync config files from .config-templates"
+          branch: sync/update-configs
+          title:
+            "chore: sync config files from .config-templates"
+          body: |
+            This PR updates config files from [tschm/.config-templates](https://github.com/tschm/.config-templates).
+          delete-branch: true
