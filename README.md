@@ -205,6 +205,54 @@ Build the complete documentation book:
 task docs:book
 ```
 
+## 🖥️ Dev Container Compatibility
+
+This repository includes a template **Dev Container** configuration for seamless development experience in both **VS Code** and **GitHub Codespaces**.
+
+### What's Configured
+
+The `.devcontainer` setup provides:
+
+- 🐍 **Python 3.13** runtime environment
+- 🔧 **UV Package Manager** - Fast Python package installer and resolver
+- ⚡ **Task CLI** - For running project workflows
+- 🧪 **Pre-commit Hooks** - Automated code quality checks
+- 📊 **Marimo Integration** - Interactive notebook support with VS Code extension
+- 🔍 **Python Development Tools** - Pylance, Python extension, and optimized settings
+- 🚀 **Port Forwarding** - Port 8080 for development servers
+- 🔐 **SSH Agent Forwarding** - Full Git functionality with your host SSH keys
+
+### Usage
+
+#### In VS Code
+1. Install the "Dev Containers" extension
+2. Open the repository in VS Code
+3. Click "Reopen in Container" when prompted
+4. The environment will automatically set up with all dependencies
+
+#### In GitHub Codespaces
+1. Navigate to the repository on GitHub
+2. Click the green "Code" button
+3. Select "Codespaces" tab
+4. Click "Create codespace on main" (or your branch)
+5. Your development environment will be ready in minutes
+
+The dev container automatically runs the initialization script that:
+- Installs UV package manager
+- Sets up Task CLI
+- Configures the Python virtual environment
+- Installs project dependencies
+- Sets up pre-commit hooks
+
+### VS Code Dev Container SSH Agent Forwarding
+
+Dev containers launched locally via VS code are configured with SSH agent forwarding to enable seamless Git operations:
+
+- **Mounts your SSH directory** - Your `~/.ssh` folder is mounted into the container
+- **Forwards SSH agent** - Your host's SSH agent is available inside the container
+- **Enables Git operations** - Push, pull, and clone using your existing SSH keys
+- **Works transparently** - No additional setup required in VS Code dev containers
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
