@@ -14,6 +14,22 @@ inputs:
     description: 'Commit message for sync'
     default: 'chore: sync config files from .config-templates'
     required: false
+  include:
+    description: 'List of files and folders to include'
+    default: |
+      CODE_OF_CONDUCT.md
+      CONTRIBUTING.md
+      ruff.toml
+      Makefile
+      .pre-commit-config.yaml
+      .editorconfig
+      .gitignore
+      .github
+    required: false
+  exclude:
+    description: 'List of files to exclude'
+  #  default: 'LICENSE'
+  #  required: false
 
 runs:
   using: "composite"
@@ -32,7 +48,8 @@ runs:
 
         REPO_URL="https://github.com/tschm/.config-templates"
         TEMP_DIR="$(mktemp -d)"
-        trap 'rm -rf "$TEMP_DIR"' EXIT
+        FILTERED_DIR="$(mktemp -d)"
+        trap 'rm -rf "$TEMP_DIR" "$FILTERED_DIR"' EXIT
 
         echo "📥 Downloading template archive..."
         curl -sSL -o templates.zip "$REPO_URL/archive/refs/heads/main.zip"
@@ -42,14 +59,32 @@ runs:
         rm -f templates.zip
 
         EXTRACTED_DIR="${TEMP_DIR}/.config-templates-main"
+        ls -all ${EXTRACTED_DIR}
 
-        echo "🧹 Removing files not needed for client..."
-        rm -f "${EXTRACTED_DIR}/action.yml"
-        rm -f "${EXTRACTED_DIR}/README.md"
-        rm -f "${EXTRACTED_DIR}/.gitignore"
+        echo "🔍 Processing include list..."
+        echo "${{ inputs.include }}"
+
+        # Split on newlines instead of commas
+        while IFS= read -r item; do
+          # Skip empty lines
+          [ -z "$item" ] && continue
+          # Trim whitespace
+          item=$(echo "$item" | xargs)
+          if [ -e "${EXTRACTED_DIR}/$item" ]; then
+            mkdir -p "${FILTERED_DIR}/$(dirname "$item")"
+            # Copy the included item to the filtered directory
+            if [ -d "${EXTRACTED_DIR}/$item" ]; then
+              cp -R "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$(dirname "$item")/"
+            else
+              cp "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$item"
+            fi
+          else
+            echo "  Warning: Include item '$item' not found in template"
+          fi
+        done <<< "${{ inputs.include }}"
 
         echo "📂 Copying to working directory..."
-        cp -Rf "${EXTRACTED_DIR}/." .
+        cp -Rf "${FILTERED_DIR}/." .
 
         echo "✅ Sync complete. Changed files:"
         git status --short || true
