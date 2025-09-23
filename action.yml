@@ -58,7 +58,7 @@ runs:
         ref: main
         sparse-checkout: |
           ${{ inputs.include }}
-        sparse-checkout-cone-mode: true
+        sparse-checkout-cone-mode: false
 
     - name: Check
       shell: bash
