@@ -7,7 +7,7 @@ author: 'Thomas Schmelzer'
 
 inputs:
   branch:
-    description: 'Branch to sync changes to'
+    description: 'Branch to sync changes to in the target repo'
     default: 'sync/update-configs'
     required: false
   commit-message:
@@ -15,7 +15,7 @@ inputs:
     default: 'chore: sync config files from .config-templates'
     required: false
   include:
-    description: 'Comma-separated list of files and folders to include'
+    description: 'List of files and folders to include (multi-line)'
     default: |
       CODE_OF_CONDUCT.md
       CONTRIBUTING.md
@@ -29,7 +29,7 @@ inputs:
       Taskfile.yml
     required: false
   exclude:
-    description: 'List of files to exclude'
+    description: 'List of files and folders to exclude (multi-line)'
     default: |
       .git
       README.md
@@ -37,7 +37,6 @@ inputs:
       action.yml
       .github/workflows/sync.yml
     required: false
-
 
 runs:
   using: "composite"
@@ -50,14 +49,15 @@ runs:
         }
       shell: bash
 
-    - name: Try sparse checkout
+    - name: Sparse checkout from template repo
       uses: actions/checkout@v5
       with:
         repository: 'tschm/.config-templates'
-        fetch-depth: 0
+        path: .template-temp
         ref: main
         sparse-checkout: ${{ inputs.include }}
         sparse-checkout-cone-mode: false
+        fetch-depth: 0
 
     - name: Apply excludes
       if: ${{ inputs.exclude != '' }}
@@ -68,10 +68,16 @@ runs:
           item="$(echo "$item" | xargs)"
           [ -z "$item" ] && continue
           echo "  Excluding: $item"
-          rm -rf "$item"
+          rm -rf ".template-temp/$item"
         done <<< "${{ inputs.exclude }}"
 
-    - name: Check
+    - name: Copy template files into target repo
+      shell: bash
+      run: |
+        echo "📂 Copying template files into repo..."
+        cp -R .template-temp/. .
+
+    - name: Show final synced files
       shell: bash
       run: |
         echo "📂 Final synced files:"
@@ -90,3 +96,21 @@ runs:
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git commit -m "${{ inputs.commit-message }}"
         git push origin "${{ inputs.branch }}" --force
+
+    - name: Create pull request
+      if: success()
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell: bash
+      run: |
+        # Check if a PR already exists for this branch
+        if gh pr view "${{ inputs.branch }}" >/dev/null 2>&1; then
+          echo "ℹ️ PR already exists for branch ${{ inputs.branch }}"
+        else
+          echo "✨ Creating pull request for branch ${{ inputs.branch }}"
+          gh pr create \
+            --title "${{ inputs.commit-message }}" \
+            --body "Sync from tschm/.config-templates" \
+            --base main \
+            --head "${{ inputs.branch }}"
+        fi
