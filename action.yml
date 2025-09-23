@@ -96,21 +96,3 @@ runs:
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git commit -m "${{ inputs.commit-message }}"
         git push origin "${{ inputs.branch }}" --force
-
-    - name: Create pull request
-      if: success()
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      shell: bash
-      run: |
-        # Check if a PR already exists for this branch
-        if gh pr view "${{ inputs.branch }}" >/dev/null 2>&1; then
-          echo "ℹ️ PR already exists for branch ${{ inputs.branch }}"
-        else
-          echo "✨ Creating pull request for branch ${{ inputs.branch }}"
-          gh pr create \
-            --title "${{ inputs.commit-message }}" \
-            --body "Sync from tschm/.config-templates" \
-            --base main \
-            --head "${{ inputs.branch }}"
-        fi
