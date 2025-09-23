@@ -23,13 +23,8 @@ inputs:
       Makefile
       .pre-commit-config.yaml
       .editorconfig
-<<<<<<< HEAD
       .gitignore
       .github
-=======
-      taskfiles
-      .gitignore
->>>>>>> 23f8de0 (more output)
     required: false
   exclude:
     description: 'List of files to exclude'
