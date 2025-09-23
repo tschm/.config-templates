@@ -69,6 +69,7 @@ runs:
         while IFS= read -r item; do
           # Skip empty lines
           [ -z "$item" ] && continue
+
           # Trim whitespace
           item=$(echo "$item" | xargs)
           if [ -e "${EXTRACTED_DIR}/$item" ]; then
