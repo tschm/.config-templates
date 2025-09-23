@@ -28,6 +28,11 @@ inputs:
     required: false
   exclude:
     description: 'List of files to exclude'
+    default: |
+      README.md
+      LICENSE
+      action.yml
+      .github/workflows/sync.yml
 
   #  default: 'LICENSE'
   #  required: false
@@ -62,32 +67,39 @@ runs:
         EXTRACTED_DIR="${TEMP_DIR}/.config-templates-main"
         ls -all ${EXTRACTED_DIR}
 
-        echo "🔍 Processing include list..."
-        echo "${{ inputs.include }}"
-
-        # Split on newlines instead of commas
+        # Remove excluded items
         while IFS= read -r item; do
-          # Skip empty lines
-          [ -z "$item" ] && continue
+          item="$(echo "$item" | xargs)"
+          [ -n "$item" ] && rm -rf "$EXTRACTED_DIR/$item"
+        done <<< "${{ inputs.exclude }}"
 
-          # Trim whitespace
-          item=$(echo "$item" | xargs)
-          if [ -e "${EXTRACTED_DIR}/$item" ]; then
-            mkdir -p "${FILTERED_DIR}/$(dirname "$item")"
-
-            # Copy the included item to the filtered directory
-            if [ -d "${EXTRACTED_DIR}/$item" ]; then
-              cp -R "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$(dirname "$item")/"
-            else
-              cp "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$item"
-            fi
-          else
-            echo "  Warning: Include item '$item' not found in template"
-          fi
-        done <<< "${{ inputs.include }}"
-
+#
+#        echo "🔍 Processing include list..."
+#        echo "${{ inputs.include }}"
+#
+#        # Split on newlines instead of commas
+#        while IFS= read -r item; do
+#          # Skip empty lines
+#          [ -z "$item" ] && continue
+#
+#          # Trim whitespace
+#          item=$(echo "$item" | xargs)
+#          if [ -e "${EXTRACTED_DIR}/$item" ]; then
+#            mkdir -p "${FILTERED_DIR}/$(dirname "$item")"
+#
+#            # Copy the included item to the filtered directory
+#            if [ -d "${EXTRACTED_DIR}/$item" ]; then
+#              cp -R "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$(dirname "$item")/"
+#            else
+#              cp "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$item"
+#            fi
+#          else
+#            echo "  Warning: Include item '$item' not found in template"
+#          fi
+#        done <<< "${{ inputs.include }}"
+#
         echo "📂 Copying to working directory..."
-        cp -Rf "${FILTERED_DIR}/." .
+        cp -Rf "${EXTRACTED_DIR}/." .
 
         echo "✅ Sync complete. Changed files:"
         git status --short || true
