@@ -23,8 +23,13 @@ inputs:
       Makefile
       .pre-commit-config.yaml
       .editorconfig
+<<<<<<< HEAD
       .gitignore
       .github
+=======
+      taskfiles
+      .gitignore
+>>>>>>> 23f8de0 (more output)
     required: false
   exclude:
     description: 'List of files to exclude'
@@ -79,7 +84,6 @@ runs:
             if [ -d "${EXTRACTED_DIR}/$item" ]; then
               cp -R "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$(dirname "$item")/"
             else
-
               cp "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$item"
             fi
           else
