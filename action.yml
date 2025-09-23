@@ -28,6 +28,7 @@ inputs:
     required: false
   exclude:
     description: 'List of files to exclude'
+
   #  default: 'LICENSE'
   #  required: false
 
@@ -76,6 +77,7 @@ runs:
             if [ -d "${EXTRACTED_DIR}/$item" ]; then
               cp -R "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$(dirname "$item")/"
             else
+
               cp "${EXTRACTED_DIR}/$item" "${FILTERED_DIR}/$item"
             fi
           else
