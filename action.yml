@@ -78,14 +78,14 @@ runs:
       shell: bash
       run: |
         echo "📂 Copying template files into repo..."
-        cp -R .template-temp/* .
+        mv -R .template-temp/* .
         ls -all .
 
-    - name: Show final synced files
-      shell: bash
-      run: |
-        echo "📂 Final synced files:"
-        ls -R .
+    #- name: Show final synced files
+    #  shell: bash
+    #  run: |
+    #    echo "📂 Final synced files:"
+    #    ls -R .
 
     - name: Commit and push changes
       shell: bash
