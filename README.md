@@ -96,7 +96,7 @@ mkdir -p .github/workflows
 cp config-templates/.github/workflows/ci.yml .github/workflows/
 ```
 
-### Using [Jebel Quant](https://jqr.ae)'s Sync Template Action
+### Using Jebel Quant's [Sync Template Action](https://github.com/marketplace/actions/sync-template)
 
 You can automatically sync these configuration
 templates into your GitHub repositories using
@@ -150,7 +150,7 @@ include: |
     CODE_OF_CONDUCT.md
     CONTRIBUTING.md
     Makefile
-ta    ruff.toml
+    ruff.toml
     Taskfile.yml
 > ```
 
