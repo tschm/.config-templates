@@ -33,39 +33,6 @@ brew install go-task/tap/go-task        # macOS
 sudo snap install task --classic        # Ubuntu (Snap)
 ```
 
-#### GitHub Actions
-
-In your GitHub Actions workflow, add an installation step:
-
-```yaml
-name: Install Go Task CLI
-run: |
-  if ! command -v task &> /dev/null; then
-    curl -sSL https://raw.githubusercontent.com/go-task/task/v3/install.sh | sh
-  fi
-```
-
-or
-
-```yaml
-name: Install Go Task CLI
-uses: arduino/setup-task@v2
-with:
-  version: 3.x
-  # optional but recommended to avoid API rate limiting
-  repo-token: ${{ secrets.GITHUB_TOKEN }}
-```
-
-#### GitLab CI/CD
-
-In your GitLab CI/CD pipeline, add an installation step:
-
-```yaml
-# Install Task
-- curl -sL https://taskfile.dev/install.sh | sh
-- mv ./bin/task /usr/local/bin/task
-```
-
 ### Installation
 
 ```bash
@@ -73,13 +40,12 @@ In your GitLab CI/CD pipeline, add an installation step:
 git clone https://github.com/tschm/config-templates.git
 cd config-templates
 
-# Install dependencies
+# Install dependencies (assuming Task is installed)
 task build:install
 ```
 
 ## 📋 Available Tasks
 
-We recommend using [Task](https://taskfile.dev/) to run the available tasks.
 Run `task --list-all` to see all available tasks:
 
 ```
@@ -103,8 +69,6 @@ We also provide a small [Makefile](Makefile) for convenience.
 ## 📁 Available Templates
 
 This repository includes the following configuration templates:
-
-> **Note:** This repository includes a `sync.yml` workflow file that demonstrates how to set up template synchronization in your own CI/CD pipelines.
 
 - **Taskfile.yml** - Main task runner configuration
 - **taskfiles/** - Task definitions organized by category
@@ -130,9 +94,6 @@ Copy the desired configuration files to your project:
 # Example: Copy GitHub workflow files
 mkdir -p .github/workflows
 cp config-templates/.github/workflows/ci.yml .github/workflows/
-
-# Example: Copy Taskfile
-cp config-templates/Taskfile.yml .
 ```
 
 ### Using [Jebel Quant](https://jqr.ae)'s Sync Template Action
@@ -147,7 +108,7 @@ name: Sync Templates
 on:
   schedule:
     - cron: '0 0 * * 1'  # Weekly on Monday at midnight
-  workflow_dispatch:  # Allow manual triggering
+  workflow_dispatch:     # Allow manual triggering
 
 permissions:
   contents: write
@@ -177,28 +138,21 @@ This workflow will:
 >
 > Example template.yml:
 > ```yaml
-> # List of files to sync from the config-templates repository
-> include: |
->   ruff.toml
->   Taskfile.yml
->   taskfiles/build.yml
->   .github
->    .devcontainer
+template-repository: "tschm/.config-templates"
+template-branch: "main"
+include: |
+    .github
+    taskfiles
+    tests
+    .editorconfig
+    .gitignore
+    .pre-commit-config.yaml
+    CODE_OF_CONDUCT.md
+    CONTRIBUTING.md
+    Makefile
+ta    ruff.toml
+    Taskfile.yml
 > ```
-
-## 📚 Documentation
-
-The repository includes several documentation components:
-
-- 📖 **API Documentation** - Generated with pdoc
-- 📊 **Test Reports** - HTML test reports with coverage
-- 📓 **Marimo Notebooks** - Interactive documentation
-
-Build the complete documentation book:
-
-```bash
-task docs:book
-```
 
 ## 🖥️ Dev Container Compatibility
 
@@ -238,7 +192,7 @@ The `.devcontainer` setup provides:
 5. Your development environment will be ready in minutes
 
 The dev container automatically runs the initialization script that:
--
+
 - Installs UV package manager
 - Sets up Task CLI
 - Configures the Python virtual environment
