@@ -134,10 +134,11 @@ This workflow will:
 2. Copy them to your project
 3. Create a pull request with the changes (if any)
 
-> **Note:** You need to create a `.github/template.yml` file in your repository that specifies which templates to sync. This file should list the configuration files you want to include from this repository.
->
-> Example template.yml:
-> ```yaml
+**Note:** You need to create a `.github/template.yml` file in your repository that specifies 
+which templates to sync. This file should list the configuration files you want to include from this repository. 
+Example template.yml:
+
+```yaml
 template-repository: "tschm/.config-templates"
 template-branch: "main"
 include: |
@@ -152,7 +153,7 @@ include: |
     Makefile
     ruff.toml
     Taskfile.yml
-> ```
+```
 
 ## 🖥️ Dev Container Compatibility
 
