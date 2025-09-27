@@ -1,11 +1,15 @@
 # 🛠️ Config Templates
 
-[![CI Status](https://github.com/tschm/.config-templates/workflows/CI/badge.svg)](https://github.com/tschm/config-templates/actions)
-[![Release](https://github.com/tschm/.config-templates/workflows/Release%20Workflow/badge.svg)](https://github.com/tschm/config-templates/actions)
+[![CI Status](https://github.com/tschm/config-templates/workflows/CI/badge.svg)](https://github.com/tschm/config-templates/actions)
+[![Release](https://github.com/tschm/config-templates/workflows/Release%20Workflow/badge.svg)](https://github.com/tschm/config-templates/actions)
 
-A collection of reusable configuration templates for modern Python projects.
-Save time and maintain consistency across your projects with these
+A collection of reusable configuration templates
+for modern Python projects.
+Save time and maintain consistency across your projects
+with these
 pre-configured templates.
+
+> Last updated: September 27, 2025
 
 ## ✨ Features
 
@@ -96,11 +100,27 @@ Run `task --list-all` to see all available tasks:
 
 We also provide a small [Makefile](Makefile) for convenience.
 
+## 📁 Available Templates
+
+This repository includes the following configuration templates:
+
+> **Note:** This repository includes a `sync.yml` workflow file that demonstrates how to set up template synchronization in your own CI/CD pipelines.
+
+- **Taskfile.yml** - Main task runner configuration
+- **taskfiles/** - Task definitions organized by category
+  - **build.yml** - Tasks for dependency management and building
+  - **cleanup.yml** - Tasks for cleaning up generated files
+  - **docs.yml** - Tasks for documentation generation
+  - **quality.yml** - Tasks for code quality checks
+- **ruff.toml** - Configuration for the Ruff linter and formatter
+- **.devcontainer/** - Development container configuration
+- **.github/workflows/** - GitHub Actions workflow templates
+- **Makefile** - Simple make commands for common operations
+
 ## 🧩 Usage Examples
 
-We recommend injecting the templates into your project using the
-[GitHub Action](https://github.com/tschm/config-templates/actions)
-provided in this repository.
+You can inject the templates into your project
+using one of the methods described below.
 
 ### Manual Copy
 
@@ -115,14 +135,14 @@ cp config-templates/.github/workflows/ci.yml .github/workflows/
 cp config-templates/Taskfile.yml .
 ```
 
-### Using GitHub Action
+### Using [Jebel Quant](https://jqr.ae)'s Sync Template Action
 
 You can automatically sync these configuration
-templates into your project using the GitHub Action provided
-in this repository:
+templates into your GitHub repositories using
+the Jebel Quant action:
 
 ```yaml
-name: Sync Config Templates
+name: Sync Templates
 
 on:
   schedule:
@@ -131,65 +151,40 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Sync Config Templates
-        uses: tschm/.config-templates@main
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+      - name: Sync Template
+        id: sync
+        uses: jebel-quant/sync_template@v0.3.1
         with:
           token: ${{ secrets.PAT_TOKEN }}
-          branch: sync/update-configs
-          title: 'chore: sync configuration templates'
-          commit-message: 'chore: sync config files from config-templates'
-          body: |
-            This PR updates configuration files from the
-            [config-templates](https://github.com/tschm/.config-templates)
-            repository.
+          source: ".github/template.yml"
+          branch: "template-updates"
+          commit-message: "chore: sync template files"
 ```
 
-This action will:
-1. Download the latest templates from this repository
+This workflow will:
+
+1. Download the latest templates based on your template.yml configuration
 2. Copy them to your project
 3. Create a pull request with the changes (if any)
 
-### Using GitLab CI/CD Template
-
-You can automatically sync these configuration templates into your GitLab project using the CI/CD template provided in this repository:
-
-```yaml
-# .gitlab-ci.yml
-include:
-  - remote: 'https://gitlab.com/tschm/config-templates/-/raw/main/.gitlab/ci-templates/sync-config-templates.yml'
-
-# Define a job that extends the template
-sync-config-templates:
-  extends: .sync-config-templates
-  variables:
-    # Optional: override default branch name
-    BRANCH_NAME: 'sync/update-configs'
-    # Optional: override default commit message
-    COMMIT_MESSAGE: 'chore: sync config files from config-templates'
-  # Run manually from GitLab UI or on schedule
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    - if: '$CI_PIPELINE_SOURCE == "web"'
-      when: manual
-```
-
-To set up scheduled runs, go to CI/CD > Schedules in your GitLab project and create a new schedule.
-
-This template will:
-1. Download the latest templates from this repository
-2. Copy them to your project
-3. Create a branch with the changes
-4. Optionally create a merge request if GITLAB_API_TOKEN is provided
+> **Note:** You need to create a `.github/template.yml` file in your repository that specifies which templates to sync. This file should list the configuration files you want to include from this repository.
+>
+> Example template.yml:
+> ```yaml
+> # List of files to sync from the config-templates repository
+> include: |
+>   ruff.toml
+>   Taskfile.yml
+>   taskfiles/build.yml
+>   .github
+>    .devcontainer
+> ```
 
 ## 📚 Documentation
 
@@ -207,7 +202,10 @@ task docs:book
 
 ## 🖥️ Dev Container Compatibility
 
-This repository includes a template **Dev Container** configuration for seamless development experience in both **VS Code** and **GitHub Codespaces**.
+This repository includes a
+template **Dev Container** configuration
+for seamless development experience in
+both **VS Code** and **GitHub Codespaces**.
 
 ### What's Configured
 
@@ -225,12 +223,14 @@ The `.devcontainer` setup provides:
 ### Usage
 
 #### In VS Code
+
 1. Install the "Dev Containers" extension
 2. Open the repository in VS Code
 3. Click "Reopen in Container" when prompted
 4. The environment will automatically set up with all dependencies
 
 #### In GitHub Codespaces
+
 1. Navigate to the repository on GitHub
 2. Click the green "Code" button
 3. Select "Codespaces" tab
@@ -238,6 +238,7 @@ The `.devcontainer` setup provides:
 5. Your development environment will be ready in minutes
 
 The dev container automatically runs the initialization script that:
+-
 - Installs UV package manager
 - Sets up Task CLI
 - Configures the Python virtual environment
@@ -246,7 +247,9 @@ The dev container automatically runs the initialization script that:
 
 ### VS Code Dev Container SSH Agent Forwarding
 
-Dev containers launched locally via VS code are configured with SSH agent forwarding to enable seamless Git operations:
+Dev containers launched locally via VS code
+are configured with SSH agent forwarding
+to enable seamless Git operations:
 
 - **Mounts your SSH directory** - Your `~/.ssh` folder is mounted into the container
 - **Forwards SSH agent** - Your host's SSH agent is available inside the container
