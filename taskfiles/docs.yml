@@ -69,8 +69,8 @@ tasks:
               base_name=$(basename "$rel_path" .py)
               mkdir -p "_marimushka/$dir_path"
 
-              # Check if the file has a script header ("/// script")
-              if grep -q "^/// script" "$py_file"; then
+              # Check if the file has a script header ("# /// script")
+              if grep -q "^# /// script" "$py_file"; then
                 printf " ${BLUE}[INFO] Script header detected, using --sandbox flag...${RESET}\n"
                 uvx marimo export html --sandbox --include-code --output "_marimushka/$dir_path/$base_name.html" "$py_file"
               else
