@@ -6,10 +6,11 @@ tasks:
     cmds:
       - |
         # install uv and uvx
-        if [ -x "./bin/uv" ]; then
-          printf "${BLUE}[INFO] uv already present in ./bin, skipping installation${RESET}\n"
+        if [ -f "./bin/uv" ] && [ -x "./bin/uv" ]; then
+          printf "{{.BLUE}}[INFO] uv already present in ./bin, skipping installation{{.RESET}}\n"
         else
-          curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh || { printf "${RED}[ERROR] Failed to install uv${RESET}\n"; exit 1; }
+          printf "{{.BLUE}}Installing uv{{.RESET}}\n"
+          curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh || { printf "{{.RED}}[ERROR] Failed to install uv{{.RESET}}\n"; exit 1; }
         fi
 
   install:
