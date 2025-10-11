@@ -9,7 +9,7 @@ Save time and maintain consistency across your projects
 with these
 pre-configured templates.
 
-> Last updated: September 27, 2025
+> Last updated: October 11, 2025
 
 ## ✨ Features
 
