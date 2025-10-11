@@ -23,30 +23,32 @@ pre-configured templates.
 
 ## 🚀 Getting Started
 
-### Prerequisites
-
-All workflows rely on [Task](https://taskfile.dev/).
-You can install it using one of the following methods:
-
-```bash
-brew install go-task/tap/go-task        # macOS
-sudo snap install task --classic        # Ubuntu (Snap)
-```
-
-### Installation
+Start by cloning the repository:
 
 ```bash
 # Clone the repository
 git clone https://github.com/tschm/config-templates.git
 cd config-templates
-
-# Install dependencies (assuming Task is installed)
-task build:install
 ```
+
+The project assumes `make` is installed. It relies
+on [Task](https://taskfile.dev/) for task management and
+[uv and uvx](https://github.com/astral-sh/uv) for dependency management.
+
+Install all those tools locally using
+
+```bash
+make install
+```
+
+The aforementioned tools will be installed within the `bin` directory.
+It will also create the virtual environment defined
+in `pyproject.toml` in the `.venv` directory.
+Both the `.venv` and `bin` directories are listed in `.gitignore`.
 
 ## 📋 Available Tasks
 
-Run `task --list-all` to see all available tasks:
+Run `./bin/task --list-all` to see all available tasks:
 
 ```
 * build:build:      Build the package using hatch
@@ -134,8 +136,8 @@ This workflow will:
 2. Copy them to your project
 3. Create a pull request with the changes (if any)
 
-**Note:** You need to create a `.github/template.yml` file in your repository that specifies 
-which templates to sync. This file should list the configuration files you want to include from this repository. 
+**Note:** You need to create a `.github/template.yml` file in your repository that specifies
+which templates to sync. This file should list the configuration files you want to include from this repository.
 Example template.yml:
 
 ```yaml

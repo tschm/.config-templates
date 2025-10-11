@@ -6,8 +6,11 @@ tasks:
     cmds:
       - |
         # install uv and uvx
-        curl -sSf https://astral.sh/uv/install.sh | sh > /dev/null 2>&1 || { echo "${RED}Installation failed!${RESET}" >&2; exit 1; }
-        export PATH="$HOME/.local/bin:$PATH"
+        if [ -x "./bin/uv" ]; then
+          printf "${BLUE}[INFO] uv already present in ./bin, skipping installation${RESET}\n"
+        else
+          curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh || { printf "${RED}[ERROR] Failed to install uv${RESET}\n"; exit 1; }
+        fi
 
   install:
     desc: Install all dependencies using uv
@@ -20,16 +23,16 @@ tasks:
         else
           # we need the virtual environment at least for the tests to work
           # even if we don't install anything
-          
+
           # Create the virtual environment
           printf "${BLUE}[INFO] Creating virtual environment...${RESET}\n"
-          
+
           # Create the virtual environment
-          uv venv --python 3.12 || { printf "${RED}[ERROR] Failed to create virtual environment${RESET}\n"; exit 1; }
-          
+          ./bin/uv venv --python 3.12 || { printf "${RED}[ERROR] Failed to create virtual environment${RESET}\n"; exit 1; }
+
           if [ -f "pyproject.toml" ]; then
             printf "${BLUE}[INFO] Installing dependencies${RESET}\n"
-            uv sync --all-extras --frozen || { printf "${RED}[ERROR] Failed to install dependencies${RESET}\n"; exit 1; }
+            ./bin/uv sync --all-extras --frozen || { printf "${RED}[ERROR] Failed to install dependencies${RESET}\n"; exit 1; }
           else
             printf "${YELLOW}[WARN] No pyproject.toml found, skipping install${RESET}\n"
           fi
@@ -42,8 +45,8 @@ tasks:
       - |
         if [ -f "pyproject.toml" ]; then
           printf "${BLUE}[INFO] Building package...${RESET}\n"
-          uv pip install hatch
-          uv run hatch build
+          ./bin/uv pip install hatch
+          ./bin/uv run hatch build
         else
           printf "${YELLOW}[WARN] No pyproject.toml found, skipping build${RESET}\n"
         fi
