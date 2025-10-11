@@ -16,21 +16,9 @@ runs:
   using: 'composite'
   steps:
     - name: Set up task, uv, uvx and the venv
-    #- name: Install uv
-    # uses: astral-sh/setup-uv@v7
       shell: bash
       run: |
         make install
-
-      #with:
-      #  python-version: ${{ inputs.python-version }}
-      #  cache-dependency-glob: "**/*requirements*.txt,**/*requirements*.in,**/*constraints*.txt,**/*constraints*.in,**/pyproject.toml,**/uv.lock"
-
-    #- name: Install Task
-    #  uses: arduino/setup-task@v2
-    #  with:
-    #    version: 3.x
-    #    repo-token: ${{ github.token }}
 
     - name: Render the project
       if: hashFiles('tests/resources/render.yml') != ''
@@ -62,16 +50,3 @@ runs:
         else
           echo "exists=false" >> "$GITHUB_OUTPUT"
         fi
-
-    #- name: Build the virtual environment
-    #  shell: bash
-    #  run: uv venv --python ${{ inputs.python-version }}
-
-    #- name: "Build the virtual environment for ${{ github.repository }}"
-    #  shell: bash
-    #  run: |
-    #    if [ -f "pyproject.toml" ]; then
-    #      uv sync --all-extras
-    #    else
-    #      echo "No pyproject.toml found, skipping package installation"
-    #    fi
