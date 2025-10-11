@@ -64,13 +64,13 @@ runs:
 
     - name: Build the virtual environment
       shell: bash
-      run: uv venv --python ${{ inputs.python-version }}
+      run: ./bin/uv venv --python ${{ inputs.python-version }}
 
     - name: "Build the virtual environment for ${{ github.repository }}"
       shell: bash
       run: |
         if [ -f "pyproject.toml" ]; then
-          uv sync --all-extras
+          ./bin/uv sync --all-extras
         else
           echo "No pyproject.toml found, skipping package installation"
         fi
