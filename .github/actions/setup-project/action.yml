@@ -19,13 +19,14 @@ runs:
       shell: bash
       run: |
         mkdir -p bin
-        # install task into new bin folder
-        sh -c "$$(curl --location https://taskfile.dev/install.sh)" -- -d -b ./bin;
-        # install uv and uvx into the same bin folder
-        curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh
 
-        export PATH=".bin:$$PATH"
+        # Install Task
+        curl -fsSL https://taskfile.dev/install.sh | sh -s -- -d -b ./bin
 
+        # Install uv and uvx
+        curl -fsSL https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh
+
+        # Verify installations
         ./bin/task --version
         ./bin/uv --version
         ./bin/uvx --version
