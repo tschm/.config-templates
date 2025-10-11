@@ -18,7 +18,17 @@ runs:
     - name: Set up task, uv, uvx and the venv
       shell: bash
       run: |
-        make install
+        mkdir -p bin
+        # install task into new bin folder
+        sh -c "$$(curl --location https://taskfile.dev/install.sh)" -- -d -b ./bin;
+        # install uv and uvx into the same bin folder
+        curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh
+
+        export PATH=".bin:$$PATH"
+
+        ./bin/task --version
+        ./bin/uv --version
+        ./bin/uvx --version
 
     - name: Render the project
       if: hashFiles('tests/resources/render.yml') != ''
@@ -49,4 +59,17 @@ runs:
           echo "exists=true" >> "$GITHUB_OUTPUT"
         else
           echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Build the virtual environment
+      shell: bash
+      run: uv venv --python ${{ inputs.python-version }}
+
+    - name: "Build the virtual environment for ${{ github.repository }}"
+      shell: bash
+      run: |
+        if [ -f "pyproject.toml" ]; then
+          uv sync --all-extras
+        else
+          echo "No pyproject.toml found, skipping package installation"
         fi
