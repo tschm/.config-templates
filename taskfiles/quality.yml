@@ -9,19 +9,19 @@ includes:
 tasks:
   fmt:
     desc: Format code using Ruff
-    deps: [build:uv]
+    deps: ["build:uv"]
     cmds:
       - ./bin/uvx ruff format .
 
   lint:
     desc: Run pre-commit hooks
-    deps: [build:uv]
+    deps: ["build:uv"]
     cmds:
       - ./bin/uvx pre-commit run --all-files
 
   deptry:
     desc: Check for dependency issues
-    deps: [build:uv]
+    deps: ["build:uv"]
     cmds:
       - |
         if [ -f "pyproject.toml" ]; then
