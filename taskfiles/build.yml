@@ -1,10 +1,13 @@
 version: '3'
 
+dir: .
+
 tasks:
   uv:
     desc: Install uv and uvx
     cmds:
       - |
+        echo "PWD: $PWD"
         # install uv and uvx
         if [ -f "./bin/uv" ] && [ -x "./bin/uv" ]; then
           printf "{{.BLUE}}[INFO] uv already present in ./bin, skipping installation{{.RESET}}\n"

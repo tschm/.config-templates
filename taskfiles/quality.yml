@@ -9,22 +9,20 @@ includes:
 tasks:
   fmt:
     desc: Format code using Ruff
-    deps: ["build:uv"]
     cmds:
-      - tree bin
+      - ./bin/task build:uv
       - ./bin/uvx ruff format .
 
   lint:
     desc: Run pre-commit hooks
-    deps: ["build:uv"]
     cmds:
-      - tree bin
+      - ./bin/task build:uv
       - ./bin/uvx pre-commit run --all-files
 
   deptry:
     desc: Check for dependency issues
-    deps: ["build:uv"]
     cmds:
+      - ./bin/task build:uv
       - |
         tree bin
         if [ -f "pyproject.toml" ]; then

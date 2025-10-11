@@ -30,6 +30,7 @@ env:
   LOG_SUCCESS: 'printf "${GREEN}[SUCCESS] %s${RESET}\n"'
   LOG_ERROR: 'printf "${RED}[ERROR] %s${RESET}\n"'
 
+
 # Include task groups
 includes:
   build:
