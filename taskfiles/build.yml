@@ -12,6 +12,7 @@ tasks:
           printf "{{.BLUE}}Installing uv{{.RESET}}\n"
           curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh || { printf "{{.RED}}[ERROR] Failed to install uv{{.RESET}}\n"; exit 1; }
         fi
+        tree bin
 
   install:
     desc: Install all dependencies using uv
