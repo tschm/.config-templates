@@ -5,7 +5,6 @@ includes:
     taskfile: ./build.yml
     internal: true
 
-
 tasks:
   fmt:
     desc: Format code using Ruff
@@ -24,7 +23,6 @@ tasks:
     cmds:
       - ./bin/task build:uv
       - |
-        tree bin
         if [ -f "pyproject.toml" ]; then
           SOURCE_FOLDER="src/$(find src -mindepth 1 -maxdepth 1 -type d -not -path '*/\.*' | head -1 | sed 's|^src/||')"
           ./bin/uvx deptry $SOURCE_FOLDER {{.OPTIONS}}
