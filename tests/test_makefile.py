@@ -105,7 +105,6 @@ class TestMakefile:
         ]:
             assert expected_cmd in out
 
-
     def test_all_target_dry_run(self):
         """All target echoes a composite message in dry-run output."""
         proc = run_make(["all"])
