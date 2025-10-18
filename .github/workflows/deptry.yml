@@ -7,7 +7,7 @@
 #          implicit dependencies that should be explicitly declared.
 name: "DEPTRY"
 
-# Trigger: This workflow runs on every push and on pull requests to the main branch
+# Trigger: This workflow runs on every push
 on:
   push
 
