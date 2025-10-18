@@ -20,7 +20,6 @@ RESET := \033[0m
 ##@ Bootstrap
 install-task: ## ensure go-task (Taskfile) is installed
 	@mkdir -p ./bin;
-	export PATH="./bin:$$PATH"
 	# install task
 	@if command -v ./bin/task >/dev/null 2>&1; then \
 		printf "$(GREEN)task is already installed$(RESET)\n"; \
