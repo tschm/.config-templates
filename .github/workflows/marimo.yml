@@ -1,5 +1,6 @@
 # This workflow runs and tests all Marimo notebooks in the project
 # It creates a matrix of jobs, one for each notebook, and runs them in parallel
+# Trigger: This workflow runs on every push and pull request (including from forks)
 name: "Marimo"
 permissions:
   contents: read

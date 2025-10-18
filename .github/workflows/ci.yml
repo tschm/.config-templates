@@ -5,7 +5,7 @@
 # Purpose: This workflow runs tests on multiple Python versions to ensure
 #          compatibility and code quality across different environments.
 #
-# Trigger: This workflow runs on every push
+# Trigger: This workflow runs on every push and pull request (including from forks)
 #
 # Components:
 #   - 🧪 Run tests on multiple Python versions

@@ -7,7 +7,7 @@
 #          like formatting errors, linting issues, and other code quality
 #          problems before they are merged.
 #
-# Trigger: This workflow runs on every push
+# Trigger: This workflow runs on every push and pull request (including from forks)
 #
 # Components:
 #   - 🔍 Run pre-commit checks using reusable action
