@@ -49,12 +49,16 @@ def run_make(args: list[str] | None = None, check: bool = True) -> subprocess.Co
     cmd.insert(1, "-sn")
     result = subprocess.run(cmd, capture_output=True, text=True)
     if check and result.returncode != 0:
-        raise AssertionError(f"make failed with code {result.returncode}:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}")
+        msg = f"make failed with code {result.returncode}:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        raise AssertionError(msg)
     return result
 
 
 class TestMakefile:
+    """Smoke tests for Makefile help and common targets using make -n."""
+
     def test_default_goal_is_help(self):
+        """Default goal should render the help index with known targets."""
         proc = run_make()
         out = proc.stdout
         assert "Usage:" in out
@@ -64,6 +68,7 @@ class TestMakefile:
             assert target in out
 
     def test_help_target(self):
+        """Explicit `make help` prints usage, targets, and section headers."""
         proc = run_make(["help"])
         out = proc.stdout
         assert "Usage:" in out
@@ -71,21 +76,25 @@ class TestMakefile:
         assert "Bootstrap" in out or "Meta" in out  # section headers
 
     def test_fmt_target_dry_run(self):
+        """Fmt target should call the quality:lint task in dry-run output."""
         proc = run_make(["fmt"])
         out = proc.stdout
         assert "./bin/task quality:lint" in out
 
     def test_deptry_target_dry_run(self):
+        """Deptry target should call the quality:deptry task in dry-run."""
         proc = run_make(["deptry"])
         out = proc.stdout
         assert "./bin/task quality:deptry" in out
 
     def test_test_target_dry_run(self):
+        """Test target should invoke docs:test in dry-run output."""
         proc = run_make(["test"])
         out = proc.stdout
         assert "./bin/task docs:test" in out
 
     def test_book_target_dry_run(self):
+        """Book target should run all three docs-related commands in order."""
         proc = run_make(["book"])
         out = proc.stdout
         # It should run three docs-related commands in the recipe
@@ -94,12 +103,14 @@ class TestMakefile:
         assert "./bin/task docs:book" in out
 
     def test_all_target_dry_run(self):
+        """All target echoes a composite message in dry-run output."""
         proc = run_make(["all"])
         out = proc.stdout
         # The composite target should echo a message
         assert "Run fmt, deptry, test and book" in out
 
     def test_install_task_dry_run_shows_expected_commands(self):
+        """install-task target should show task installer and version check."""
         proc = run_make(["install-task"])
         out = proc.stdout
         # ensure key steps of install are present in the dry run output
