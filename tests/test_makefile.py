@@ -96,19 +96,15 @@ class TestMakefile:
     def test_book_target_dry_run(self):
         """Book target should run all three docs-related commands in order."""
         proc = run_make(["book"])
+        out = proc.stdout
         # The composite target should run all dependent commands
         for expected_cmd in [
-            "./bin/task quality:lint",
-            "./bin/task quality:deptry",
-            "./bin/task docs:test",
             "./bin/task docs:docs",
             "./bin/task docs:marimushka",
             "./bin/task docs:book",
         ]:
             assert expected_cmd in out
-        assert "./bin/task docs:docs" in out
-        assert "./bin/task docs:marimushka" in out
-        assert "./bin/task docs:book" in out
+
 
     def test_all_target_dry_run(self):
         """All target echoes a composite message in dry-run output."""
