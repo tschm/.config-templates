@@ -9,7 +9,7 @@ Save time and maintain consistency across your projects
 with these
 pre-configured templates.
 
-> Last updated: October 11, 2025
+> Last updated: October 18, 2025
 
 ## ✨ Features
 
@@ -62,7 +62,6 @@ Run `./bin/task --list-all` to see all available tasks:
 * docs:test:        Run all tests
 * quality:check:    Run all code quality checks
 * quality:deptry:   Check for dependency issues
-* quality:fmt:      Format code using Ruff
 * quality:lint:     Run pre-commit hooks
 ```
 
