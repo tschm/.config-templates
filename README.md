@@ -1,7 +1,16 @@
 # 🛠️ Config Templates
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue)]
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg?logo=ruff)](https://github.com/astral-sh/ruff)
+
 [![CI Status](https://github.com/tschm/.config-templates/workflows/CI/badge.svg)](https://github.com/tschm/.config-templates/actions)
 [![Release](https://github.com/tschm/.config-templates/workflows/Release%20Workflow/badge.svg)](https://github.com/tschm/.config-templates/actions)
+[![Pre-commit](https://github.com/tschm/.config-templates/workflows/PRE-COMMIT/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3APRE-COMMIT)
+[![Deptry](https://github.com/tschm/.config-templates/workflows/DEPTRY/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3ADEPTRY)
+[![Book](https://github.com/tschm/.config-templates/workflows/BOOK/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3ABOOK)
+[![Marimo](https://github.com/tschm/.config-templates/workflows/Marimo/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3AMarimo)
+
 
 A collection of reusable configuration templates
 for modern Python projects.
@@ -9,7 +18,7 @@ Save time and maintain consistency across your projects
 with these
 pre-configured templates.
 
-> Last updated: October 11, 2025
+> Last updated: October 19, 2025
 
 ## ✨ Features
 
@@ -62,7 +71,6 @@ Run `./bin/task --list-all` to see all available tasks:
 * docs:test:        Run all tests
 * quality:check:    Run all code quality checks
 * quality:deptry:   Check for dependency issues
-* quality:fmt:      Format code using Ruff
 * quality:lint:     Run pre-commit hooks
 ```
 
