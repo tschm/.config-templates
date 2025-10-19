@@ -2,18 +2,24 @@
 # (https://github.com/tschm/.config-templates).
 #
 # Workflow: Deptry
+#
 # Purpose: This workflow identifies missing and obsolete dependencies in the project.
 #          It helps maintain a clean dependency tree by detecting unused packages and
 #          implicit dependencies that should be explicitly declared.
-name: "DEPTRY"
+#
+# Trigger: This workflow runs on every push and on pull requests to main/master
+#          branches (including from forks)
 
-# Trigger: This workflow runs on every push
-on:
-  push
+name: "DEPTRY"
 
 # Permissions: Only read access to repository contents is needed
 permissions:
     contents: read
+
+on:
+  push:
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   deptry_analysis:
