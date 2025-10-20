@@ -45,16 +45,20 @@ runs:
     - name: Install Task
       uses: go-task/setup-task@v1
 
+    - name: Install uv/uvx
+      uses: astral-sh/setup-uv@v7
+
     - name: Set up task, uv, uvx and the venv
       shell: bash
       run: |
         set -euo pipefail
 
-        mkdir -p bin
+        #mkdir -p bin
 
         # Add ./bin to the PATH for subsequent steps (note: not current shell)
-        echo "Adding ./bin to PATH"
-        echo "$(pwd)/bin" >> "$GITHUB_PATH"
+        #echo "Adding ./bin to PATH"
+        #echo "$(pwd)/bin" >> "$GITHUB_PATH"
+        #echo $GITHUB_PATH
 
         # Install Task (idempotent)
         #if [ -x "./bin/task" ]; then
@@ -65,12 +69,12 @@ runs:
         #fi
 
         # Install uv (idempotent)
-        if [ -x "./bin/uv" ]; then
-          echo "uv already present in ./bin, skipping installation"
-        else
-          echo "Installing uv into ./bin"
-          curl -fsSL https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh
-        fi
+        #if [ -x "./bin/uv" ]; then
+        #  echo "uv already present in ./bin, skipping installation"
+        #else
+        #  echo "Installing uv into ./bin"
+        #  curl -fsSL https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh
+        #fi
 
         # Verify installations (use explicit paths because PATH change doesn't affect current shell)
         task --version
