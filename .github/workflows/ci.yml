@@ -2,7 +2,7 @@
 # (https://github.com/tschm/.config-templates).
 #
 # Workflow: Continuous Integration
-# 
+#
 # Purpose: This workflow runs tests on multiple Python versions to ensure
 #          compatibility and code quality across different environments.
 #
@@ -51,5 +51,5 @@ jobs:
 
       - name: "Run the tests"
         run: |
-          ./bin/uv pip install pytest
-          ./bin/uv run pytest tests
+          uv pip install pytest
+          uv run pytest tests
