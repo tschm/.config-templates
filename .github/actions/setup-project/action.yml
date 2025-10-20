@@ -51,20 +51,42 @@ runs:
         echo "Adding ./bin to PATH"
         echo "$(pwd)/bin" >> $GITHUB_PATH
 
-        # Task: Download install script and verify checksum
+        # Define task URLs
         TASK_URL="https://taskfile.dev/install.sh"
         TASK_CHECKSUM_URL="https://taskfile.dev/install.sh.sha256"
+
+        # Download the install script and checksum
         curl -fsSL $TASK_URL -o task-install.sh
         curl -fsSL $TASK_CHECKSUM_URL -o task-install.sh.sha256
-        echo "$(cat task-install.sh.sha256)  task-install.sh" | sha256sum --check || exit 1
+
+        # Verify the checksum matches
+        expected_checksum=$(cat task-install.sh.sha256)
+        actual_checksum=$(sha256sum task-install.sh | awk '{ print $1 }')
+
+        if [ "$expected_checksum" != "$actual_checksum" ]; then
+          echo "Checksum verification failed! Exiting."
+          exit 1
+        fi
+
+        # If checksum matches, install Task
         sh task-install.sh -d -b ./bin
 
-        # UV: Download install script and verify checksum
+        # UV: Same process for UV installation
         UV_URL="https://astral.sh/uv/install.sh"
         UV_CHECKSUM_URL="https://astral.sh/uv/install.sh.sha256"
         curl -fsSL $UV_URL -o uv-install.sh
         curl -fsSL $UV_CHECKSUM_URL -o uv-install.sh.sha256
-        echo "$(cat uv-install.sh.sha256)  uv-install.sh" | sha256sum --check || exit 1
+
+        # Verify checksum
+        expected_checksum=$(cat uv-install.sh.sha256)
+        actual_checksum=$(sha256sum uv-install.sh | awk '{ print $1 }')
+
+        if [ "$expected_checksum" != "$actual_checksum" ]; then
+          echo "Checksum verification failed! Exiting."
+          exit 1
+        fi
+
+        # If checksum matches, install UV
         UV_INSTALL_DIR="./bin" sh uv-install.sh
 
         # Verify installations
