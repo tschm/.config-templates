@@ -36,6 +36,12 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    # Use actions/setup-python before using uv, to ensure the version exists
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+
     - name: Set up task, uv, uvx and the venv
       shell: bash
       run: |
@@ -45,11 +51,21 @@ runs:
         echo "Adding ./bin to PATH"
         echo "$(pwd)/bin" >> $GITHUB_PATH
 
-        # Install Task
-        curl -fsSL https://taskfile.dev/install.sh | sh -s -- -d -b ./bin
+        # Task: Download install script and verify checksum
+        TASK_URL="https://taskfile.dev/install.sh"
+        TASK_CHECKSUM_URL="https://taskfile.dev/install.sh.sha256"
+        curl -fsSL $TASK_URL -o task-install.sh
+        curl -fsSL $TASK_CHECKSUM_URL -o task-install.sh.sha256
+        echo "$(cat task-install.sh.sha256)  task-install.sh" | sha256sum --check || exit 1
+        sh task-install.sh -d -b ./bin
 
-        # Install uv and uvx
-        curl -fsSL https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh
+        # UV: Download install script and verify checksum
+        UV_URL="https://astral.sh/uv/install.sh"
+        UV_CHECKSUM_URL="https://astral.sh/uv/install.sh.sha256"
+        curl -fsSL $UV_URL -o uv-install.sh
+        curl -fsSL $UV_CHECKSUM_URL -o uv-install.sh.sha256
+        echo "$(cat uv-install.sh.sha256)  uv-install.sh" | sha256sum --check || exit 1
+        UV_INSTALL_DIR="./bin" sh uv-install.sh
 
         # Verify installations
         task --version
