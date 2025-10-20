@@ -4,7 +4,7 @@
 # Action: Setup Project (composite action)
 #
 # Purpose: Bootstrap a Python project in GitHub Actions by:
-#   - Installing Task, uv, and uvx into a local ./bin directory
+#   - Installing Task, uv, and uvx
 #   - Optionally rendering the repository from a Copier template for tests
 #   - Detecting presence of pyproject.toml and exposing it as an output
 #   - Creating a virtual environment with uv and syncing dependencies
@@ -51,31 +51,6 @@ runs:
     - name: Set up task, uv, uvx and the venv
       shell: bash
       run: |
-        set -euo pipefail
-
-        #mkdir -p bin
-
-        # Add ./bin to the PATH for subsequent steps (note: not current shell)
-        #echo "Adding ./bin to PATH"
-        #echo "$(pwd)/bin" >> "$GITHUB_PATH"
-        #echo $GITHUB_PATH
-
-        # Install Task (idempotent)
-        #if [ -x "./bin/task" ]; then
-        #  echo "task already present in ./bin, skipping installation"
-        #else
-        #  echo "Installing go-task (Taskfile) into ./bin"
-        #  curl -fsSL https://taskfile.dev/install.sh | sh -s -- -d -b ./bin
-        #fi
-
-        # Install uv (idempotent)
-        #if [ -x "./bin/uv" ]; then
-        #  echo "uv already present in ./bin, skipping installation"
-        #else
-        #  echo "Installing uv into ./bin"
-        #  curl -fsSL https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh
-        #fi
-
         # Verify installations (use explicit paths because PATH change doesn't affect current shell)
         task --version
         uv --version
