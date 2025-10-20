@@ -51,10 +51,15 @@ runs:
         # Install uv and uvx
         curl -fsSL https://astral.sh/uv/install.sh | UV_INSTALL_DIR="./bin" sh
 
-        # Verify installations
+    - name: Check version for task
+      shell: bash
+      run: |
         task --version
+
+    - name: Check version for uv
+      shell: bash
+      run: |
         uv --version
-        uvx --version
 
     - name: Render the project
       if: hashFiles('tests/resources/render.yml') != ''
