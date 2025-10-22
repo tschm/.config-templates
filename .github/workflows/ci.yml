@@ -51,5 +51,9 @@ jobs:
 
       - name: "Run the tests"
         run: |
+          # if there is a requirements.txt file, install it
+          if [ -f "tests/requirements.txt" ]; then
+            uv pip install -r tests/requirements.txt
+          fi
           uv pip install pytest
           uv run pytest tests
