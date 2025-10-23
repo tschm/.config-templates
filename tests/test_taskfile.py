@@ -72,7 +72,7 @@ class TestTaskfile:
     def setup_and_teardown(self, tmp_path):
         """Setup before each test and teardown after.
 
-        This ensures tests don't interfere with each other.
+        Ensures tests don't interfere with each other.
         """
         # Store original working directory
         self.original_dir = os.getcwd()
