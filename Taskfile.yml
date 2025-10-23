@@ -19,7 +19,7 @@ version: '3'
 vars:
   TESTS_FOLDER: tests
   MARIMO_FOLDER: book/marimo
-  BOOK_TITLE: '{{.REPO_NAME}}'
+  BOOK_TITLE: '{{env "REPO_NAME"}}'   # defined below env section
   BOOK_SUBTITLE: 'Documentation and Reports'
   OPTIONS: ''
 

@@ -47,7 +47,7 @@ def run_make(args: list[str] | None = None, check: bool = True) -> subprocess.Co
         cmd.extend(args)
     # Use -s to reduce noise, -n to avoid executing commands
     cmd.insert(1, "-sn")
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True)   # noqa: S603
     if check and result.returncode != 0:
         msg = f"make failed with code {result.returncode}:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
         raise AssertionError(msg)
