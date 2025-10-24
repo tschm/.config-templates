@@ -277,7 +277,6 @@ class TestTaskfile:
         assert result.returncode == 0, f"Install task failed with: {result.stderr}"
         assert result.stdout, "Install task produced no output"
 
-
     def test_install_always_creates_venv(self):
         """Test that install task always attempts to create virtual environment.
 
@@ -424,15 +423,11 @@ class TestTaskfile:
         assert result.returncode == 0, f"Install task should succeed: {result.stderr}"
 
         # The output should show venv creation message
-        assert result.contains_message("Creating virtual environment..."), (
-            f"Should show venv creation: {result.stdout}"
-        )
+        assert result.contains_message("Creating virtual environment..."), f"Should show venv creation: {result.stdout}"
 
         # Should reference dependencies (either from test requirements or pyproject)
         assert (
-            result.contains_message("dependencies") or
-            result.contains_message("Installing") or
-            result.returncode == 0
+            result.contains_message("dependencies") or result.contains_message("Installing") or result.returncode == 0
         ), f"Should install dependencies: {result.stdout}"
 
     def test_install_empty_test_requirements(self):
@@ -469,9 +464,7 @@ hypothesis>=6.0.0
 
         # Should handle comments gracefully
         assert result.returncode == 0, f"Install task should handle comments: {result.stderr}"
-        assert result.contains_message("Creating virtual environment..."), (
-            f"Should create venv: {result.stdout}"
-        )
+        assert result.contains_message("Creating virtual environment..."), f"Should create venv: {result.stdout}"
 
     def test_install_idempotency(self):
         """Test that running install multiple times is safe (idempotent).
@@ -514,7 +507,6 @@ hypothesis>=6.0.0
         assert any(result.contains_message(msg) for msg in expected_msgs), (
             f"Expected build or install message not found in output: {result.stdout}"
         )
-
 
         # Test without pyproject.toml
         os.remove("pyproject.toml")
