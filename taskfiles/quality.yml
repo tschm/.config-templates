@@ -22,7 +22,7 @@ tasks:
   lint:
     desc: Run pre-commit hooks
     cmds:
-      - ./bin/task build:uv
+      - ./bin/task build:uv --silent
       - ./bin/uvx pre-commit run --all-files
 
   deptry:
@@ -34,11 +34,11 @@ tasks:
           SOURCE_FOLDER="src/$(find src -mindepth 1 -maxdepth 1 -type d -not -path '*/\.*' | head -1 | sed 's|^src/||')"
           ./bin/uvx deptry $SOURCE_FOLDER {{.OPTIONS}}
         else
-          echo -e "${YELLOW}[WARN] No pyproject.toml found, skipping deptry${RESET}\n"
+          printf "${YELLOW} No pyproject.toml found, skipping deptry${RESET}\n"
         fi
 
   check:
     desc: Run all code quality checks
     deps: [lint, deptry]
     cmds:
-      - echo -e "${GREEN}[INFO] All checks passed!${RESET}\n"
+      - printf "${GREEN} All checks passed!${RESET}\n"

@@ -42,7 +42,7 @@ tasks:
         # we need the virtual environment at least for the tests to work
         # even if we don't install anything
 
-        echo -e "${BLUE}[INFO] Creating virtual environment...${RESET}\n"
+        printf "${BLUE}[INFO] Creating virtual environment...${RESET}\n"
 
         # Create the virtual environment
         ./bin/uv venv --python 3.12 || { printf "${RED}[ERROR] Failed to create virtual environment${RESET}\n"; exit 1; }
@@ -52,10 +52,10 @@ tasks:
         fi
 
         if [ -f "pyproject.toml" ]; then
-          echo -e "${BLUE}[INFO] Installing dependencies${RESET}\n"
+          printf "${BLUE}[INFO] Installing dependencies${RESET}\n"
           ./bin/uv sync --all-extras --frozen || { printf "${RED}[ERROR] Failed to install dependencies${RESET}\n"; exit 1; }
         else
-          echo -e "${YELLOW}[WARN] No pyproject.toml found, skipping install${RESET}\n"
+          printf "${YELLOW}[WARN] No pyproject.toml found, skipping install${RESET}\n"
         fi
 
   build:
@@ -68,5 +68,5 @@ tasks:
           ./bin/uv pip install hatch
           ./bin/uv run hatch build
         else
-          echo -e "${YELLOW}[WARN] No pyproject.toml found, skipping build${RESET}\n"
+          printf "${YELLOW}[WARN] No pyproject.toml found, skipping build${RESET}\n"
         fi
