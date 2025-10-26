@@ -24,7 +24,7 @@ tasks:
       UV_INSTALL_DIR: ./bin
     cmds:
       - |
-        if [ -f "${UV_INSTALL_DIR}/uv" ] && [ -x "${UV_INSTALL_DIR}/uvx" ]; then
+        if [ -x "${UV_INSTALL_DIR}/uv" ] && [ -x "${UV_INSTALL_DIR}/uvx" ]; then
           # already installed — stay quiet
           exit 0
         fi
