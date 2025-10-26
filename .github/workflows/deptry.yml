@@ -40,7 +40,7 @@ jobs:
             else
               SOURCE_FOLDER="."
             fi
-            ./bin/uvx deptry "$SOURCE_FOLDER"
+            uvx deptry "$SOURCE_FOLDER"
           else
             printf "${YELLOW:-}[WARN] No pyproject.toml found, skipping deptry${RESET:-}\n"
           fi
