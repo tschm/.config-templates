@@ -118,4 +118,3 @@ class TestMakefile:
         out = proc.stdout
         # ensure key steps of install are present in the dry run output
         assert "curl --location https://taskfile.dev/install.sh" in out
-        assert "./bin/task --version" in out

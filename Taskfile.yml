@@ -14,6 +14,7 @@
 #       - help: show all tasks including nested ones
 
 version: '3'
+silent: true
 
 # Variables
 vars:
@@ -38,9 +39,9 @@ env:
   REPO_NAME:
     sh: basename $(pwd)
 
-  LOG_INFO: 'printf "${BLUE}[INFO] %s${RESET}\n"'
-  LOG_SUCCESS: 'printf "${GREEN}[SUCCESS] %s${RESET}\n"'
-  LOG_ERROR: 'printf "${RED}[ERROR] %s${RESET}\n"'
+  #LOG_INFO: 'printf "${BLUE}[INFO] %s${RESET}\n"'
+  #LOG_SUCCESS: 'printf "${GREEN}[SUCCESS] %s${RESET}\n"'
+  #LOG_ERROR: 'printf "${RED}[ERROR] %s${RESET}\n"'
 
 
 # Include task groups
