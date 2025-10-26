@@ -46,7 +46,7 @@ tasks:
         ./bin/uv venv --python 3.12 || { printf "${RED}[ERROR] Failed to create virtual environment${RESET}\n"; exit 1; }
 
         if [ -f "tests/requirements.txt" ]; then
-          ./bin/uv pip install -r tests/requirements.txt
+          ./bin/uv pip install -r tests/requirements.txt || { printf "{{.RED}}[ERROR] Failed to install test requirements{{.RESET}}\n"; exit 1; }
         fi
         
         if [ -f "pyproject.toml" ]; then
