@@ -19,6 +19,7 @@ on:
 
 jobs:
   lint_and_build:
+    if: ${{ hashFiles('docker/Dockerfile') != '' }}
     runs-on: ubuntu-latest
 
     steps:
