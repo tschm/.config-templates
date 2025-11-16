@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "config-templates"
+version = "0.0.0"
+description = "Reusable configuration templates for modern Python projects"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+  { name = "Thomas Schmelzer" }
+]
+keywords = ["templates", "configuration", "taskfile", "ci", "ruff"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Build Tools",
+]
+
+[project.urls]
+Homepage = "https://github.com/tschm/.config-templates"
+Repository = "https://github.com/tschm/.config-templates"
+Issues = "https://github.com/tschm/.config-templates/issues"
+
+[tool.hatch.build.targets.wheel]
+# Use src-layout: package code is under src/config
+packages = ["src/config"]
