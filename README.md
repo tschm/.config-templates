@@ -78,8 +78,8 @@ We also provide a small [Makefile](Makefile) for convenience.
 
 ## Testing your documentation
 
-Any README.md file will be scanned for python code blocks.
-If any are found, they will be tested in tests/test_docs.py.
+Any README.md file will be scanned for Python code blocks.
+If any are found, they will be tested in [tests/test_docs.py](tests/test_docs.py).
 
 ```python
 # Some generic Python code block
