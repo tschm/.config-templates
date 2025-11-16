@@ -19,14 +19,19 @@ on:
 
 jobs:
   lint_and_build:
-    if: ${{ hashFiles('docker/Dockerfile') != '' }}
     runs-on: ubuntu-latest
 
     steps:
+      - name: Skip notice (no docker/Dockerfile present)
+        if: ${{ hashFiles('docker/Dockerfile') == '' }}
+        run: echo "No docker/Dockerfile found; skipping hadolint and image build."
+
       - name: Checkout repository
+        if: ${{ hashFiles('docker/Dockerfile') != '' }}
         uses: actions/checkout@v5
 
       - name: Lint Dockerfile with hadolint
+        if: ${{ hashFiles('docker/Dockerfile') != '' }}
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: docker/Dockerfile
@@ -34,9 +39,11 @@ jobs:
           # failure-threshold: error
 
       - name: Set up Podman
+        if: ${{ hashFiles('docker/Dockerfile') != '' }}
         uses: redhat-actions/setup-podman@v2
 
       - name: Build container image with Podman (validation only)
+        if: ${{ hashFiles('docker/Dockerfile') != '' }}
         run: |
           # Derive image tag from repository name to avoid hardcoding
           REPO_NAME="${GITHUB_REPOSITORY##*/}"
