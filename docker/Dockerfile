@@ -3,31 +3,39 @@
 # ================================
 FROM ghcr.io/astral-sh/uv:0.9.9-python3.12-trixie-slim AS builder
 
-ENV UV_SYSTEM_PYTHON=1
 WORKDIR /app
 
 # Create non-root user
 RUN useradd -m app_user && chown app_user:app_user /app
 
-# Copy dependency files
-COPY uv.lock pyproject.toml README.md /app/
+# Copy dependency files (for caching)
+COPY pyproject.toml uv.lock README.md ./
 
 # Use non-root user
 USER app_user
 
-# Sync dependencies (no dev, no cache) into .venv
+# Install dependencies into .venv (no dev deps)
 RUN uv sync --frozen --no-dev --no-cache
 
 # Copy application code
-COPY src /app
+COPY --chown=app_user:app_user src ./src
 
-# Install the package itself
-RUN uv pip install --no-deps -e .
+# Install the package itself (non-editable, so src/ is not required afterwards)
+RUN uv pip install --no-deps .
 
-# Strip unnecessary files from .venv to save space
-RUN find .venv -type d -name "__pycache__" -exec rm -rf {} + && \
-    find .venv -type d -name "tests" -exec rm -rf {} + && \
-    rm -rf .venv/share/man .venv/share/doc .venv/share/doc-base
+# Remove source to shrink image
+RUN rm -rf ./src/ ~/.cache/ && \
+    rm -rf /app/.venv/CACHEDIR.TAG && \
+    rm -rf /app/.venv/bin/activate* && \
+    rm -rf /app/.venv/bin/deactivate.bat && \
+    rm -rf /app/.venv/bin/pydoc.bat && \
+    rm -rf /app/.venv/.gitignore /app/.venv/.lock && \
+    find /app/.venv -path "*/site-packages/*dist-info" -type d -exec rm -rf {} + && \
+    find /app/.venv -path "*/site-packages/*egg-info" -type d -exec rm -rf {} + && \
+    rm -f /app/.venv/lib/python3.12/site-packages/_virtualenv.* && \
+    find /app/.venv -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true \
+    find /app/.venv -name "*.pyc" -delete
+
 
 # ================================
 # Stage 2: Runtime
@@ -45,7 +53,7 @@ RUN apt-get update && \
 RUN useradd -m app_user && chown app_user:app_user /app
 
 # Copy stripped .venv and app from builder
-COPY --from=builder --chown=app_user:app_user /app /app
+COPY --from=builder --chown=app_user:app_user /app/.venv /app/.venv
 
 # Set virtual environment PATH
 ENV PATH="/app/.venv/bin:$PATH"
