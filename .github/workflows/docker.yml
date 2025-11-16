@@ -1,0 +1,45 @@
+# GitHub Actions workflow: Lint Dockerfile with hadolint and build the image
+#
+# This workflow runs on pushes and pull requests. It performs two main tasks:
+#  - Lints docker/Dockerfile using hadolint (fails the job on lint errors)
+#  - Builds the container image with Podman to ensure the Dockerfile is valid
+#
+# Notes:
+#  - The image is built locally for validation only; it is not pushed to any registry.
+#  - Permissions are minimized (read-only) since no repository writes occur.
+name: DOCKER
+
+permissions:
+  contents: read
+
+on:
+  push:
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint_and_build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Lint Dockerfile with hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: docker/Dockerfile
+          # Fail on any error-level findings (default behavior). Adjust if needed:
+          # failure-threshold: error
+
+      - name: Set up Podman
+        uses: redhat-actions/setup-podman@v2
+
+      - name: Build container image with Podman (validation only)
+        run: |
+          # Derive image tag from repository name to avoid hardcoding
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+          podman build \
+            --file docker/Dockerfile \
+            --tag "${REPO_NAME}:ci" \
+            .
