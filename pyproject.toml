@@ -29,6 +29,14 @@ Homepage = "https://github.com/tschm/.config-templates"
 Repository = "https://github.com/tschm/.config-templates"
 Issues = "https://github.com/tschm/.config-templates/issues"
 
+[project.optional-dependencies]
+dev = [
+    "pytest-cov>=6.1.1",
+    "pytest==8.4.2",
+    "pre-commit==4.4.0",
+    "marimo==0.17.7"
+]
+
 [tool.hatch.build.targets.wheel]
 # Use src-layout: package code is under src/config
 packages = ["src/config"]
