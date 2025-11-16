@@ -91,8 +91,7 @@ def test_doc(readme_path):
         optionflags=ELLIPSIS | NORMALIZE_WHITESPACE | IGNORE_EXCEPTION_DETAIL,
     )
 
-    with open(readme_path) as f:
-        doc = f.read()
+    doc = readme_path.read_text(encoding="utf-8")
 
     test = parser.get_doctest(doc, {}, readme_path.name, readme_path, 0)
     result = runner.run(test)
