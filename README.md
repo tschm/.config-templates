@@ -88,8 +88,8 @@ Hello, World!
 >>> 1 + 1
 2
 >>> import math
->>> math.pi
-3.141592653589793
+>>> round(math.pi, 2)
+3.14
 >>> round(math.cos(math.pi/4.0), 2)
 0.71
 
