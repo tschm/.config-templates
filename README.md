@@ -76,6 +76,19 @@ Run `./bin/task --list-all` to see all available tasks:
 
 We also provide a small [Makefile](Makefile) for convenience.
 
+## Testing your documentation
+
+Any README.md file will be scanned for python code blocks.
+If any are found, they will be tested in tests/test_docs.py.
+
+```python
+# Some generic Python code block
+>>> print("Hello, World!")
+Hello, World!
+>>> 1 + 1
+3
+```
+
 ## 📁 Available Templates
 
 This repository includes the following configuration templates:
