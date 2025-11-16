@@ -1,10 +1,9 @@
-"""Doctest README.md's Python code blocks with a float-tolerant checker.
+"""Doctest README.md's Python code blocks.
 
 This module parses fenced Python blocks from the top-level README.md and runs
-them with doctest in a shared namespace. It uses a custom OutputChecker that
-allows small floating-point differences and enables ELLIPSIS and
-NORMALIZE_WHITESPACE, so examples remain stable yet meaningful as the code
-evolves.
+them with doctest in a shared namespace. It enables ELLIPSIS,
+NORMALIZE_WHITESPACE, and IGNORE_EXCEPTION_DETAIL so examples remain stable yet
+meaningful as the code evolves while focusing comparisons on relevant output.
 """
 
 import doctest
