@@ -87,6 +87,11 @@ If any are found, they will be tested in tests/test_docs.py.
 Hello, World!
 >>> 1 + 1
 2
+>>> import math
+>>> math.pi
+3.141592653589793
+>>> math.cos(math.pi/3.0)
+0.3
 ```
 
 ## 📁 Available Templates
