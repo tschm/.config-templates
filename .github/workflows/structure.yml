@@ -44,9 +44,12 @@ jobs:
 
           if [ ! -f ".gitignore" ]; then
             printf "${YELLOW:-}[WARN] No .gitignore file found, skipping structure check${RESET:-}\n"
+          fi
 
           if [ ! -f ".pre-commit-config.yaml" ]; then
             printf "${YELLOW:-}[WARN] No .pre-commit-config file found, skipping structure check${RESET:-}\n"
+          fi
 
           if [ ! -f "Makefile" ]; then
-             printf "${YELLOW:-}[WARN] No Makefile found, skipping structure check${RESET:-}\n"
+            printf "${YELLOW:-}[WARN] No Makefile found, skipping structure check${RESET:-}\n"
+          fi
