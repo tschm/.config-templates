@@ -33,7 +33,7 @@ RUN rm -rf ./src/ ~/.cache/ && \
     find /app/.venv -path "*/site-packages/*dist-info" -type d -exec rm -rf {} + && \
     find /app/.venv -path "*/site-packages/*egg-info" -type d -exec rm -rf {} + && \
     rm -f /app/.venv/lib/python3.12/site-packages/_virtualenv.* && \
-    find /app/.venv -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true \
+    find /app/.venv -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true && \
     find /app/.venv -name "*.pyc" -delete
 
 
