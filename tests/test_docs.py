@@ -74,10 +74,6 @@ class FloatTolerantOutputChecker(doctest.OutputChecker):
             if len(want_floats) != len(got_floats):
                 return False
 
-            # Compare with tolerance
-            print(want_floats)
-            print(got_floats)
-
             return all(math.isclose(w, g, rel_tol=1e-3, abs_tol=1e-5) for w, g in zip(want_floats, got_floats))
         except Exception:
             return False
