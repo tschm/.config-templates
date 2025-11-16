@@ -90,8 +90,9 @@ Hello, World!
 >>> import math
 >>> math.pi
 3.141592653589793
->>> math.cos(math.pi/3.0)
-0.3
+>>> math.cos(math.pi/4.0)
+0.7071067811865476
+
 ```
 
 ## 📁 Available Templates
