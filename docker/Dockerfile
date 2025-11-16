@@ -21,6 +21,9 @@ RUN uv sync --frozen --no-dev --no-cache
 # Copy application code
 COPY src /app
 
+# Install the package itself
+RUN uv pip install --no-deps -e .
+
 # Strip unnecessary files from .venv to save space
 RUN find .venv -type d -name "__pycache__" -exec rm -rf {} + && \
     find .venv -type d -name "tests" -exec rm -rf {} + && \
