@@ -1,0 +1,52 @@
+name: "STRUCTURE"
+
+permissions:
+  contents: read
+
+on:
+  push:
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  book:
+    runs-on: "ubuntu-latest"
+
+    permissions:
+      contents: read
+
+    steps:
+      # Check out the repository code
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+
+      # Check there is a src folder
+      - name: Check src folder exists
+        run: |
+          if [ ! -d "src" ]; then
+            printf "${YELLOW:-}[WARN] No src folder found, skipping structure check${RESET:-}\n"
+          fi
+
+      # Check there is a tests folder
+      - name: Check tests folder exists
+        run: |
+          if [ ! -d "tests" ]; then
+            printf "${YELLOW:-}[WARN] No tests folder found, skipping structure check${RESET:-}\n"
+          fi
+
+      # Check there is a .editorconfig and .gitignore file
+      - name: Check .editorconfig and .gitignore files exist
+        run: |
+          if [ ! -f ".editorconfig" ]; then
+            printf "${YELLOW:-}[WARN] No .editorconfig file found, skipping structure check${RESET:-}\n"
+          fi
+
+          if [ ! -f ".gitignore" ]; then
+            printf "${YELLOW:-}[WARN] No .gitignore file found, skipping structure check${RESET:-}\n"
+
+          if [ ! -f ".pre-commit-config.yaml" ]; then
+            printf "${YELLOW:-}[WARN] No .pre-commit-config file found, skipping structure check${RESET:-}\n"
+
+          if [ ! -f "Makefile" ]; then
+             printf "${YELLOW:-}[WARN] No Makefile found, skipping structure check${RESET:-}\n"
