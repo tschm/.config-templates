@@ -8,7 +8,6 @@ evolves.
 """
 
 import doctest
-import math
 from doctest import ELLIPSIS, IGNORE_EXCEPTION_DETAIL, NORMALIZE_WHITESPACE
 from pathlib import Path
 
@@ -40,43 +39,6 @@ def readme_path() -> Path:
             return candidate
         current_dir = current_dir.parent
     raise FileNotFoundError("README.md not found in any parent directory")
-
-
-# class FloatTolerantOutputChecker(doctest.OutputChecker):
-#     """Doctest output checker tolerant to small float discrepancies."""
-#
-#     def check_output(self, want, got, optionflags):
-#         """Return True if outputs match allowing for small float differences.
-#
-#         This first defers to the standard doctest comparison. If that fails,
-#         it parses all floats contained in the expected and actual strings and
-#         compares them using math.isclose with a small tolerance.
-#
-#         Args:
-#             want: The expected output string from the doctest.
-#             got: The actual output string produced by the code under test.
-#             optionflags: Bitmask of doctest option flags in effect.
-#         """
-#         # First try vanilla doctest comparison
-#         if super().check_output(want, got, optionflags):
-#             return True
-#
-#         # Try float-tolerant comparison
-#         try:
-#             # Extract floats from both strings
-#             want_floats = [
-#                 float(x) for x in want.replace(",", " ").split() if x.replace(".", "", 1).replace("-", "", 1).isdigit()
-#             ]
-#             got_floats = [
-#                 float(x) for x in got.replace(",", " ").split() if x.replace(".", "", 1).replace("-", "", 1).isdigit()
-#             ]
-#
-#             if len(want_floats) != len(got_floats):
-#                 return False
-#
-#             return all(math.isclose(w, g, rel_tol=1e-3, abs_tol=1e-5) for w, g in zip(want_floats, got_floats))
-#         except Exception:
-#             return False
 
 
 def test_doc(readme_path):
