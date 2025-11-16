@@ -86,7 +86,7 @@ If any are found, they will be tested in tests/test_docs.py.
 >>> print("Hello, World!")
 Hello, World!
 >>> 1 + 1
-3
+2
 ```
 
 ## 📁 Available Templates
