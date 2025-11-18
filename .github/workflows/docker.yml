@@ -22,16 +22,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Skip notice (no docker/Dockerfile present)
-        if: ${{ hashFiles('docker/Dockerfile') == '' }}
-        run: echo "No docker/Dockerfile found; skipping hadolint and image build."
-
       - name: Checkout repository
-        if: ${{ hashFiles('docker/Dockerfile') != '' }}
         uses: actions/checkout@v5
 
+      - name: Detect docker/Dockerfile presence
+        id: check_dockerfile
+        run: |
+          if [ -f docker/Dockerfile ]; then
+            echo "docker_present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "docker_present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip notice (no docker/Dockerfile present)
+        if: ${{ steps.check_dockerfile.outputs.docker_present != 'true' }}
+        run: echo "No docker/Dockerfile found; skipping hadolint and image build."
+
       - name: Lint Dockerfile with hadolint
-        if: ${{ hashFiles('docker/Dockerfile') != '' }}
+        if: ${{ steps.check_dockerfile.outputs.docker_present == 'true' }}
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: docker/Dockerfile
@@ -39,11 +47,11 @@ jobs:
           # failure-threshold: error
 
       - name: Set up Docker Buildx
-        if: ${{ hashFiles('docker/Dockerfile') != '' }}
+        if: ${{ steps.check_dockerfile.outputs.docker_present == 'true' }}
         uses: docker/setup-buildx-action@v3
 
       - name: Build container image with Docker Buildx (validation only)
-        if: ${{ hashFiles('docker/Dockerfile') != '' }}
+        if: ${{ steps.check_dockerfile.outputs.docker_present == 'true' }}
         run: |
           # Derive image tag from repository name to avoid hardcoding
           REPO_NAME="${GITHUB_REPOSITORY##*/}"
