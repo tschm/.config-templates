@@ -34,7 +34,7 @@ dev = [
     "pytest-cov>=6.1.1",
     "pytest==8.4.2",
     "pre-commit==4.4.0",
-    "marimo==0.17.7"
+    "marimo==0.17.8"
 ]
 
 [tool.hatch.build.targets.wheel]
