@@ -53,8 +53,9 @@ jobs:
       - name: Build container image with Docker Buildx (validation only)
         if: ${{ steps.check_dockerfile.outputs.docker_present == 'true' }}
         run: |
-          # Derive image tag from repository name to avoid hardcoding
+          # Derive image tag from repository name and sanitize (remove '.' and '_')
           REPO_NAME="${GITHUB_REPOSITORY##*/}"
+          REPO_NAME="${REPO_NAME//[._]/}"
           docker buildx build \
             --file docker/Dockerfile \
             --tag "${REPO_NAME}:ci" \
