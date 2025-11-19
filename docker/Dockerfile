@@ -40,7 +40,7 @@ RUN rm -rf ./src/ ~/.cache/ && \
 # ================================
 # Stage 2: Runtime
 # ================================
-FROM python:3.12-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 WORKDIR /app
 
