@@ -40,7 +40,7 @@ jobs:
 
       - name: Lint Dockerfile with hadolint
         if: ${{ steps.check_dockerfile.outputs.docker_present == 'true' }}
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: docker/Dockerfile
           # Fail on any error-level findings (default behavior). Adjust if needed:
