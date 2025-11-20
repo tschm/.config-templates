@@ -3,6 +3,7 @@
 This module extracts Python code and expected result blocks from README.md,
 executes the code, and verifies the output matches the documented result.
 """
+
 import pathlib
 import re
 import subprocess
