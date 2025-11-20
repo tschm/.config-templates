@@ -5,7 +5,6 @@
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg?logo=ruff)](https://github.com/astral-sh/ruff)
 
 [![CI Status](https://github.com/tschm/.config-templates/workflows/CI/badge.svg)](https://github.com/tschm/.config-templates/actions)
-[![Release](https://github.com/tschm/.config-templates/workflows/Release%20Workflow/badge.svg)](https://github.com/tschm/.config-templates/actions)
 [![Pre-commit](https://github.com/tschm/.config-templates/workflows/PRE-COMMIT/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3APRE-COMMIT)
 [![Deptry](https://github.com/tschm/.config-templates/workflows/DEPTRY/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3ADEPTRY)
 [![Book](https://github.com/tschm/.config-templates/workflows/BOOK/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3ABOOK)
@@ -18,7 +17,7 @@ Save time and maintain consistency across your projects
 with these
 pre-configured templates.
 
-> Last updated: November 03, 2025
+> Last updated: November 20, 2025
 
 ## ✨ Features
 
