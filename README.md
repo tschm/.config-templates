@@ -89,6 +89,10 @@ print(round(math.pi, 2))
 print(round(math.cos(math.pi/4.0), 2))
 ```
 
+For each code block, we define a block of expected output.
+If the output matches the expected output, a [test](tests/test_readme.py) passes,
+Otherwise, it fails.
+
 ```result
 Hello, World!
 2
