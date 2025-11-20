@@ -83,16 +83,18 @@ If any are found, they will be tested in [tests/test_docs.py](tests/test_docs.py
 
 ```python
 # Some generic Python code block
->>> print("Hello, World!")
-Hello, World!
->>> 1 + 1
-2
->>> import math
->>> round(math.pi, 2)
-3.14
->>> round(math.cos(math.pi/4.0), 2)
-0.71
+import math
+print("Hello, World!")
+print(1 + 1)
+print(round(math.pi, 2))
+print(round(math.cos(math.pi/4.0), 2))
+```
 
+```result
+Hello, World!
+2
+3.14
+0.71
 ```
 
 ## 📁 Available Templates
