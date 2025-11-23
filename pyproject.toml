@@ -33,7 +33,7 @@ Issues = "https://github.com/tschm/.config-templates/issues"
 dev = [
     "pytest-cov>=6.1.1",
     "pytest==9.0.1",
-    "pre-commit==4.4.0",
+    "pre-commit==4.5.0",
     "marimo==0.17.8"
 ]
 
