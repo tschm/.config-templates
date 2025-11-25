@@ -150,7 +150,6 @@ jobs:
             echo "No .env file found; continuing."
             echo "publish_from_env=" >> "$GITHUB_OUTPUT"
           fi
-          cat $GITHUB_OUTPUT
 
       - name: Download dist artifact
         uses: actions/download-artifact@v6
