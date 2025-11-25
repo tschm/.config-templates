@@ -122,26 +122,35 @@ jobs:
         run: |
           if [ -f ".env" ]; then
             echo "Found .env; exporting variables to GITHUB_ENV"
-            while IFS= read -r line; do
-              line="${line#"${line%%[![:space:]]*}"}"
-              line="${line%"${line##*[![:space:]]}"}"
-              [[ -z "$line" || "$line" == \#* || "$line" != *=* ]] && continue
-              key="${line%%=*}"
-              value="${line#*=}"
+            while IFS='=' read -r key value; do
+              # skip empty lines, comments, or lines without '='
+              [[ -z "$key" || "$key" == \#* ]] && continue
+      
+              # strip 'export ' prefix if present
+              key="${key#export }"
+      
+              # trim whitespace
+              key="${key//[[:space:]]/}"
+              value="${value#"${value%%[![:space:]]*}"}"
+              value="${value%"${value##*[![:space:]]}"}"
+      
+              # remove surrounding quotes
               value="${value%\"}"; value="${value#\"}"
               value="${value%\'}"; value="${value#\'}"
+      
               echo "${key}=${value}" >> "$GITHUB_ENV"
-            done < .env
-
-            # expose PUBLISH_TO_PYPI specifically as an output
-            publish_val=$(grep -E '^[[:space:]]*PUBLISH_TO_PYPI=' .env | head -n1 | cut -d'=' -f2- || true)
+            done < <(grep -v '^\s*$\|^\s*#' .env)
+      
+            # expose PUBLISH_TO_PYPI specifically
+            publish_val=$(grep -E '^\s*PUBLISH_TO_PYPI=' .env | head -n1 | cut -d'=' -f2-)
             publish_val="${publish_val%\"}"; publish_val="${publish_val#\"}"
             publish_val="${publish_val%\'}"; publish_val="${publish_val#\'}"
             echo "publish_from_env=$publish_val" >> "$GITHUB_OUTPUT"
           else
-            echo "No .env file found; continuing without it"
+            echo "No .env file found; continuing."
             echo "publish_from_env=" >> "$GITHUB_OUTPUT"
-
+          fi
+        
       - name: Abort if PUBLISH_TO_PYPI is false
         if: ${{ steps.load_env.outputs.publish_from_env == 'false' || steps.load_env.outputs.publish_from_env == '' }}
         run: |
