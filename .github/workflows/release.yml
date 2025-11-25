@@ -158,7 +158,7 @@ jobs:
             echo "should_publish=true" >> $GITHUB_OUTPUT
 
       - name: Publish to PyPI
-        if: ${{ steps.check_dist.outputs.should_publish == 'true' && (steps.load_env.outputs.publish_from_env == 'true' || vars.PUBLISH_TO_PYPI == 'true' || env.PUBLISH_TO_PYPI == 'true' || secrets.PUBLISH_TO_PYPI == 'true') }}
+        if: ${{ steps.check_dist.outputs.should_publish == 'true' && (steps.load_env.outputs.publish_from_env == 'true' ) }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
