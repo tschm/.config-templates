@@ -1,0 +1,17 @@
+branchProtectionRules:
+  - pattern: main
+    requiresStatusChecks: true
+    requiresStrictStatusChecks: true
+    requiredStatusCheckContexts:
+      - "CI / test"
+      - "PRE-COMMIT / pre-commit"
+      - "DEPTRY / deptry"
+      - "MARIMO / test-notebooks"
+  - pattern: master
+    requiresStatusChecks: true
+    requiresStrictStatusChecks: true
+    requiredStatusCheckContexts:
+      - "CI / test"
+      - "PRE-COMMIT / pre-commit"
+      - "DEPTRY / deptry"
+      - "MARIMO / test-notebooks"
