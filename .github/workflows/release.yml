@@ -120,27 +120,33 @@ jobs:
         id: load_env
         shell: bash
         run: |
+          publish_val=""
           if [ -f ".env" ]; then
             echo "Found .env; exporting variables to GITHUB_ENV"
-            while IFS= read -r line; do
-              line="${line#"${line%%[![:space:]]*}"}"
-              line="${line%"${line##*[![:space:]]}"}"
-              [[ -z "$line" || "$line" == \#* || "$line" != *=* ]] && continue
-              key="${line%%=*}"
-              value="${line#*=}"
+            while IFS='=' read -r key value; do
+              # Trim whitespace
+              key="${key#"${key%%[![:space:]]*}"}"
+              key="${key%"${key##*[![:space:]]}"}"
+              value="${value#"${value%%[![:space:]]*}"}"
+              value="${value%"${value##*[![:space:]]}"}"
+              # Skip empty lines or comments
+              [[ -z "$key" || "$key" == \#* ]] && continue
+              # Remove surrounding quotes
               value="${value%\"}"; value="${value#\"}"
               value="${value%\'}"; value="${value#\'}"
+              # Export
               echo "${key}=${value}" >> "$GITHUB_ENV"
+              # Capture PUBLISH_TO_PYPI
+              if [ "$key" == "PUBLISH_TO_PYPI" ]; then
+                publish_val="$value"
+              fi
             done < .env
-
-            # expose PUBLISH_TO_PYPI specifically as an output
-            publish_val=$(grep -E '^[[:space:]]*PUBLISH_TO_PYPI=' .env | head -n1 | cut -d'=' -f2- || true)
-            publish_val="${publish_val%\"}"; publish_val="${publish_val#\"}"
-            publish_val="${publish_val%\'}"; publish_val="${publish_val#\'}"
-            echo "publish_from_env=$publish_val" >> "$GITHUB_OUTPUT"
           else
             echo "No .env file found; continuing without it"
-            echo "publish_from_env=" >> "$GITHUB_OUTPUT"
+          fi
+      
+          # Always set output, even if empty
+          echo "publish_from_env=${publish_val:-}" >> "$GITHUB_OUTPUT"
 
       - name: Download dist artifact
         uses: actions/download-artifact@v6
