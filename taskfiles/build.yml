@@ -73,7 +73,6 @@ tasks:
           printf "${YELLOW}[WARN] No pyproject.toml found, skipping install${RESET}\n"
         fi
 
-
   build:
     desc: Build the package using hatch
     deps: [install]
