@@ -123,31 +123,24 @@ jobs:
           if [ -f ".env" ]; then
             echo "Found .env; exporting variables to GITHUB_ENV"
             while IFS= read -r line; do
-              # skip empty lines and comments
-              if [ -z "$line" ] || echo "$line" | grep -E '^\s*#' >/dev/null; then
-                continue
-              fi
-              key=$(echo "$line" | cut -d '=' -f1)
-              value=$(echo "$line" | cut -d '=' -f2-)
-              # strip surrounding quotes
-              value=${value#"}; value=${value%"}
-              value=${value#\'}; value=${value%\'}
-              if [ -n "$key" ]; then
-                echo "$key=$value" >> "$GITHUB_ENV"
-              fi
+              line="${line#"${line%%[![:space:]]*}"}"
+              line="${line%"${line##*[![:space:]]}"}"
+              [[ -z "$line" || "$line" == \#* || "$line" != *=* ]] && continue
+              key="${line%%=*}"
+              value="${line#*=}"
+              value="${value%\"}"; value="${value#\"}"
+              value="${value%\'}"; value="${value#\'}"
+              echo "${key}=${value}" >> "$GITHUB_ENV"
             done < .env
+
             # expose PUBLISH_TO_PYPI specifically as an output
-            if grep -E '^PUBLISH_TO_PYPI=' .env >/dev/null; then
-              val=$(grep -E '^PUBLISH_TO_PYPI=' .env | head -n1 | cut -d '=' -f2-)
-              val=${val#"}; val=${val%"}; val=${val#\'}; val=${val%\'}
-              echo "publish_from_env=$val" >> "$GITHUB_OUTPUT"
-            else
-              echo "publish_from_env=" >> "$GITHUB_OUTPUT"
-            fi
+            publish_val=$(grep -E '^[[:space:]]*PUBLISH_TO_PYPI=' .env | head -n1 | cut -d'=' -f2- || true)
+            publish_val="${publish_val%\"}"; publish_val="${publish_val#\"}"
+            publish_val="${publish_val%\'}"; publish_val="${publish_val#\'}"
+            echo "publish_from_env=$publish_val" >> "$GITHUB_OUTPUT"
           else
             echo "No .env file found; continuing without it"
             echo "publish_from_env=" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Download dist artifact
         uses: actions/download-artifact@v6
@@ -164,10 +157,9 @@ jobs:
             echo "should_publish=false" >> $GITHUB_OUTPUT
           else
             echo "should_publish=true" >> $GITHUB_OUTPUT
-          fi
 
       - name: Publish to PyPI
-        if: ${{ steps.check_dist.outputs.should_publish == 'true' && (steps.load_env.outputs.publish_from_env == 'true') }}
+        if: ${{ steps.check_dist.outputs.should_publish == 'true' && (steps.load_env.outputs.publish_from_env == 'true' ) }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
