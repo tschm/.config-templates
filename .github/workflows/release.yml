@@ -142,6 +142,12 @@ jobs:
             echo "No .env file found; continuing without it"
             echo "publish_from_env=" >> "$GITHUB_OUTPUT"
 
+      - name: Abort if PUBLISH_TO_PYPI is false
+        if: ${{ steps.load_env.outputs.publish_from_env == 'false' || steps.load_env.outputs.publish_from_env == '' }}
+        run: |
+          echo "PUBLISH_TO_PYPI is false or not set — skipping PyPI publish."
+          exit 1
+
       - name: Download dist artifact
         uses: actions/download-artifact@v6
         with:
