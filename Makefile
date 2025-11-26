@@ -81,9 +81,9 @@ fmt: install-task ## check the pre-commit hooks and the linting
 
 deptry: install-task ## run deptry if pyproject.toml exists
 	if [ -f "pyproject.toml" ]; then \
-	  ./bin/uvx deptry ${SOURCE_FOLDER}; \
+	  @./bin/uvx deptry ${SOURCE_FOLDER}; \
 	else \
-	  printf "${YELLOW} No pyproject.toml found, skipping deptry${RESET}\n"; \
+	  @printf "${YELLOW} No pyproject.toml found, skipping deptry${RESET}\n"; \
 	fi
 
 all: fmt deptry test book ## Run everything
