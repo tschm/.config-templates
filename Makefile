@@ -44,7 +44,7 @@ install: install-task ## install
 	@./bin/task build:install --silent
 
 clean: install-task ## clean
-	printf "${BLUE}Cleaning project...${RESET}\n"
+	@printf "${BLUE}Cleaning project...${RESET}\n"
 	# do not clean .env files
 	@git clean -d -X -f -e .env -e '.env.*'
 	@rm -rf dist build *.egg-info .coverage .pytest_cache
