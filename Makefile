@@ -112,100 +112,12 @@ marimushka: install ## export Marimo notebooks to HTML
 	  printf "${YELLOW}[WARN] Directory '${MARIMO_FOLDER}' does not exist. Skipping marimushka.${RESET}\n"; \
 	else \
 	  ./bin/uv pip install marimo; \
-	  mkdir -p _marimushka; \
-	  set -- "${MARIMO_FOLDER}"/*.py; \
-	  if [ "$$1" = "${MARIMO_FOLDER}/*.py" ]; then \
-	    printf "${YELLOW}[WARN] No Python files found in '${MARIMO_FOLDER}'.${RESET}\n"; \
-	    echo "<html><head><title>Marimo Notebooks</title></head><body><h1>Marimo Notebooks</h1><p>No notebooks found.</p></body></html>" > _marimushka/index.html; \
-	  else \
-	    py_files=$$(printf "%s " "$$@"); \
-	    printf "${BLUE}[INFO] Found Python files: %s${RESET}\n" "$$py_files"; \
-	    for py_file in "$$@"; do \
-	      printf " ${BLUE}[INFO] Processing %s...${RESET}\n" "$$py_file"; \
-	      rel_path=$$(echo "$$py_file" | sed "s|^${MARIMO_FOLDER}/||"); \
-	      dir_path=$$(dirname "$$rel_path"); \
-	      base_name=$$(basename "$$rel_path" .py); \
-	      mkdir -p "_marimushka/$$dir_path"; \
-       out_html="_marimushka/$$dir_path/$$base_name.html"; \
-       : ; \
-       rm -f "$$out_html"; \
-       if grep -q "^# /// script" "$$py_file"; then \
-         printf " ${BLUE}[INFO] Script header detected, using --sandbox flag...${RESET}\n"; \
-         ./bin/uvx marimo export html --sandbox --include-code --output "$$out_html" "$$py_file"; \
-       else \
-         printf " ${BLUE}[INFO] No script header detected, using standard export...${RESET}\n"; \
-         ./bin/uv run marimo export html --include-code --output "$$out_html" "$$py_file"; \
-       fi; \
-     done; \
-     echo "<html><head><title>Marimo Notebooks</title></head><body><h1>Marimo Notebooks</h1><ul>" > _marimushka/index.html; \
-     find _marimushka -name "*.html" -not -path "*index.html" | sort | while read html_file; do \
-       rel_path=$$(echo "$$html_file" | sed "s|^_marimushka/||"); \
-       name=$$(basename "$$rel_path" .html); \
-       echo "<li><a href=\"$$rel_path\">$$name</a></li>" >> _marimushka/index.html; \
-     done; \
-     echo "</ul></body></html>" >> _marimushka/index.html; \
-     touch _marimushka/.nojekyll; \
-   fi; \
- fi
+	  MARIMO_FOLDER="${MARIMO_FOLDER}" UV_BIN="./bin/uv" UVX_BIN="./bin/uvx" /bin/sh .github/scripts/marimushka.sh; \
+	fi
 
 ##@ Documentation
 book: test docs marimushka ## compile the companion book
-	@printf "${BLUE}[INFO] Building combined documentation...${RESET}\n"
-	@printf "${BLUE}[INFO] Ensuring jq is installed...${RESET}\n"
-	@if ! command -v jq >/dev/null 2>&1; then \
-	  if command -v apt-get >/dev/null 2>&1; then \
-	    if command -v sudo >/dev/null 2>&1; then SUDO="sudo"; else SUDO=""; fi; \
-	    $$SUDO apt-get update && $$SUDO apt-get install -y jq || true; \
-	  elif command -v apk >/dev/null 2>&1; then \
-	    apk add --no-cache jq || true; \
-	  elif command -v dnf >/dev/null 2>&1; then \
-	    dnf install -y jq || true; \
-	  elif command -v brew >/dev/null 2>&1; then \
-	    brew install jq || true; \
-	  else \
-	    printf "${YELLOW}[WARN] Could not install jq automatically. Proceeding, but book task may have limited functionality.${RESET}\n"; \
-	  fi; \
-	fi
-	@printf "${BLUE}[INFO] Delete the _book folder...${RESET}\n"
-	@rm -rf _book
-	@printf "${BLUE}[INFO] Create empty _book folder...${RESET}\n"
-	@mkdir -p _book
-	@touch _book/links.json
-	@printf "${BLUE}[INFO] Copy API docs...${RESET}\n"
-	@if [ -f _pdoc/index.html ]; then \
-	  mkdir -p _book/pdoc; \
-	  cp -r _pdoc/* _book/pdoc; \
-	  echo '{"API": "./pdoc/index.html"}' > _book/links.json; \
-	else \
-	  echo '{}' > _book/links.json; \
-	fi
-	@printf "${BLUE}[INFO] Copy coverage report...${RESET}\n"
-	@if [ -f _tests/html-coverage/index.html ]; then \
-	  mkdir -p _book/tests/html-coverage; \
-	  cp -r _tests/html-coverage/* _book/tests/html-coverage; \
-	  jq '. + {"Coverage": "./tests/html-coverage/index.html"}' _book/links.json > _book/tmp && mv _book/tmp _book/links.json; \
-	else \
-	  printf "${YELLOW}[WARN] No coverage report found or directory is empty${RESET}\n"; \
-	fi
-	@printf "${BLUE}[INFO] Copy test report...${RESET}\n"
-	@if [ -f _tests/html-report/report.html ]; then \
-	  mkdir -p _book/tests/html-report; \
-	  cp -r _tests/html-report/* _book/tests/html-report; \
-	  jq '. + {"Test Report": "./tests/html-report/report.html"}' _book/links.json > _book/tmp && mv _book/tmp _book/links.json; \
-	else \
-	  printf "${YELLOW}[WARN] No test report found or directory is empty${RESET}\n"; \
-	fi
-	@printf "${BLUE}[INFO] Copy notebooks...${RESET}\n"
-	@if [ -f _marimushka/index.html ]; then \
-	  mkdir -p _book/marimushka; \
-	  cp -r _marimushka/* _book/marimushka; \
-	  jq '. + {"Notebooks": "./marimushka/index.html"}' _book/links.json > _book/tmp && mv _book/tmp _book/links.json; \
-	  printf "${BLUE}[INFO] Copied notebooks from ${MARIMO_FOLDER} to _book/marimushka${RESET}\n"; \
-	else \
-	  printf "${YELLOW}[WARN] No notebooks found or directory is empty${RESET}\n"; \
-	fi
-	@printf "${BLUE}[INFO] Generated links.json:${RESET}\n"
-	@cat _book/links.json
+	@/bin/sh .github/scripts/book.sh
 	@./bin/uvx minibook --title "${BOOK_TITLE}" --subtitle "${BOOK_SUBTITLE}" --links "$$(jq -c . _book/links.json)" --output "_book"
 	@touch "_book/.nojekyll"
 
