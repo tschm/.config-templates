@@ -33,7 +33,7 @@ install-task: ## ensure go-task (Taskfile) is installed
 		curl --location https://taskfile.dev/install.sh | sh -s -- -d -b ${UV_INSTALL_DIR}; \
 	fi
 
-	printf "${BLUE}[INFO] Installing uv and uvx...${RESET}\n"
+	@printf "${BLUE}[INFO] Installing uv and uvx...${RESET}\n"
 	@if ! curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1; then \
 	  printf "${RED}[ERROR] Failed to install uv${RESET}\n"; \
 	  exit 1; \
