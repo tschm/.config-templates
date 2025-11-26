@@ -81,7 +81,7 @@ clean: install-uv ## clean
 ##@ Development and Testing
 test: install ## run all tests
 	@if [ -d ${SOURCE_FOLDER} ] && [ -d ${TESTS_FOLDER} ]; then \
-	  ./bin/uv pip install pytest pytest-cov pytest-html; \
+	  #./bin/uv pip install pytest pytest-cov pytest-html; \
 	  mkdir -p _tests/html-coverage _tests/html-report; \
 	  ./bin/uv run pytest ${TESTS_FOLDER} --cov=${SOURCE_FOLDER} --cov-report=term --cov-report=html:_tests/html-coverage --html=_tests/html-report/report.html; \
 	else \
@@ -90,7 +90,7 @@ test: install ## run all tests
 
 docs: install-uv ## create documentation with pdoc
 	@if [ -d ${SOURCE_FOLDER} ]; then \
-	  ./bin/uv pip install pdoc; \
+	  #./bin/uv pip install pdoc; \
 	  ./bin/uv run pdoc -o _pdoc ${SOURCE_FOLDER}/*; \
 	else \
 	  printf "${YELLOW}[WARN] Source folder ${SOURCE_FOLDER} not found, skipping docs${RESET}\n"; \
@@ -101,7 +101,7 @@ marimo: install-uv ## fire up Marimo server
 	@if [ ! -d "${MARIMO_FOLDER}" ]; then \
 	  printf " ${YELLOW}[WARN] Marimo folder '${MARIMO_FOLDER}' not found, skipping start${RESET}\n"; \
 	else \
-	  ./bin/uv pip install marimo; \
+	  #./bin/uv pip install marimo; \
 	  ./bin/uv sync --all-extras; \
 	  ./bin/uv run marimo edit "${MARIMO_FOLDER}"; \
 	fi
@@ -111,7 +111,7 @@ marimushka: install ## export Marimo notebooks to HTML
 	@if [ ! -d "${MARIMO_FOLDER}" ]; then \
 	  printf "${YELLOW}[WARN] Directory '${MARIMO_FOLDER}' does not exist. Skipping marimushka.${RESET}\n"; \
 	else \
-	  ./bin/uv pip install marimo; \
+	  #./bin/uv pip install marimo; \
 	  MARIMO_FOLDER="${MARIMO_FOLDER}" UV_BIN="./bin/uv" UVX_BIN="./bin/uvx" /bin/sh .github/scripts/marimushka.sh; \
 	fi
 
