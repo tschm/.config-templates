@@ -21,6 +21,8 @@ RESET := \033[0m
 UV_INSTALL_DIR := "./bin"
 UV_NO_MODIFY_PATH := 1
 MARIMO_FOLDER := "book/marimo"
+TESTS_FOLDER := "tests"
+SOURCE_FOLDER := "src"
 
 ##@ Bootstrap
 install-task: ## ensure go-task (Taskfile) is installed
@@ -55,10 +57,11 @@ clean: install-task ## clean
 
 ##@ Development and Testing
 test: install-task ## run all tests
-	@./bin/task docs:test --silent
+	@./bin/uv pip install pytest pytest-cov pytest-html
+	@mkdir -p _tests/html-coverage _tests/html-report
+	@./bin/uv run pytest ${TESTS_FOLDER} --cov=${SOURCE_FOLDER} --cov-report=term --cov-report=html:_tests/html-coverage --html=_tests/html-report/report.html
 
 marimo: install-task ## fire up Marimo server
-	#@./bin/task docs:marimo --silent
 	@if [ ! -d "${MARIMO_FOLDER}" ]; then \
 	  printf " ${YELLOW}[WARN] Marimo folder '${MARIMO_FOLDER}' not found, skipping start${RESET}\n"; \
 	else \
@@ -68,8 +71,7 @@ marimo: install-task ## fire up Marimo server
 
 
 ##@ Documentation
-book: install-task ## compile the companion book
-	@./bin/task docs:test --silent
+book: test ## compile the companion book
 	@./bin/task docs:docs --silent
 	@./bin/task docs:marimushka --silent
 	@./bin/task docs:book --silent
@@ -79,7 +81,7 @@ fmt: install-task ## check the pre-commit hooks and the linting
 
 deptry: install-task ## run deptry if pyproject.toml exists
 	if [ -f "pyproject.toml" ]; then \
-	  ./bin/uvx deptry src; \
+	  ./bin/uvx deptry ${SOURCE_FOLDER}; \
 	else \
 	  printf "${YELLOW} No pyproject.toml found, skipping deptry${RESET}\n"; \
 	fi

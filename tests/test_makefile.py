@@ -87,13 +87,16 @@ class TestMakefile:
         """Deptry target should invoke deptry via uvx in dry-run output."""
         proc = run_make(["deptry"])
         out = proc.stdout
-        assert "./bin/uvx deptry src" in out
+        assert './bin/uvx deptry "src"' in out
 
     def test_test_target_dry_run(self):
-        """Test target should invoke docs:test in dry-run output."""
+        """Test target should invoke pytest via uv with coverage and HTML outputs in dry-run output."""
         proc = run_make(["test"])
         out = proc.stdout
-        assert "./bin/task docs:test" in out
+        # Expect key steps
+        assert "./bin/uv pip install pytest pytest-cov pytest-html" in out
+        assert "mkdir -p _tests/html-coverage _tests/html-report" in out
+        assert "./bin/uv run pytest" in out
 
     def test_book_target_dry_run(self):
         """Book target should run all three docs-related commands in order."""
