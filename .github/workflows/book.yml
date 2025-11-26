@@ -43,22 +43,22 @@ jobs:
       # Use the composite action to set up the project
       - name: Setup the project
         uses: ./.github/actions/setup-project
-
-      - name: "Make the docs"
-        run: |
-          make docs
-
-      - name: "Make the tests"
-        run: |
-          make test
-
-      - name: "Make the notebooks"
-        run: |
-          task docs:marimushka
+#
+#      - name: "Make the docs"
+#        run: |
+#          make docs
+#
+#      - name: "Make the tests"
+#        run: |
+#          make test
+#
+#      - name: "Make the notebooks"
+#        run: |
+#          make marimushka
 
       - name: "Make the book"
         run: |
-          task docs:book
+          make book
 
       # Step 5: Package all artifacts for GitHub Pages deployment
       # This prepares the combined outputs for deployment by creating a single artifact

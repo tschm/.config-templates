@@ -99,15 +99,12 @@ class TestMakefile:
         assert "./bin/uv run pytest" in out
 
     def test_book_target_dry_run(self):
-        """Book target should run all three docs-related commands in order."""
+        """Book target should run inline commands to assemble the book without go-task."""
         proc = run_make(["book"])
         out = proc.stdout
-        # The composite target should run all dependent commands
-        for expected_cmd in [
-            "./bin/task docs:marimushka",
-            "./bin/task docs:book",
-        ]:
-            assert expected_cmd in out
+        # Expect marimushka export to install marimo and minibook to be invoked
+        assert "./bin/uv pip install marimo" in out
+        assert "./bin/uvx minibook" in out
 
     def test_all_target_dry_run(self):
         """All target echoes a composite message in dry-run output."""
@@ -115,10 +112,3 @@ class TestMakefile:
         out = proc.stdout
         # The composite target should echo a message
         assert "Run fmt, deptry, test and book" in out
-
-    def test_install_task_dry_run_shows_expected_commands(self):
-        """install-task target should show task installer and version check."""
-        proc = run_make(["install-task"])
-        out = proc.stdout
-        # ensure key steps of install are present in the dry run output
-        assert "curl --location https://taskfile.dev/install.sh" in out
