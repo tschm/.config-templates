@@ -124,27 +124,27 @@ marimushka: install ## export Marimo notebooks to HTML
 	      dir_path=$$(dirname "$$rel_path"); \
 	      base_name=$$(basename "$$rel_path" .py); \
 	      mkdir -p "_marimushka/$$dir_path"; \
-	      out_html="_marimushka/$$dir_path/$$base_name.html"; \
-	      : # Ensure non-interactive overwrite: remove existing output file if present; \
-	      rm -f "$$out_html"; \
-	      if grep -q "^# /// script" "$$py_file"; then \
-	        printf " ${BLUE}[INFO] Script header detected, using --sandbox flag...${RESET}\n"; \
-	        ./bin/uvx marimo export html --sandbox --include-code --output "$$out_html" "$$py_file"; \
-	      else \
-	        printf " ${BLUE}[INFO] No script header detected, using standard export...${RESET}\n"; \
-	        ./bin/uv run marimo export html --include-code --output "$$out_html" "$$py_file"; \
-	      fi; \
-	    done; \
-	    echo "<html><head><title>Marimo Notebooks</title></head><body><h1>Marimo Notebooks</h1><ul>" > _marimushka/index.html; \
-	    find _marimushka -name "*.html" -not -path "*index.html" | sort | while read html_file; do \
-	      rel_path=$$(echo "$$html_file" | sed "s|^_marimushka/||"); \
-	      name=$$(basename "$$rel_path" .html); \
-	      echo "<li><a href=\"$$rel_path\">$$name</a></li>" >> _marimushka/index.html; \
-	    done; \
-	    echo "</ul></body></html>" >> _marimushka/index.html; \
-	    touch _marimushka/.nojekyll; \
-	  fi; \
-	fi
+       out_html="_marimushka/$$dir_path/$$base_name.html"; \
+       : ; \
+       rm -f "$$out_html"; \
+       if grep -q "^# /// script" "$$py_file"; then \
+         printf " ${BLUE}[INFO] Script header detected, using --sandbox flag...${RESET}\n"; \
+         ./bin/uvx marimo export html --sandbox --include-code --output "$$out_html" "$$py_file"; \
+       else \
+         printf " ${BLUE}[INFO] No script header detected, using standard export...${RESET}\n"; \
+         ./bin/uv run marimo export html --include-code --output "$$out_html" "$$py_file"; \
+       fi; \
+     done; \
+     echo "<html><head><title>Marimo Notebooks</title></head><body><h1>Marimo Notebooks</h1><ul>" > _marimushka/index.html; \
+     find _marimushka -name "*.html" -not -path "*index.html" | sort | while read html_file; do \
+       rel_path=$$(echo "$$html_file" | sed "s|^_marimushka/||"); \
+       name=$$(basename "$$rel_path" .html); \
+       echo "<li><a href=\"$$rel_path\">$$name</a></li>" >> _marimushka/index.html; \
+     done; \
+     echo "</ul></body></html>" >> _marimushka/index.html; \
+     touch _marimushka/.nojekyll; \
+   fi; \
+ fi
 
 ##@ Documentation
 book: test docs marimushka ## compile the companion book
