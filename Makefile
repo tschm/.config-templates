@@ -118,7 +118,7 @@ marimushka: install ## export Marimo notebooks to HTML
 ##@ Documentation
 book: test docs marimushka ## compile the companion book
 	@/bin/sh .github/scripts/book.sh
-	@./bin/uvx minibook --title "${BOOK_TITLE}" --subtitle "${BOOK_SUBTITLE}" --links "$$(jq -c . _book/links.json)" --output "_book"
+	@./bin/uvx minibook --title "${BOOK_TITLE}" --subtitle "${BOOK_SUBTITLE}" --links "$$(python3 -c 'import json,sys; print(json.dumps(json.load(open("_book/links.json"))))')" --output "_book"
 	@touch "_book/.nojekyll"
 
 fmt: install-uv ## check the pre-commit hooks and the linting

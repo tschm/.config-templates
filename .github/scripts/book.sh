@@ -13,44 +13,32 @@ YELLOW="\033[33m"
 RESET="\033[0m"
 
 printf "%b[INFO] Building combined documentation...%b\n" "$BLUE" "$RESET"
-printf "%b[INFO] Ensuring jq is installed...%b\n" "$BLUE" "$RESET"
-
-# Best-effort install of jq depending on the platform; non-fatal on failure
-if ! command -v jq >/dev/null 2>&1; then
-  if command -v apt-get >/dev/null 2>&1; then
-    if command -v sudo >/dev/null 2>&1; then SUDO="sudo"; else SUDO=""; fi
-    $SUDO apt-get update && $SUDO apt-get install -y jq || true
-  elif command -v apk >/dev/null 2>&1; then
-    apk add --no-cache jq || true
-  elif command -v dnf >/dev/null 2>&1; then
-    dnf install -y jq || true
-  elif command -v brew >/dev/null 2>&1; then
-    brew install jq || true
-  else
-    printf "%b[WARN] Could not install jq automatically. Proceeding, but book task may have limited functionality.%b\n" "$YELLOW" "$RESET"
-  fi
-fi
+printf "%b[INFO] Assembling book without jq dependency...%b\n" "$BLUE" "$RESET"
 
 printf "%b[INFO] Delete the _book folder...%b\n" "$BLUE" "$RESET"
 rm -rf _book
 printf "%b[INFO] Create empty _book folder...%b\n" "$BLUE" "$RESET"
 mkdir -p _book
-: > _book/links.json
+
+# Start building links.json content without jq
+LINKS_ENTRIES=""
 
 printf "%b[INFO] Copy API docs...%b\n" "$BLUE" "$RESET"
 if [ -f _pdoc/index.html ]; then
   mkdir -p _book/pdoc
   cp -r _pdoc/* _book/pdoc
-  echo '{"API": "./pdoc/index.html"}' > _book/links.json
-else
-  echo '{}' > _book/links.json
+  LINKS_ENTRIES='"API": "./pdoc/index.html"'
 fi
 
 printf "%b[INFO] Copy coverage report...%b\n" "$BLUE" "$RESET"
 if [ -f _tests/html-coverage/index.html ]; then
   mkdir -p _book/tests/html-coverage
   cp -r _tests/html-coverage/* _book/tests/html-coverage
-  jq '. + {"Coverage": "./tests/html-coverage/index.html"}' _book/links.json > _book/tmp && mv _book/tmp _book/links.json
+  if [ -n "$LINKS_ENTRIES" ]; then
+    LINKS_ENTRIES="$LINKS_ENTRIES, \"Coverage\": \"./tests/html-coverage/index.html\""
+  else
+    LINKS_ENTRIES='"Coverage": "./tests/html-coverage/index.html"'
+  fi
 else
   printf "%b[WARN] No coverage report found or directory is empty%b\n" "$YELLOW" "$RESET"
 fi
@@ -59,7 +47,11 @@ printf "%b[INFO] Copy test report...%b\n" "$BLUE" "$RESET"
 if [ -f _tests/html-report/report.html ]; then
   mkdir -p _book/tests/html-report
   cp -r _tests/html-report/* _book/tests/html-report
-  jq '. + {"Test Report": "./tests/html-report/report.html"}' _book/links.json > _book/tmp && mv _book/tmp _book/links.json
+  if [ -n "$LINKS_ENTRIES" ]; then
+    LINKS_ENTRIES="$LINKS_ENTRIES, \"Test Report\": \"./tests/html-report/report.html\""
+  else
+    LINKS_ENTRIES='"Test Report": "./tests/html-report/report.html"'
+  fi
 else
   printf "%b[WARN] No test report found or directory is empty%b\n" "$YELLOW" "$RESET"
 fi
@@ -68,10 +60,21 @@ printf "%b[INFO] Copy notebooks...%b\n" "$BLUE" "$RESET"
 if [ -f _marimushka/index.html ]; then
   mkdir -p _book/marimushka
   cp -r _marimushka/* _book/marimushka
-  jq '. + {"Notebooks": "./marimushka/index.html"}' _book/links.json > _book/tmp && mv _book/tmp _book/links.json
+  if [ -n "$LINKS_ENTRIES" ]; then
+    LINKS_ENTRIES="$LINKS_ENTRIES, \"Notebooks\": \"./marimushka/index.html\""
+  else
+    LINKS_ENTRIES='"Notebooks": "./marimushka/index.html"'
+  fi
   printf "%b[INFO] Copied notebooks into _book/marimushka%b\n" "$BLUE" "$RESET"
 else
   printf "%b[WARN] No notebooks found or directory is empty%b\n" "$YELLOW" "$RESET"
+fi
+
+# Write final links.json
+if [ -n "$LINKS_ENTRIES" ]; then
+  printf '{%s}\n' "$LINKS_ENTRIES" > _book/links.json
+else
+  printf '{}\n' > _book/links.json
 fi
 
 printf "%b[INFO] Generated links.json:%b\n" "$BLUE" "$RESET"
