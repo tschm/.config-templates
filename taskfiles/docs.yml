@@ -176,15 +176,3 @@ tasks:
 
         touch "_book/.nojekyll"
 
-#  marimo:
-#    desc: Start a Marimo server
-#    cmds:
-#      - ./bin/task build:install
-#      - printf " ${BLUE}[INFO] Start Marimo server with {{.MARIMO_FOLDER}}...${RESET}\n"
-#      - |
-#        if [ ! -d "{{.MARIMO_FOLDER}}" ]; then
-#          printf " ${YELLOW}[WARN] Marimo folder '{{.MARIMO_FOLDER}}' not found, skipping start${RESET}\n"
-#        else
-#          ./bin/uv sync --all-extras
-#          ./bin/uv run marimo edit "{{.MARIMO_FOLDER}}"
-#        fi
