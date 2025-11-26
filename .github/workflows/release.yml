@@ -116,41 +116,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Load .env file (if present)
-        id: load_env
-        shell: bash
-        run: |
-          if [ -f ".env" ]; then
-            echo "Found .env; exporting variables to GITHUB_ENV"
-            while IFS='=' read -r key value; do
-              # skip empty lines, comments, or lines without '='
-              [[ -z "$key" || "$key" == \#* ]] && continue
-
-              # strip 'export ' prefix if present
-              key="${key#export }"
-
-              # trim whitespace
-              key="${key//[[:space:]]/}"
-              value="${value#"${value%%[![:space:]]*}"}"
-              value="${value%"${value##*[![:space:]]}"}"
-
-              # remove surrounding quotes
-              value="${value%\"}"; value="${value#\"}"
-              value="${value%\'}"; value="${value#\'}"
-
-              echo "${key}=${value}" >> "$GITHUB_ENV"
-            done < <(grep -v '^\s*$\|^\s*#' .env)
-
-            # expose PUBLISH_TO_PYPI specifically
-            publish_val=$(grep -E '^\s*PUBLISH_TO_PYPI=' .env | head -n1 | cut -d'=' -f2-)
-            publish_val="${publish_val%\"}"; publish_val="${publish_val#\"}"
-            publish_val="${publish_val%\'}"; publish_val="${publish_val#\'}"
-            echo "publish_from_env=$publish_val" >> "$GITHUB_OUTPUT"
-          else
-            echo "No .env file found; continuing."
-            echo "publish_from_env=" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Download dist artifact
         uses: actions/download-artifact@v6
         with:
@@ -158,14 +123,18 @@ jobs:
           path: dist
         continue-on-error: true
 
-      - name: Check if dist contains artifacts
+      - name: Check if dist contains artifacts and not marked as private
         id: check_dist
         run: |
           if [[ ! -d dist ]]; then
             echo "::warning::No folder dist/. Skipping PyPI publish."
             echo "should_publish=false" >> $GITHUB_OUTPUT
           else
-            echo "should_publish=true" >> $GITHUB_OUTPUT
+            if grep -R "Private :: Do Not Upload" pyproject.toml; then
+              echo "should_publish=false" >> $GITHUB_OUTPUT
+            else
+              echo "should_publish=true" >> $GITHUB_OUTPUT
+            fi
           fi
           cat $GITHUB_OUTPUT
 
