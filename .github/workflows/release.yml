@@ -73,7 +73,7 @@ jobs:
           sed -i.bak "s/^version = .*/version = \"$version\"/" pyproject.toml
           rm pyproject.toml.bak
 
-          printf "${BLUE}[INFO] Building package...${RESET}\n"
+          printf "[INFO] Building package...\n"
           uvx hatch build
 
 
