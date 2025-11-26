@@ -525,33 +525,6 @@ hypothesis>=6.0.0
             f"Should warn about missing pyproject.toml: {result.stdout}"
         )
 
-    def test_fmt_task(self):
-        """Test that the fmt task runs formatters."""
-        result = self.run_task("fmt", check=False)
-        assert result.contains_message("Running formatters..."), (
-            f"Formatter message not found in output: {result.stdout}"
-        )
-
-    def test_lint_task(self):
-        """Test that the lint task runs linters."""
-        result = self.run_task("lint", check=False)
-        assert result.contains_message("Running linters..."), f"Linter message not found in output: {result.stdout}"
-
-    def test_deptry_task(self):
-        """Test that the deptry task checks dependencies."""
-        # Create a mock pyproject.toml
-        self.create_pyproject_toml()
-
-        result = self.run_task("deptry", check=False)
-        assert result.contains_message("Running deptry..."), f"Deptry message not found in output: {result.stdout}"
-
-        # Test without pyproject.toml
-        os.remove("pyproject.toml")
-        result = self.run_task("deptry", check=False)
-        assert result.contains_message("No pyproject.toml found"), (
-            f"Should warn about missing pyproject.toml: {result.stdout}"
-        )
-
     def test_check_task(self):
         """Test that the check task runs all checks."""
         # This is a meta-task that runs other tasks

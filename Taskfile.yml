@@ -49,15 +49,9 @@ includes:
   build:
     taskfile: ./taskfiles/build.yml
     desc: Build tasks for managing dependencies and building packages
-  quality:
-    taskfile: ./taskfiles/quality.yml
-    desc: Code quality tasks for formatting, linting, and checking code
   docs:
     taskfile: ./taskfiles/docs.yml
     desc: Documentation tasks for building docs, notebooks, and books
-  cleanup:
-    taskfile: ./taskfiles/cleanup.yml
-    desc: Cleanup tasks for removing generated files and directories
 
 # Task definitions
 tasks:

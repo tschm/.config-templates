@@ -78,16 +78,16 @@ class TestMakefile:
         assert "Bootstrap" in out or "Meta" in out  # section headers
 
     def test_fmt_target_dry_run(self):
-        """Fmt target should call the quality:lint task in dry-run output."""
+        """Fmt target should invoke pre-commit via uvx in dry-run output."""
         proc = run_make(["fmt"])
         out = proc.stdout
-        assert "./bin/task quality:lint" in out
+        assert "./bin/uvx pre-commit run --all-files" in out
 
     def test_deptry_target_dry_run(self):
-        """Deptry target should call the quality:deptry task in dry-run."""
+        """Deptry target should invoke deptry via uvx in dry-run output."""
         proc = run_make(["deptry"])
         out = proc.stdout
-        assert "./bin/task quality:deptry" in out
+        assert "./bin/uvx deptry src" in out
 
     def test_test_target_dry_run(self):
         """Test target should invoke docs:test in dry-run output."""
