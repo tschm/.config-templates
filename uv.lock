@@ -64,7 +64,7 @@ requires-dist = [
     { name = "marimo", marker = "extra == 'dev'", specifier = "==0.18.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = "==4.5.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = "==9.0.1" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.1.1" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=7.0.0" },
 ]
 provides-extras = ["dev"]
 
