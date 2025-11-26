@@ -169,9 +169,17 @@ jobs:
           fi
           cat $GITHUB_OUTPUT
 
+#      - name: Publish to PyPI
+#        if: ${{ steps.check_dist.outputs.should_publish == 'true' && (steps.load_env.outputs.publish_from_env == 'true' ) }}
+#        uses: pypa/gh-action-pypi-publish@release/v1
+#        with:
+#          packages-dir: dist/
+#          skip-existing: true
+
+      # this should not take place, as "Private :: Do Not Upload" set in pyprojec.toml
       - name: Publish to PyPI
-        if: ${{ steps.check_dist.outputs.should_publish == 'true' && (steps.load_env.outputs.publish_from_env == 'true' ) }}
+        if: ${{ steps.check_dist.outputs.should_publish == 'true' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: dist/
-          skip-existing: true
+            packages-dir: dist/
+            skip-existing: true
