@@ -83,16 +83,3 @@ tasks:
         else
           printf "${YELLOW}[WARN] No pyproject.toml found, skipping install${RESET}\n"
         fi
-
-  build:
-    desc: Build the package using hatch
-    deps: [install]
-    cmds:
-      - |
-        if [ -f "pyproject.toml" ]; then
-          printf "${BLUE}[INFO] Building package...${RESET}\n"
-          ./bin/uv pip install hatch
-          ./bin/uv run hatch build
-        else
-          printf "${YELLOW}[WARN] No pyproject.toml found, skipping build${RESET}\n"
-        fi

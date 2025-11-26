@@ -73,7 +73,9 @@ jobs:
           sed -i.bak "s/^version = .*/version = \"$version\"/" pyproject.toml
           rm pyproject.toml.bak
 
-          task build:build -s
+          printf "${BLUE}[INFO] Building package...${RESET}\n"
+          uvx hatch build
+
 
       - name: Upload dist artifact
         # not tested at runtime!
