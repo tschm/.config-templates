@@ -24,7 +24,7 @@ def test_readme_runs():
     code_blocks = CODE_BLOCK.findall(readme_text)
     result_blocks = RESULT.findall(readme_text)
 
-    code = "".join(code_blocks)        # merged code
+    code = "".join(code_blocks)  # merged code
     expected = "".join(result_blocks)  # merged results
 
     # Trust boundary: we execute Python snippets sourced from README.md in this repo.
