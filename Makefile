@@ -88,14 +88,6 @@ test: install ## run all tests
 	  printf "${YELLOW}[WARN] Source folder ${SOURCE_FOLDER} or tests folder ${TESTS_FOLDER} not found, skipping tests${RESET}\n"; \
 	fi
 
-docs: install-uv ## create documentation with pdoc
-	@if [ -d ${SOURCE_FOLDER} ]; then \
-	  ./bin/uv run pdoc -o _pdoc ${SOURCE_FOLDER}/*; \
-	else \
-	  printf "${YELLOW}[WARN] Source folder ${SOURCE_FOLDER} not found, skipping docs${RESET}\n"; \
-	fi
-
-
 marimo: install ## fire up Marimo server
 	@if [ ! -d "${MARIMO_FOLDER}" ]; then \
 	  printf " ${YELLOW}[WARN] Marimo folder '${MARIMO_FOLDER}' not found, skipping start${RESET}\n"; \
@@ -111,7 +103,21 @@ marimushka: install ## export Marimo notebooks to HTML
 	  MARIMO_FOLDER="${MARIMO_FOLDER}" UV_BIN="./bin/uv" UVX_BIN="./bin/uvx" /bin/sh .github/scripts/marimushka.sh; \
 	fi
 
+deptry: install-uv ## run deptry if pyproject.toml exists
+	@if [ -f "pyproject.toml" ]; then \
+	  ./bin/uvx deptry "${SOURCE_FOLDER}"; \
+	else \
+	  printf "${YELLOW} No pyproject.toml found, skipping deptry${RESET}\n"; \
+	fi
+
 ##@ Documentation
+docs: install-uv ## create documentation with pdoc
+	@if [ -d ${SOURCE_FOLDER} ]; then \
+	  ./bin/uv run pdoc -o _pdoc ${SOURCE_FOLDER}/*; \
+	else \
+	  printf "${YELLOW}[WARN] Source folder ${SOURCE_FOLDER} not found, skipping docs${RESET}\n"; \
+	fi
+
 book: test docs marimushka ## compile the companion book
 	@/bin/sh .github/scripts/book.sh
 	@./bin/uvx minibook --title "${BOOK_TITLE}" --subtitle "${BOOK_SUBTITLE}" --links "$$(python3 -c 'import json,sys; print(json.dumps(json.load(open("_book/links.json"))))')" --output "_book"
@@ -119,13 +125,6 @@ book: test docs marimushka ## compile the companion book
 
 fmt: install-uv ## check the pre-commit hooks and the linting
 	@./bin/uvx pre-commit run --all-files
-
-deptry: install-uv ## run deptry if pyproject.toml exists
-	@if [ -f "pyproject.toml" ]; then \
-	  ./bin/uvx deptry "${SOURCE_FOLDER}"; \
-	else \
-	  printf "${YELLOW} No pyproject.toml found, skipping deptry${RESET}\n"; \
-	fi
 
 all: fmt deptry book ## Run everything
 	echo "Run fmt, deptry, test and book"
