@@ -104,7 +104,6 @@ class TestMakefile:
         out = proc.stdout
         # The composite target should run all dependent commands
         for expected_cmd in [
-            "./bin/task docs:docs",
             "./bin/task docs:marimushka",
             "./bin/task docs:book",
         ]:

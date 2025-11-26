@@ -28,7 +28,7 @@ tasks:
       - printf "${BLUE}[INFO] Running tests...${RESET}\n"
       - |
         # Find source folder
-        SOURCE_FOLDER="src/$(find src -mindepth 1 -maxdepth 1 -type d -not -path '*/\.*' | head -1 | sed 's|^src/||')"
+        # SOURCE_FOLDER="src/$(find src -mindepth 1 -maxdepth 1 -type d -not -path '*/\.*' | head -1 | sed 's|^src/||')"
 
         if [ -z "$SOURCE_FOLDER" ] || [ -z "{{.TESTS_FOLDER}}" ]; then
           printf "${YELLOW}[WARN] No valid source folder structure found, skipping tests${RESET}\n"

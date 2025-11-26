@@ -46,11 +46,11 @@ jobs:
 
       - name: "Make the docs"
         run: |
-          task docs:docs
+          make docs
 
       - name: "Make the tests"
         run: |
-          task docs:test
+          make test
 
       - name: "Make the notebooks"
         run: |

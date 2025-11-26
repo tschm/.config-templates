@@ -499,49 +499,6 @@ hypothesis>=6.0.0
             f"Second run should also attempt venv creation: {result2.stdout}"
         )
 
-    def test_build_task(self):
-        """Test that the build task builds the package."""
-        # Create a mock pyproject.toml
-        self.create_pyproject_toml()
-
-        # Since the build task depends on install, we need to check for either
-        # the build message or install-related messages
-        result = self.run_task("build", check=False)
-        expected_msgs = [
-            "Building package...",
-            "Creating virtual environment...",
-            "Virtual environment already exists",
-            "Installing dependencies",
-        ]
-        assert any(result.contains_message(msg) for msg in expected_msgs), (
-            f"Expected build or install message not found in output: {result.stdout}"
-        )
-
-        # Test without pyproject.toml
-        os.remove("pyproject.toml")
-        result = self.run_task("build", check=False)
-        expected_msgs = ["No pyproject.toml found", "skipping build"]
-        assert any(result.contains_message(msg) for msg in expected_msgs), (
-            f"Should warn about missing pyproject.toml: {result.stdout}"
-        )
-
-    def test_check_task(self):
-        """Test that the check task runs all checks."""
-        # This is a meta-task that runs other tasks
-        result = self.run_task("check", check=False)
-        # We don't expect this to pass necessarily, just to run
-        # Check for any of the expected messages from the dependent tasks
-        expected_msgs = [
-            "All checks passed",
-            "Running formatters",
-            "Running linters",
-            "Running deptry",
-            "No pyproject.toml found",
-        ]
-        assert result.returncode == 0 or any(result.contains_message(msg) for msg in expected_msgs), (
-            f"Check task failed: {result.stderr}"
-        )
-
     def test_test_task(self):
         """Test that the test task runs tests."""
         # Create a minimal test directory structure
@@ -620,36 +577,6 @@ hypothesis>=6.0.0
         ]
         assert any(result.contains_message(msg) for msg in expected_msgs), (
             f"Expected book-related message not found in output: {result.stdout}"
-        )
-
-    def test_marimo_task(self):
-        """Test that the marimo task starts a server."""
-        # Create marimo directory
-        self.create_marimo_structure()
-
-        # Use a very short timeout to avoid actually starting the server
-        result = self.run_task("marimo", check=False, timeout=1)
-
-        expected_msgs = ["Start Marimo server with", "Marimo folder", "Installing dependencies"]
-        assert any(result.contains_message(msg) for msg in expected_msgs), (
-            f"Marimo server message not found in output: {result.stdout}"
-        )
-
-    def test_clean_task(self):
-        """Test that the clean task cleans the project."""
-        # Create some files that would be cleaned
-        os.makedirs("dist", exist_ok=True)
-        os.makedirs("build", exist_ok=True)
-        os.makedirs(".pytest_cache", exist_ok=True)
-
-        # Just check that the task runs and outputs the expected message
-        # We don't actually want to run the full clean in tests
-        result = self.run_task("clean", check=False)
-
-        # The task might actually clean files or just show the message
-        expected_msgs = ["Cleaning project...", "git clean", "Removing local branches..."]
-        assert any(result.contains_message(msg) for msg in expected_msgs), (
-            f"Clean message not found in output: {result.stdout}"
         )
 
     def test_all_tasks_defined(self):

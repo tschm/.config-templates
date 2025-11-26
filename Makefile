@@ -16,7 +16,7 @@ RESET := \033[0m
 .DEFAULT_GOAL := help
 
 # Declare phony targets (they don't produce files)
-.PHONY: install-task install clean test marimo book fmt deptry help all
+.PHONY: install-task install clean test marimo book fmt deptry docs help all
 
 UV_INSTALL_DIR := "./bin"
 UV_NO_MODIFY_PATH := 1
@@ -57,9 +57,15 @@ clean: install-task ## clean
 
 ##@ Development and Testing
 test: install-task ## run all tests
+	# if SOURCE_FOLDER and TESTS_FOLDER exist
 	@./bin/uv pip install pytest pytest-cov pytest-html
 	@mkdir -p _tests/html-coverage _tests/html-report
 	@./bin/uv run pytest ${TESTS_FOLDER} --cov=${SOURCE_FOLDER} --cov-report=term --cov-report=html:_tests/html-coverage --html=_tests/html-report/report.html
+
+docs: install-task ## create documentation with pdoc
+	@./bin/uv pip install pdoc
+	@./bin/uv run pdoc -o _pdoc ${SOURCE_FOLDER}/*
+
 
 marimo: install-task ## fire up Marimo server
 	@if [ ! -d "${MARIMO_FOLDER}" ]; then \
@@ -71,8 +77,7 @@ marimo: install-task ## fire up Marimo server
 
 
 ##@ Documentation
-book: test ## compile the companion book
-	@./bin/task docs:docs --silent
+book: test docs ## compile the companion book
 	@./bin/task docs:marimushka --silent
 	@./bin/task docs:book --silent
 
