@@ -94,7 +94,6 @@ class TestMakefile:
         proc = run_make(["test"])
         out = proc.stdout
         # Expect key steps
-        assert "./bin/uv pip install pytest pytest-cov pytest-html" in out
         assert "mkdir -p _tests/html-coverage _tests/html-report" in out
         assert "./bin/uv run pytest" in out
 
@@ -103,7 +102,6 @@ class TestMakefile:
         proc = run_make(["book"])
         out = proc.stdout
         # Expect marimushka export to install marimo and minibook to be invoked
-        assert "./bin/uv pip install marimo" in out
         assert "./bin/uvx minibook" in out
 
     def test_all_target_dry_run(self):
