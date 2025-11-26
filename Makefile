@@ -65,8 +65,8 @@ marimo: install-task ## fire up Marimo server
 	@if [ ! -d "${MARIMO_FOLDER}" ]; then \
 	  printf " ${YELLOW}[WARN] Marimo folder '${MARIMO_FOLDER}' not found, skipping start${RESET}\n"; \
 	else \
-	  ./bin/uv sync --all-extras; \
-	  ./bin/uv run marimo edit "${MARIMO_FOLDER}"; \
+	  @./bin/uv sync --all-extras; \
+	  @./bin/uv run marimo edit "${MARIMO_FOLDER}"; \
 	fi
 
 
