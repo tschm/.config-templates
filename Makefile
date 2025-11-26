@@ -1,7 +1,8 @@
-## Makefile for config-templates: developer tasks orchestrated via go-task
+## Makefile for tschm/.config-templates
+# (https://github.com/tschm/.config-templates)
 #
-# This Makefile wraps the Taskfile.yml commands and provides a friendly
-# `make help` index. Lines with `##` after a target are parsed into help text,
+# Purpose: Developer tasks using uv/uvx (install, test, docs, marimushka, book).
+# Lines with `##` after a target are parsed into help text,
 # and lines starting with `##@` create section headers in the help output.
 #
 # Colors for pretty output in help messages
@@ -66,7 +67,7 @@ install: install-uv ## install
 	fi
 
 
-clean: install-uv ## clean
+clean: ## clean
 	@printf "${BLUE}Cleaning project...${RESET}\n"
 	# do not clean .env files
 	@git clean -d -X -f -e .env -e '.env.*'
