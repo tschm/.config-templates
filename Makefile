@@ -102,6 +102,7 @@ marimushka: install ## export Marimo notebooks to HTML
 	@if [ ! -d "${MARIMO_FOLDER}" ]; then \
 	  printf "${YELLOW}[WARN] Directory '${MARIMO_FOLDER}' does not exist. Skipping marimushka.${RESET}\n"; \
 	else \
+	  ./bin/uv pip install marimo
 	  MARIMO_FOLDER="${MARIMO_FOLDER}" UV_BIN="./bin/uv" UVX_BIN="./bin/uvx" /bin/sh .github/scripts/marimushka.sh; \
 	fi
 
