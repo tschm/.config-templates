@@ -14,15 +14,16 @@ authors = [
 ]
 keywords = ["templates", "configuration", "taskfile", "ci", "ruff"]
 classifiers = [
-  "Private :: Do Not Upload",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-  "License :: OSI Approved :: MIT License",
-  "Intended Audience :: Developers",
-  "Topic :: Software Development :: Build Tools",
+    "Private :: Do Not Upload",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
 ]
 
 [project.urls]
@@ -32,10 +33,12 @@ Issues = "https://github.com/tschm/.config-templates/issues"
 
 [project.optional-dependencies]
 dev = [
-    "pytest-cov>=6.1.1",
+    "pytest-cov>=7.0.0",
+    "pytest-html>=4.1.1",
     "pytest==9.0.1",
     "pre-commit==4.5.0",
-    "marimo==0.18.0"
+    "marimo==0.18.0",
+    "pdoc>=16.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]
