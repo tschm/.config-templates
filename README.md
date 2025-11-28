@@ -245,6 +245,52 @@ to enable seamless Git operations:
 - **Enables Git operations** - Push, pull, and clone using your existing SSH keys
 - **Works transparently** - No additional setup required in VS Code dev containers
 
+## 🔧 Custom Build Extras
+
+The project includes a hook for installing additional system dependencies and custom build steps needed across all build phases.
+
+### Using build-extras.sh
+
+Create a file `.github/scripts/build-extras.sh` in your repository to install system packages or dependencies:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# Example: Install graphviz for diagram generation
+sudo apt-get update
+sudo apt-get install -y graphviz
+
+# Add other custom installation commands here
+```
+
+### When it Runs
+
+The `build-extras.sh` script is automatically invoked during:
+- `make install` - Initial project setup
+- `make test` - Before running tests
+- `make book` - Before building documentation
+- `make docs` - Before generating API documentation
+
+This ensures custom dependencies are available whenever needed throughout the build lifecycle.
+
+### Important: Exclude from Template Updates
+
+If you customize this file, add it to the exclude list in your `action.yml` configuration to prevent it from being overwritten during template updates:
+
+```yaml
+exclude: |
+  .github/scripts/build-extras.sh
+```
+
+### Common Use Cases
+
+- Installing graphviz for diagram rendering
+- Adding LaTeX for mathematical notation
+- Installing system libraries for specialized tools
+- Setting up additional build dependencies
+- Downloading external resources or tools
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
