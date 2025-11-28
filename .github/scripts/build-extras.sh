@@ -34,8 +34,15 @@ set -euo pipefail
 echo "Running build-extras.sh..."
 
 # Add your custom installation commands here
-# Examples:
-# sudo apt-get update
-# sudo apt-get install -y graphviz
+
+# Example: graphviz
+# Good practice to check if already installed.
+#
+# if ! command -v dot &> /dev/null; then
+#     echo "graphviz not found, installing..."
+#     sudo apt-get update && sudo apt-get install -y graphviz
+# else
+#     echo "graphviz is already installed, skipping installation."
+# fi
 
 echo "Build extras setup complete."
