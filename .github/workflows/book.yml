@@ -45,15 +45,15 @@ jobs:
         uses: ./.github/actions/setup-project
 
       # Optional hook for downstream repos to install extra dependencies (e.g., graphviz)
-      # Create .github/workflows/build.sh in your repo to run custom build steps
+      # Create .github/scripts/book-extras.sh in your repo to run custom build steps
       - name: "Run custom build script (if exists)"
         run: |
-          if [ -x ".github/workflows/build.sh" ]; then
+          if [ -x ".github/scripts/book-extras.sh" ]; then
             echo "Running custom build script..."
-            ./.github/workflows/build.sh
-          elif [ -f ".github/workflows/build.sh" ]; then
+            ./.github/scripts/book-extras.sh
+          elif [ -f ".github/scripts/book-extras.sh" ]; then
             echo "Running custom build script..."
-            /bin/sh .github/workflows/build.sh
+            /bin/sh .github/scripts/book-extras.sh
           else
             echo "No custom build script found, skipping..."
           fi
