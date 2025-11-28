@@ -245,13 +245,13 @@ to enable seamless Git operations:
 - **Enables Git operations** - Push, pull, and clone using your existing SSH keys
 - **Works transparently** - No additional setup required in VS Code dev containers
 
-## 📖 Customizing Documentation Builds
+## 🔧 Custom Build Extras
 
-The book workflow (`.github/workflows/book.yml`) includes a hook for downstream repositories to install additional dependencies needed for documentation generation.
+The project includes a hook for installing additional system dependencies and custom build steps needed across all build phases.
 
-### Using book-extras.sh
+### Using build-extras.sh
 
-Create a file `.github/scripts/book-extras.sh` in your repository to install system packages or dependencies before the documentation is built:
+Create a file `.github/scripts/build-extras.sh` in your repository to install system packages or dependencies:
 
 ```bash
 #!/bin/bash
@@ -264,11 +264,15 @@ sudo apt-get install -y graphviz
 # Add other custom installation commands here
 ```
 
-Make sure the script is executable:
+### When it Runs
 
-```bash
-chmod +x .github/scripts/book-extras.sh
-```
+The `build-extras.sh` script is automatically invoked during:
+- `make install` - Initial project setup
+- `make test` - Before running tests
+- `make book` - Before building documentation
+- `make docs` - Before generating API documentation
+
+This ensures custom dependencies are available whenever needed throughout the build lifecycle.
 
 ### Important: Exclude from Template Updates
 
@@ -276,13 +280,16 @@ If you customize this file, add it to the exclude list in your `action.yml` conf
 
 ```yaml
 exclude: |
-  .github/scripts/book-extras.sh
+  .github/scripts/build-extras.sh
 ```
 
-Common use cases:
+### Common Use Cases
+
 - Installing graphviz for diagram rendering
 - Adding LaTeX for mathematical notation
-- Installing system libraries for specialized documentation tools
+- Installing system libraries for specialized tools
+- Setting up additional build dependencies
+- Downloading external resources or tools
 
 ## 🤝 Contributing
 
