@@ -21,7 +21,7 @@
 #   - Go to the "Actions" tab
 #   - Run this workflow manually with a tag input like `v1.2.3`
 
-name: Release Workflow
+name: RELEASE
 
 on:
   workflow_dispatch:
