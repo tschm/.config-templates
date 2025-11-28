@@ -3,6 +3,7 @@ name: DEVCONTAINER
 # Building these containers is expensive initially, so only run on changes to devcontainer files
 on:
   push:
+    branches: [ main, master ]
     paths:
       - ".devcontainer/**"
   pull_request:
