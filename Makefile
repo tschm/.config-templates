@@ -55,7 +55,7 @@ install-extras: ## run custom build script (if exists)
 		printf "${BLUE}[INFO] Running custom build script...${RESET}\n"; \
 		/bin/sh .github/scripts/build-extras.sh; \
 	else \
-		printf "${YELLOW}[INFO] No custom build script found, skipping...${RESET}\n"; \
+		printf "${BLUE}[INFO] No custom build script found, skipping...${RESET}\n"; \
 	fi
 
 install: install-uv install-extras ## install
