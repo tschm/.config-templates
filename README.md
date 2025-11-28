@@ -245,6 +245,45 @@ to enable seamless Git operations:
 - **Enables Git operations** - Push, pull, and clone using your existing SSH keys
 - **Works transparently** - No additional setup required in VS Code dev containers
 
+## 📖 Customizing Documentation Builds
+
+The book workflow (`.github/workflows/book.yml`) includes a hook for downstream repositories to install additional dependencies needed for documentation generation.
+
+### Using book-extras.sh
+
+Create a file `.github/scripts/book-extras.sh` in your repository to install system packages or dependencies before the documentation is built:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# Example: Install graphviz for diagram generation
+sudo apt-get update
+sudo apt-get install -y graphviz
+
+# Add other custom installation commands here
+```
+
+Make sure the script is executable:
+
+```bash
+chmod +x .github/scripts/book-extras.sh
+```
+
+### Important: Exclude from Template Updates
+
+If you customize this file, add it to the exclude list in your `action.yml` configuration to prevent it from being overwritten during template updates:
+
+```yaml
+exclude: |
+  .github/scripts/book-extras.sh
+```
+
+Common use cases:
+- Installing graphviz for diagram rendering
+- Adding LaTeX for mathematical notation
+- Installing system libraries for specialized documentation tools
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
