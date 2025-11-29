@@ -3,7 +3,6 @@ name: DEVCONTAINER
 # Building these containers is expensive initially, so only run on changes to devcontainer files
 on:
   push:
-    branches: [ main, master ]
     paths:
       - ".devcontainer/**"
   pull_request:
@@ -18,8 +17,8 @@ jobs:
     with:
       publish: false
       registry: ghcr.io
-      image_name: "devcontainer"
-      image_tags: latest,${{ github.sha }}
+      image_name: devcontainer
+      image_tags: ${{ github.head_ref || github.ref_name }}-${{ github.sha }}
     secrets: inherit
     permissions:
       contents: read
