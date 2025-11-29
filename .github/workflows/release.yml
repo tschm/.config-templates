@@ -66,8 +66,13 @@ jobs:
             exit 1
           fi
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "::error::Release '$TAG' already exists. Please use a new tag."
-            exit 1
+            DRAFT_STATUS=$(gh release view "$TAG" --json isDraft --jq '.isDraft')
+            if [ "$DRAFT_STATUS" != "true" ]; then
+              echo "::error::Release '$TAG' already exists and is not a draft. Please use a new tag."
+              exit 1
+            else
+              echo "::warning::Release '$TAG' exists as a draft. Will proceed to update it."
+            fi
           fi
 
       - name: Check for .devcontainer
