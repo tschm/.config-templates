@@ -128,8 +128,8 @@ jobs:
           name: dist
           path: dist
 
-  release:
-    name: Create GitHub Release
+  draft-release:
+    name: Draft GitHub Release
     runs-on: ubuntu-latest
     needs: [tag, build]
 
@@ -156,7 +156,7 @@ jobs:
     name: Publish to PyPI
     runs-on: ubuntu-latest
     environment: release
-    needs: [build, tag]
+    needs: [build, tag, draft-release]
     outputs:
       should_publish: ${{ steps.check_dist.outputs.should_publish }}
 
@@ -199,7 +199,7 @@ jobs:
 
   publish-devcontainer:
     name: Publish Devcontainer
-    needs: tag
+    needs: [tag, build, draft-release]
     if: needs.tag.outputs.devcontainer_exists == 'true'
     uses: ./.github/workflows/_devcontainer.yml
     with:
@@ -212,8 +212,8 @@ jobs:
   finalise-release:
     name: Finalise Release
     runs-on: ubuntu-latest
-    needs: [tag, release, pypi, publish-devcontainer]
-    if: always() && needs.release.result == 'success'
+    needs: [tag, draft-release, pypi, publish-devcontainer]
+    if: always() && success()
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
