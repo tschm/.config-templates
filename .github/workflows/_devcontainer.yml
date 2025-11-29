@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Login to the chosen container registry. Caller should provide appropriate secrets.
       - name: Login to Container Registry
