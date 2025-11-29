@@ -218,7 +218,12 @@ jobs:
     name: Finalise Release
     runs-on: ubuntu-latest
     needs: [tag, draft-release, pypi, publish-devcontainer]
-    if: ${{ !(failure() || cancelled()) }}
+    if: |
+      always() &&
+      needs.tag.result == 'success' &&
+      needs.draft-release.result == 'success' &&
+      (needs.pypi.result == 'success' || needs.pypi.result == 'skipped') &&
+      (needs.publish-devcontainer.result == 'success' || needs.publish-devcontainer.result == 'skipped')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
