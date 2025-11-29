@@ -58,7 +58,7 @@ Both the `.venv` and `bin` directories are listed in `.gitignore`.
 
 Run `make help` to see all available targets:
 
-```
+```makefile
 Usage:
   make <target>
 
