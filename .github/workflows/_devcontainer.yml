@@ -35,6 +35,8 @@
 #     with packages:write permission as the calling workflow's secrets.
 #
 name: REUSABLE DEVCONTAINER BUILD
+permissions:
+  contents: read
 
 on:
   workflow_call:
@@ -70,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Login to the chosen container registry. Caller should provide appropriate secrets.
       - name: Login to Container Registry
@@ -91,7 +93,7 @@ jobs:
         with:
           configFile: ${{ inputs.config_file }}
           push: ${{ inputs.publish && 'filter' || 'never' }}
-          refFilterForPush: refs/heads/main,refs/heads/master
-          eventFilterForPush: push
+          refFilterForPush: ${{ github.ref }}
+          eventFilterForPush: ${{ github.event_name }}
           imageName: ${{ inputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ inputs.image_name }}
           imageTag: ${{ inputs.image_tags }}

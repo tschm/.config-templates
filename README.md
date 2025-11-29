@@ -17,11 +17,10 @@ Save time and maintain consistency across your projects
 with these
 pre-configured templates.
 
-> Last updated: November 20, 2025
+> Last updated: November 29, 2025
 
 ## ✨ Features
 
-- 📦 **Task-based Workflows** - Organized task definitions using [Taskfile](https://taskfile.dev/)
 - 🚀 **CI/CD Templates** - Ready-to-use GitHub Actions and GitLab CI workflows
 - 🧪 **Testing Framework** - Comprehensive test setup with pytest
 - 📚 **Documentation** - Automated documentation generation
@@ -39,41 +38,55 @@ git clone https://github.com/tschm/config-templates.git
 cd config-templates
 ```
 
-The project assumes `make` is installed. It relies
-on [Task](https://taskfile.dev/) for task management and
-[uv and uvx](https://github.com/astral-sh/uv) for dependency management.
+The project uses a [Makefile](Makefile) as the primary entry point for all tasks.
+It relies on [uv and uvx](https://github.com/astral-sh/uv) for fast Python package management.
 
-Install all those tools locally using
+Install all dependencies using:
 
 ```bash
 make install
 ```
 
-The aforementioned tools will be installed within the `bin` directory.
-It will also create the virtual environment defined
-in `pyproject.toml` in the `.venv` directory.
+This will:
+- Install `uv` and `uvx` into the `bin/` directory
+- Create a Python virtual environment in `.venv/`
+- Install all project dependencies from `pyproject.toml`
+
 Both the `.venv` and `bin` directories are listed in `.gitignore`.
 
 ## 📋 Available Tasks
 
-Run `./bin/task --list-all` to see all available tasks:
+Run `make help` to see all available targets:
 
-```
-* build:build:      Build the package using hatch
-* build:install:    Install all dependencies using uv
-* build:uv:         Install uv and uvx
-* cleanup:clean:    Clean generated files and directories
-* docs:book:        Build the companion book with test results and notebooks
-* docs:docs:        Build documentation using pdoc
-* docs:marimo:      Start a Marimo server
-* docs:marimushka:  Export Marimo notebooks to HTML
-* docs:test:        Run all tests
-* quality:check:    Run all code quality checks
-* quality:deptry:   Check for dependency issues
-* quality:lint:     Run pre-commit hooks
+```makefile
+Usage:
+  make <target>
+
+Targets:
+
+Bootstrap
+  install-uv      ensure uv/uvx is installed
+  install-extras  run custom build script (if exists)
+  install         install
+  clean           clean
+
+Development and Testing
+  test            run all tests
+  marimo          fire up Marimo server
+  marimushka      export Marimo notebooks to HTML
+  deptry          run deptry if pyproject.toml exists
+
+Documentation
+  docs            create documentation with pdoc
+  book            compile the companion book
+  fmt             check the pre-commit hooks and the linting
+  all             Run everything
+
+Meta
+  help            Display this help message
 ```
 
-We also provide a small [Makefile](Makefile) for convenience.
+The [Makefile](Makefile) provides organized targets for bootstrapping, development, testing, and documentation tasks.
 
 ## Testing your documentation
 
@@ -104,12 +117,6 @@ Hello, World!
 
 This repository includes the following configuration templates:
 
-- **Taskfile.yml** - Main task runner configuration
-- **taskfiles/** - Task definitions organized by category
-  - **build.yml** - Tasks for dependency management and building
-  - **cleanup.yml** - Tasks for cleaning up generated files
-  - **docs.yml** - Tasks for documentation generation
-  - **quality.yml** - Tasks for code quality checks
 - **ruff.toml** - Configuration for the Ruff linter and formatter
 - **.devcontainer/** - Development container configuration
 - **.github/workflows/** - GitHub Actions workflow templates
@@ -200,9 +207,9 @@ both **VS Code** and **GitHub Codespaces**.
 
 The `.devcontainer` setup provides:
 
-- 🐍 **Python 3.13** runtime environment
+- 🐍 **Python 3.14** runtime environment
 - 🔧 **UV Package Manager** - Fast Python package installer and resolver
-- ⚡ **Task CLI** - For running project workflows
+- ⚡ **Makefile** - For running project workflows
 - 🧪 **Pre-commit Hooks** - Automated code quality checks
 - 📊 **Marimo Integration** - Interactive notebook support with VS Code extension
 - 🔍 **Python Development Tools** - Pylance, Python extension, and optimized settings
@@ -229,7 +236,6 @@ The `.devcontainer` setup provides:
 The dev container automatically runs the initialization script that:
 
 - Installs UV package manager
-- Sets up Task CLI
 - Configures the Python virtual environment
 - Installs project dependencies
 - Sets up pre-commit hooks
@@ -244,6 +250,35 @@ to enable seamless Git operations:
 - **Forwards SSH agent** - Your host's SSH agent is available inside the container
 - **Enables Git operations** - Push, pull, and clone using your existing SSH keys
 - **Works transparently** - No additional setup required in VS Code dev containers
+
+### Troubleshooting
+
+Common issues and solutions when using this configuration template.
+
+---
+
+#### SSH authentication fails on macOS when using devcontainer
+
+**Symptom**: When building or using the devcontainer on macOS, Git operations (pull, push, clone) fail with SSH authentication errors, even though your SSH keys work fine on the host.
+
+**Cause**: macOS SSH config often includes `UseKeychain yes`, which is a macOS-specific directive. When the devcontainer mounts your `~/.ssh` directory, other platforms (Linux containers) don't recognize this directive and fail to parse the SSH config.
+
+**Solution**: Add `IgnoreUnknown UseKeychain` to the top of your `~/.ssh/config` file on your Mac:
+
+```ssh-config
+# At the top of ~/.ssh/config
+IgnoreUnknown UseKeychain
+
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_rsa
+```
+
+This tells SSH clients on non-macOS platforms to ignore the `UseKeychain` directive instead of failing.
+
+**Reference**: [Stack Overflow solution](https://stackoverflow.com/questions/75613632/trying-to-ssh-to-my-server-from-the-terminal-ends-with-error-line-x-bad-configu/75616369#75616369)
+
 
 ## 🔧 Custom Build Extras
 
@@ -291,6 +326,7 @@ exclude: |
 - Setting up additional build dependencies
 - Downloading external resources or tools
 
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -307,7 +343,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- [Taskfile](https://taskfile.dev/) - For the amazing task runner
 - [GitHub Actions](https://github.com/features/actions) - For CI/CD capabilities
 - [Marimo](https://marimo.io/) - For interactive notebooks
 - [UV](https://github.com/astral-sh/uv) - For fast Python package operations
