@@ -10,11 +10,12 @@
 #   - 🔖 Tagging the release (Git tag)
 #   - 🏗️ Building the package with Hatch
 #   - 🐳 Building and publishing Devcontainer image (if present)
-#   - 🚀 Publishing to PyPI using OIDC (no passwords or secrets)
+#   - 🚀 Publishing to PyPI using OIDC (no passwords or secrets) or custom feed
 #   - 📦 Creating a GitHub Release with artifacts (dist + devcontainer image)
 #
 # 🔐 Security:
 #   - No PyPI credentials are stored; relies on Trusted Publishing via GitHub OIDC.
+#   - For custom feeds, secrets are used, default username is `__token__`, which is set in action by default anyway.
 #
 # 📄 Requirements:
 #   - `pyproject.toml` with a top-level `version = "..."`
@@ -186,12 +187,15 @@ jobs:
           cat $GITHUB_OUTPUT
 
       # this should not take place, as "Private :: Do Not Upload" set in pyproject.toml
+      # repository-url and password only used for custom feeds, not for PyPI with OIDC
       - name: Publish to PyPI
         if: ${{ steps.check_dist.outputs.should_publish == 'true' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
           skip-existing: true
+          repository-url: ${{ vars.PYPI_REPOSITORY_URL }}
+          password: ${{ secrets.PYPI_TOKEN }}
 
   publish-devcontainer:
     name: Publish Devcontainer
@@ -266,10 +270,19 @@ jobs:
           PACKAGE_NAME=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['name'])")
           VERSION="${{ github.event.inputs.tag }}"
           VERSION=${VERSION#v}
-          LINK="https://pypi.org/project/$PACKAGE_NAME/$VERSION/"
+          
+          REPO_URL="${{ vars.PYPI_REPOSITORY_URL || '' }}"
+          if [ -z "$REPO_URL" ]; then
+             LINK="https://pypi.org/project/$PACKAGE_NAME/$VERSION/"
+             NAME="PyPI Package"
+          else
+             LINK="$REPO_URL"
+             NAME="Custom Feed Package"
+          fi
+
           {
             echo "message<<EOF"
-            echo "### PyPI Package"
+            echo "### $NAME"
             echo ""
             echo "[$PACKAGE_NAME]($LINK)"
             echo "EOF"
