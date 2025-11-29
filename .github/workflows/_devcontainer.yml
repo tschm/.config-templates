@@ -93,7 +93,7 @@ jobs:
         with:
           configFile: ${{ inputs.config_file }}
           push: ${{ inputs.publish && 'filter' || 'never' }}
-          refFilterForPush: refs/heads/main,refs/heads/master
-          eventFilterForPush: push
+          refFilterForPush: ${{ github.ref }}
+          eventFilterForPush: ${{ github.event_name }}
           imageName: ${{ inputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ inputs.image_name }}
           imageTag: ${{ inputs.image_tags }}
