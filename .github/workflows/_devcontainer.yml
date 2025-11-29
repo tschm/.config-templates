@@ -92,6 +92,6 @@ jobs:
           configFile: ${{ inputs.config_file }}
           push: ${{ inputs.publish && 'filter' || 'never' }}
           refFilterForPush: ${{ github.ref }}
-          eventFilterForPush: push, workflow_dispatch
+          eventFilterForPush: ${{ github.event_name }}
           imageName: ${{ inputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ inputs.image_name }}
           imageTag: ${{ inputs.image_tags }}
