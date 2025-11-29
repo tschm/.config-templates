@@ -218,7 +218,7 @@ jobs:
     name: Finalise Release
     runs-on: ubuntu-latest
     needs: [tag, draft-release, pypi, publish-devcontainer]
-    if: always() && success()
+    if: ${{ !(failure() || cancelled()) }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -229,7 +229,7 @@ jobs:
           python-version: '3.14'
 
       - name: Login to Container Registry
-        if: needs.tag.outputs.devcontainer_exists == 'true' && needs.publish-devcontainer.result == 'success'
+        if: needs.publish-devcontainer.result == 'success'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -237,7 +237,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull and Save Devcontainer Image
-        if: needs.tag.outputs.devcontainer_exists == 'true' && needs.publish-devcontainer.result == 'success'
+        if: needs.publish-devcontainer.result == 'success'
         run: |
           OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME="${{ needs.tag.outputs.image_name }}"
@@ -247,7 +247,7 @@ jobs:
           docker save $FULL_IMAGE -o $FILENAME
 
       - name: Upload Devcontainer Artifact
-        if: needs.tag.outputs.devcontainer_exists == 'true' && needs.publish-devcontainer.result == 'success'
+        if: needs.publish-devcontainer.result == 'success'
         uses: actions/upload-artifact@v5
         with:
           name: devcontainer-image
@@ -255,7 +255,7 @@ jobs:
 
       - name: Generate Devcontainer Link
         id: devcontainer_link
-        if: needs.tag.outputs.devcontainer_exists == 'true' && needs.publish-devcontainer.result == 'success'
+        if: needs.publish-devcontainer.result == 'success'
         run: |
           OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME="${{ needs.tag.outputs.image_name }}"
