@@ -21,7 +21,6 @@ pre-configured templates.
 
 ## ✨ Features
 
-- 📦 **Task-based Workflows** - Organized task definitions using [Taskfile](https://taskfile.dev/)
 - 🚀 **CI/CD Templates** - Ready-to-use GitHub Actions and GitLab CI workflows
 - 🧪 **Testing Framework** - Comprehensive test setup with pytest
 - 📚 **Documentation** - Automated documentation generation
@@ -39,41 +38,55 @@ git clone https://github.com/tschm/config-templates.git
 cd config-templates
 ```
 
-The project assumes `make` is installed. It relies
-on [Task](https://taskfile.dev/) for task management and
-[uv and uvx](https://github.com/astral-sh/uv) for dependency management.
+The project uses a [Makefile](Makefile) as the primary entry point for all tasks.
+It relies on [uv and uvx](https://github.com/astral-sh/uv) for fast Python package management.
 
-Install all those tools locally using
+Install all dependencies using:
 
 ```bash
 make install
 ```
 
-The aforementioned tools will be installed within the `bin` directory.
-It will also create the virtual environment defined
-in `pyproject.toml` in the `.venv` directory.
+This will:
+- Install `uv` and `uvx` into the `bin/` directory
+- Create a Python virtual environment in `.venv/`
+- Install all project dependencies from `pyproject.toml`
+
 Both the `.venv` and `bin` directories are listed in `.gitignore`.
 
 ## 📋 Available Tasks
 
-Run `./bin/task --list-all` to see all available tasks:
+Run `make help` to see all available targets:
 
 ```
-* build:build:      Build the package using hatch
-* build:install:    Install all dependencies using uv
-* build:uv:         Install uv and uvx
-* cleanup:clean:    Clean generated files and directories
-* docs:book:        Build the companion book with test results and notebooks
-* docs:docs:        Build documentation using pdoc
-* docs:marimo:      Start a Marimo server
-* docs:marimushka:  Export Marimo notebooks to HTML
-* docs:test:        Run all tests
-* quality:check:    Run all code quality checks
-* quality:deptry:   Check for dependency issues
-* quality:lint:     Run pre-commit hooks
+Usage:
+  make <target>
+
+Targets:
+
+Bootstrap
+  install-uv      ensure uv/uvx is installed
+  install-extras  run custom build script (if exists)
+  install         install
+  clean           clean
+
+Development and Testing
+  test            run all tests
+  marimo          fire up Marimo server
+  marimushka      export Marimo notebooks to HTML
+  deptry          run deptry if pyproject.toml exists
+
+Documentation
+  docs            create documentation with pdoc
+  book            compile the companion book
+  fmt             check the pre-commit hooks and the linting
+  all             Run everything
+
+Meta
+  help            Display this help message
 ```
 
-We also provide a small [Makefile](Makefile) for convenience.
+The [Makefile](Makefile) provides organized targets for bootstrapping, development, testing, and documentation tasks.
 
 ## Testing your documentation
 
@@ -336,7 +349,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- [Taskfile](https://taskfile.dev/) - For the amazing task runner
 - [GitHub Actions](https://github.com/features/actions) - For CI/CD capabilities
 - [Marimo](https://marimo.io/) - For interactive notebooks
 - [UV](https://github.com/astral-sh/uv) - For fast Python package operations
