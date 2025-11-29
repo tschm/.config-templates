@@ -17,7 +17,7 @@ Save time and maintain consistency across your projects
 with these
 pre-configured templates.
 
-> Last updated: November 20, 2025
+> Last updated: November 29, 2025
 
 ## ✨ Features
 
@@ -200,9 +200,9 @@ both **VS Code** and **GitHub Codespaces**.
 
 The `.devcontainer` setup provides:
 
-- 🐍 **Python 3.13** runtime environment
+- 🐍 **Python 3.14** runtime environment
 - 🔧 **UV Package Manager** - Fast Python package installer and resolver
-- ⚡ **Task CLI** - For running project workflows
+- ⚡ **Makefile* - For running project workflows
 - 🧪 **Pre-commit Hooks** - Automated code quality checks
 - 📊 **Marimo Integration** - Interactive notebook support with VS Code extension
 - 🔍 **Python Development Tools** - Pylance, Python extension, and optimized settings
@@ -229,7 +229,6 @@ The `.devcontainer` setup provides:
 The dev container automatically runs the initialization script that:
 
 - Installs UV package manager
-- Sets up Task CLI
 - Configures the Python virtual environment
 - Installs project dependencies
 - Sets up pre-commit hooks
@@ -244,6 +243,35 @@ to enable seamless Git operations:
 - **Forwards SSH agent** - Your host's SSH agent is available inside the container
 - **Enables Git operations** - Push, pull, and clone using your existing SSH keys
 - **Works transparently** - No additional setup required in VS Code dev containers
+
+### Troubleshooting
+
+Common issues and solutions when using this configuration template.
+
+---
+
+#### SSH authentication fails on macOS when using devcontainer
+
+**Symptom**: When building or using the devcontainer on macOS, Git operations (pull, push, clone) fail with SSH authentication errors, even though your SSH keys work fine on the host.
+
+**Cause**: macOS SSH config often includes `UseKeychain yes`, which is a macOS-specific directive. When the devcontainer mounts your `~/.ssh` directory, other platforms (Linux containers) don't recognize this directive and fail to parse the SSH config.
+
+**Solution**: Add `IgnoreUnknown UseKeychain` to the top of your `~/.ssh/config` file on your Mac:
+
+```ssh-config
+# At the top of ~/.ssh/config
+IgnoreUnknown UseKeychain
+
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_rsa
+```
+
+This tells SSH clients on non-macOS platforms to ignore the `UseKeychain` directive instead of failing.
+
+**Reference**: [Stack Overflow solution](https://stackoverflow.com/questions/75613632/trying-to-ssh-to-my-server-from-the-terminal-ends-with-error-line-x-bad-configu/75616369#75616369)
+
 
 ## 🔧 Custom Build Extras
 
@@ -290,6 +318,7 @@ exclude: |
 - Installing system libraries for specialized tools
 - Setting up additional build dependencies
 - Downloading external resources or tools
+
 
 ## 🤝 Contributing
 
