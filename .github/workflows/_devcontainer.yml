@@ -93,8 +93,6 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           configFile: ${{ inputs.config_file }}
-          push: ${{ inputs.publish && 'filter' || 'never' }}
-          refFilterForPush: ${{ github.ref }}
-          eventFilterForPush: ${{ github.event_name }}
+          push: ${{ inputs.publish && 'always' || 'never' }}
           imageName: ${{ inputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ inputs.image_name }}
           imageTag: ${{ inputs.image_tags }}
