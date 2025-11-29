@@ -35,6 +35,8 @@
 #     with packages:write permission as the calling workflow's secrets.
 #
 name: REUSABLE DEVCONTAINER BUILD
+permissions:
+  contents: read
 
 on:
   workflow_call:
