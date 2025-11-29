@@ -45,6 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       devcontainer_exists: ${{ steps.check_devcontainer.outputs.exists }}
+      image_name: ${{ steps.image_name.outputs.name }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -71,6 +72,13 @@ jobs:
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Calculate Image Name
+        id: image_name
+        run: |
+          REPO="${{ github.event.repository.name }}"
+          CLEAN="${REPO#.}"
+          echo "name=${CLEAN}/devcontainer" >> $GITHUB_OUTPUT
 
       - name: Create Git Tag
         run: |
@@ -181,13 +189,13 @@ jobs:
           skip-existing: true
 
   publish-devcontainer:
-    name: Devcontainer
+    name: Publish Devcontainer
     needs: tag
     if: needs.tag.outputs.devcontainer_exists == 'true'
     uses: ./.github/workflows/_devcontainer.yml
     with:
       publish: true
-      image_name: ${{ github.event.repository.name }}/devcontainer
+      image_name: ${{ needs.tag.outputs.image_name }}
       registry: ghcr.io
       image_tags: ${{ github.event.inputs.tag }}
     secrets: inherit
@@ -213,7 +221,7 @@ jobs:
         if: needs.tag.outputs.devcontainer_exists == 'true' && needs.publish-devcontainer.result == 'success'
         run: |
           OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_NAME="${{ github.event.repository.name }}/devcontainer"
+          IMAGE_NAME="${{ needs.tag.outputs.image_name }}"
           FULL_IMAGE="ghcr.io/$OWNER_LC/$IMAGE_NAME:${{ github.event.inputs.tag }}"
           docker pull $FULL_IMAGE
           FILENAME="devcontainer-${{ github.event.inputs.tag }}.tar"
@@ -231,7 +239,7 @@ jobs:
         if: needs.tag.outputs.devcontainer_exists == 'true' && needs.publish-devcontainer.result == 'success'
         run: |
           OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_NAME="${{ github.event.repository.name }}/devcontainer"
+          IMAGE_NAME="${{ needs.tag.outputs.image_name }}"
           FULL_IMAGE="ghcr.io/$OWNER_LC/$IMAGE_NAME:${{ github.event.inputs.tag }}"
           {
             echo "message<<EOF"
