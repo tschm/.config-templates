@@ -17,7 +17,7 @@ jobs:
     with:
       publish: false
       registry: ghcr.io
-      image_name: devcontainer
+      image_name: ${{ github.repository }}/devcontainer
       image_tags: ${{ github.head_ref || github.ref_name }}-${{ github.sha }}
     secrets: inherit
     permissions:

@@ -155,7 +155,7 @@ jobs:
     uses: ./.github/workflows/_devcontainer.yml
     with:
       publish: true
-      image_name: devcontainer
+      image_name: ${{ github.repository }}/devcontainer
       registry: ghcr.io
       image_tags: ${{ github.event.inputs.tag }}
     secrets: inherit
