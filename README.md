@@ -117,12 +117,6 @@ Hello, World!
 
 This repository includes the following configuration templates:
 
-- **Taskfile.yml** - Main task runner configuration
-- **taskfiles/** - Task definitions organized by category
-  - **build.yml** - Tasks for dependency management and building
-  - **cleanup.yml** - Tasks for cleaning up generated files
-  - **docs.yml** - Tasks for documentation generation
-  - **quality.yml** - Tasks for code quality checks
 - **ruff.toml** - Configuration for the Ruff linter and formatter
 - **.devcontainer/** - Development container configuration
 - **.github/workflows/** - GitHub Actions workflow templates
@@ -215,7 +209,7 @@ The `.devcontainer` setup provides:
 
 - 🐍 **Python 3.14** runtime environment
 - 🔧 **UV Package Manager** - Fast Python package installer and resolver
-- ⚡ **Makefile* - For running project workflows
+- ⚡ **Makefile** - For running project workflows
 - 🧪 **Pre-commit Hooks** - Automated code quality checks
 - 📊 **Marimo Integration** - Interactive notebook support with VS Code extension
 - 🔍 **Python Development Tools** - Pylance, Python extension, and optimized settings
