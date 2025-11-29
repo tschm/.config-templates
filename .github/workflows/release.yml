@@ -6,9 +6,12 @@
 #
 # This workflow implements a secure, maintainable release pipeline
 # by separating concerns:
+#   - 🔍 Pre-flight checks (Tag/Release existence)
 #   - 🔖 Tagging the release (Git tag)
 #   - 🏗️ Building the package with Hatch
+#   - 🐳 Building and publishing Devcontainer image (if present)
 #   - 🚀 Publishing to PyPI using OIDC (no passwords or secrets)
+#   - 📦 Creating a GitHub Release with artifacts (dist + devcontainer image)
 #
 # 🔐 Security:
 #   - No PyPI credentials are stored; relies on Trusted Publishing via GitHub OIDC.
@@ -45,6 +48,20 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
+
+      - name: Validate Tag and Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.inputs.tag }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag '$TAG' already exists. Please use a new tag."
+            exit 1
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::Release '$TAG' already exists. Please use a new tag."
+            exit 1
+          fi
 
       - name: Check for .devcontainer
         id: check_devcontainer
