@@ -6,11 +6,15 @@ on:
     branches: [ main, master ]
     paths:
       - ".devcontainer/**"
+      - ".github/workflows/_devcontainer.yml"
+      - ".github/workflows/devcontainer.yml"
+
   pull_request:
     branches: [ main, master ]  
     paths:
       - ".devcontainer/**"
-
+      - ".github/workflows/_devcontainer.yml"
+      - ".github/workflows/devcontainer.yml"
 jobs:
   devcontainer-build:
     name: Build Devcontainer Image
