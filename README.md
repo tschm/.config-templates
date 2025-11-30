@@ -14,8 +14,7 @@
 A collection of reusable configuration templates
 for modern Python projects.
 Save time and maintain consistency across your projects
-with these
-pre-configured templates.
+with these pre-configured templates.
 
 > Last updated: November 29, 2025
 
@@ -95,7 +94,7 @@ The [Makefile](Makefile) provides organized targets for bootstrapping, developme
 ## Testing your documentation
 
 Any README.md file will be scanned for Python code blocks.
-If any are found, they will be tested in [tests/test_docs.py](tests/test_docs.py).
+If any are found, they will be tested in [tests/test_readme.py](tests/test_readme.py).
 
 ```python
 # Some generic Python code block
@@ -188,7 +187,6 @@ template-repository: "tschm/.config-templates"
 template-branch: "main"
 include: |
     .github
-    taskfiles
     tests
     .editorconfig
     .gitignore
@@ -197,7 +195,6 @@ include: |
     CONTRIBUTING.md
     Makefile
     ruff.toml
-    Taskfile.yml
 ```
 
 ## 🖥️ Dev Container Compatibility

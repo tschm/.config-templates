@@ -165,7 +165,7 @@ jobs:
           files: "dist/**"
           draft: true
 
-  # Parse .env and decide at step-level whether to publish
+  # Decide at step-level whether to publish
   pypi:
     name: Publish to PyPI
     runs-on: ubuntu-latest
@@ -319,7 +319,7 @@ jobs:
           PACKAGE_NAME=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['name'])")
           VERSION="${{ needs.tag.outputs.tag }}"
           VERSION=${VERSION#v}
-          
+
           REPO_URL="${{ vars.PYPI_REPOSITORY_URL || '' }}"
           if [ -z "$REPO_URL" ]; then
              LINK="https://pypi.org/project/$PACKAGE_NAME/$VERSION/"
