@@ -9,9 +9,11 @@
 #   - 🔍 Pre-flight checks (Tag/Release existence)
 #   - 🔖 Tagging the release (Git tag)
 #   - 🏗️ Building the package with Hatch
-#   - 🐳 Building and publishing Devcontainer image (if present)
 #   - 🚀 Publishing to PyPI using OIDC (no passwords or secrets) or custom feed
-#   - 📦 Creating a GitHub Release with artifacts (dist + devcontainer image)
+#   - 📦 Creating a GitHub Release with artifacts
+#
+# Note: Devcontainer image publishing is handled by a separate workflow
+#       (release-devcontainer.yml) which is optional for downstream users.
 #
 # 🔐 Security:
 #   - No PyPI credentials are stored; relies on Trusted Publishing via GitHub OIDC.
@@ -35,14 +37,12 @@ on:
 permissions:
   contents: write  # Needed to create releases
   id-token: write  # Needed for OIDC authentication with PyPI
-  packages: write  # Needed to publish devcontainer image
 
 jobs:
   tag:
     name: Validate Tag
     runs-on: ubuntu-latest
     outputs:
-      publish_devcontainer: ${{ steps.publish_devcontainer.outputs.exists }}
       tag: ${{ steps.set_tag.outputs.tag }}
     steps:
       - name: Checkout Code
@@ -70,18 +70,6 @@ jobs:
             else
               echo "::warning::Release '$TAG' exists as a draft. Will proceed to update it."
             fi
-          fi
-
-      - name: Check for .devcontainer
-        id: publish_devcontainer
-        env:
-          # I want the user to explicitly enable publishing, not just rely on presence of folder
-          PUBLISH_DEVCONTAINER: ${{ vars.PUBLISH_DEVCONTAINER }}
-        run: |
-          if [[ "$PUBLISH_DEVCONTAINER" == "true" ]] && [[ -d ".devcontainer" ]]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
   build:
@@ -199,44 +187,15 @@ jobs:
           repository-url: ${{ vars.PYPI_REPOSITORY_URL }}
           password: ${{ secrets.PYPI_TOKEN }}
 
-  calculate-image-name:
-    name: Calculate Image Name
-    runs-on: ubuntu-latest
-    needs: tag
-    if: needs.tag.outputs.publish_devcontainer == 'true'
-    outputs:
-      image_name: ${{ steps.image_name.outputs.name }}
-    steps:
-      - name: Calculate Image Name
-        id: image_name
-        run: |
-          REPO="${{ github.event.repository.name }}"
-          CLEAN="${REPO#.}"
-          echo "name=${CLEAN}/devcontainer" >> $GITHUB_OUTPUT
-
-  publish-devcontainer:
-    name: Publish Devcontainer
-    needs: [tag, build, draft-release, calculate-image-name]
-    if: needs.tag.outputs.publish_devcontainer == 'true'
-    uses: ./.github/workflows/_devcontainer.yml
-    with:
-      publish: true
-      image_name: ${{ needs.calculate-image-name.outputs.image_name }}
-      registry: ghcr.io
-      image_tags: ${{ needs.tag.outputs.tag }}
-    secrets: inherit
-
   finalise-release:
     name: Finalise Release
     runs-on: ubuntu-latest
-    needs: [tag, draft-release, pypi, calculate-image-name, publish-devcontainer]
+    needs: [tag, draft-release, pypi]
     if: |
       always() &&
       needs.tag.result == 'success' &&
       needs.draft-release.result == 'success' &&
-      (needs.pypi.result == 'success' || needs.pypi.result == 'skipped') &&
-      (needs.calculate-image-name.result == 'success' || needs.calculate-image-name.result == 'skipped') &&
-      (needs.publish-devcontainer.result == 'success' || needs.publish-devcontainer.result == 'skipped')
+      (needs.pypi.result == 'success' || needs.pypi.result == 'skipped')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -248,21 +207,6 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.14'
-
-      - name: Generate Devcontainer Link
-        id: devcontainer_link
-        if: needs.publish-devcontainer.result == 'success'
-        run: |
-          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_NAME="${{ needs.calculate-image-name.outputs.image_name }}"
-          FULL_IMAGE="ghcr.io/$OWNER_LC/$IMAGE_NAME:${{ needs.tag.outputs.tag }}"
-          {
-            echo "message<<EOF"
-            echo "### Devcontainer Image"
-            echo ""
-            echo "\`$FULL_IMAGE\`"
-            echo "EOF"
-          } >> $GITHUB_OUTPUT
 
       - name: Generate PyPI Link
         id: pypi_link
@@ -296,6 +240,5 @@ jobs:
           draft: false
           append_body: true
           body: |
-            ${{ steps.devcontainer_link.outputs.message }}
             ${{ steps.pypi_link.outputs.message }}
 
