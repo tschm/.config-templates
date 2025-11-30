@@ -95,7 +95,15 @@ jobs:
         if: steps.check.outputs.exists == 'true'
         id: image_name
         run: |
-          IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ github.event.repository.name }}/devcontainer"
+          # Allow custom image name via DEVCONTAINER_IMAGE_NAME variable
+          CUSTOM_IMAGE="${{ vars.DEVCONTAINER_IMAGE_NAME }}"
+          if [ -n "$CUSTOM_IMAGE" ]; then
+            IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/$CUSTOM_IMAGE"
+            echo "Using custom image name: $IMAGE_NAME"
+          else
+            # Sanitize repository name to remove leading dots
+            IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ github.event.repository.name }}/devcontainer"
+          fi
           echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
       
       - name: Validate Image Name
