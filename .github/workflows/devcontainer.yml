@@ -23,14 +23,14 @@ on:
     paths:
       - ".devcontainer/**"
       - ".github/workflows/_devcontainer.yml"
-      - ".github/workflows/devcontainer-unified.yml"
+      - ".github/workflows/devcontainer.yml"
 
   pull_request:
     branches: [ main, master ]  
     paths:
       - ".devcontainer/**"
       - ".github/workflows/_devcontainer.yml"
-      - ".github/workflows/devcontainer-unified.yml"
+      - ".github/workflows/devcontainer.yml"
 
   release:
     types: [created, published]
