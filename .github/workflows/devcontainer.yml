@@ -76,11 +76,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      # repository owner to lowercase for Docker image naming, as devcontainers/ci does not safeguard
-      - name: Get lowercase repository owner
-        id: repo_owner
-        run: echo "owner_lc=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
-      
       # Additional gate to skip build if no devcontainer.json exists
       - name: Check devcontainer exists
         id: check
@@ -91,12 +86,51 @@ jobs:
           else
             echo "exists=true" >> $GITHUB_OUTPUT
           fi
-
+      # repository owner to lowercase for Docker image naming, as devcontainers/ci does not safeguard
+      - name: Get lowercase repository owner
+        id: repo_owner
+        run: echo "owner_lc=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+      
+      - name: Get Image Name
+        if: steps.check.outputs.exists == 'true'
+        id: image_name
+        run: |
+          IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ github.event.repository.name }}/devcontainer"
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+      
+      - name: Validate Image Name
+        if: steps.check.outputs.exists == 'true'
+        id: validate
+        run: |
+          IMAGE_NAME="${{ steps.image_name.outputs.image_name }}"
+          
+          # Docker image names must:
+          # - be lowercase
+          # - contain only [a-z0-9._-/:]
+          # - each component separated by / must start and end with alphanumeric
+          if echo "$IMAGE_NAME" | grep -qE '^[a-z0-9._-]+(/[a-z0-9._-]+)*$'; then
+            echo "✅ Image name is valid: $IMAGE_NAME"
+          else
+            echo "::error::Invalid Docker image name: $IMAGE_NAME"
+            echo "::error::Image name components must contain only lowercase letters, digits, periods, underscores, and hyphens."
+            echo "::error::Each component must start and end with alphanumeric characters."
+            echo "::error::Please check your repository name, owner, or registry configuration."
+            echo "::error::Common issues: uppercase letters, special characters (!@#\$%^&*()), consecutive separators (--), leading/trailing separators"
+            exit 1
+          fi     
+      
+      - name: Sanitize Image Tag
+        if: steps.check.outputs.exists == 'true'
+        id: sanitized_tag
+        run: |
+          SANITIZED_TAG=$(echo "${{ github.ref_name }}-${{ github.sha }}" | tr '/' '-')
+          echo "sanitized_tag=$SANITIZED_TAG" >> $GITHUB_OUTPUT
+      
       - name: Build Devcontainer Image
         uses: devcontainers/ci@v0.3
         if: steps.check.outputs.exists == 'true'
         with:
           configFile: .devcontainer/devcontainer.json
           push: never
-          imageName: ${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ github.event.repository.name }}/devcontainer
-          imageTag: ${{ github.ref_name }}-${{ github.sha }}
+          imageName: ${{ steps.image_name.outputs.image_name }}
+          imageTag: ${{ steps.sanitized_tag.outputs.sanitized_tag }}

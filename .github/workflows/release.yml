@@ -271,6 +271,32 @@ jobs:
         run: |
           IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ github.event.repository.name }}/devcontainer"
           echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+      
+      - name: Validate Image Name
+        run: |
+          IMAGE_NAME="${{ steps.image_name.outputs.image_name }}"
+          
+          # Docker image names must:
+          # - be lowercase
+          # - contain only [a-z0-9._-/:]
+          # - each component separated by / must start and end with alphanumeric
+          if echo "$IMAGE_NAME" | grep -qE '^[a-z0-9._-]+(/[a-z0-9._-]+)*$'; then
+            echo "✅ Image name is valid: $IMAGE_NAME"
+          else
+            echo "::error::Invalid Docker image name: $IMAGE_NAME"
+            echo "::error::Image name components must contain only lowercase letters, digits, periods, underscores, and hyphens."
+            echo "::error::Each component must start and end with alphanumeric characters."
+            echo "::error::Please check your repository name, owner, or registry configuration."
+            echo "::error::Common issues: uppercase letters, special characters (!@#\$%^&*()), consecutive separators (--), leading/trailing separators"
+            exit 1
+          fi     
+      
+      - name: Sanitize Image Tag
+        if: steps.check_publish.outputs.should_publish == 'true'
+        id: sanitized_tag
+        run: |
+          SANITIZED_TAG=$(echo "${{ needs.tag.outputs.tag }}" | tr '/' '-')
+          echo "sanitized_tag=$SANITIZED_TAG" >> $GITHUB_OUTPUT
 
       - name: Build and Publish Devcontainer Image
         if: steps.check_publish.outputs.should_publish == 'true'
@@ -279,7 +305,7 @@ jobs:
           configFile: .devcontainer/devcontainer.json
           push: always
           imageName: ${{ steps.image_name.outputs.image_name }}
-          imageTag: ${{ needs.tag.outputs.tag }}
+          imageTag: ${{ steps.sanitized_tag.outputs.sanitized_tag }}
 
   finalise-release:
     name: Finalise Release
