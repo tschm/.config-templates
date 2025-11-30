@@ -5,11 +5,15 @@ on:
   push:
     paths:
       - ".devcontainer/**"
+      - ".github/workflows/_devcontainer.yml"
+      - ".github/workflows/devcontainer.yml"
+
   pull_request:
     branches: [ main, master ]  
     paths:
       - ".devcontainer/**"
-
+      - ".github/workflows/_devcontainer.yml"
+      - ".github/workflows/devcontainer.yml"
 jobs:
   configuration:
     runs-on: ubuntu-latest
