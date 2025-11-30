@@ -106,10 +106,10 @@ jobs:
             echo "Using default image name component: $IMAGE_NAME"
           fi
           
-          # Validate the image component matches [a-z0-9]+([._-][a-z0-9]+)*
-          if ! echo "$IMAGE_NAME" | grep -qE '^[a-z0-9]+([._-][a-z0-9]+)*$'; then
+          # Validate the image component matches [a-z0-9]+([._-][a-z0-9]+)* with optional / separators
+          if ! echo "$IMAGE_NAME" | grep -qE '^[a-z0-9]+([._-][a-z0-9]+)*(/[a-z0-9]+([._-][a-z0-9]+)*)*$'; then
             echo "::error::Invalid image name component: $IMAGE_NAME"
-            echo "::error::Image name must match [a-z0-9]+([._-][a-z0-9]+)*"
+            echo "::error::Each component must match [a-z0-9]+([._-][a-z0-9]+)* separated by /"
             exit 1
           fi
           
