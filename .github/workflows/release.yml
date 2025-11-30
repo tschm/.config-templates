@@ -92,7 +92,7 @@ jobs:
         run: |
           TAG_VERSION="${{ needs.tag.outputs.tag }}"
           TAG_VERSION=${TAG_VERSION#v}
-          PROJECT_VERSION=$(uv version)
+          PROJECT_VERSION=$(uv version --short)
           
           if [[ "$PROJECT_VERSION" != "$TAG_VERSION" ]]; then
             echo "::error::Version mismatch: pyproject.toml has '$PROJECT_VERSION' but tag is '$TAG_VERSION'"
