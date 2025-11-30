@@ -255,6 +255,7 @@ printf "%b[SUCCESS] Updated version to %s%b\n" "$GREEN" "$NEW_VERSION" "$RESET"
 # Commit the version change
 printf "%b[INFO] Committing version change...%b\n" "$BLUE" "$RESET"
 git add pyproject.toml
+git add uv.lock  # In case uv modifies the lock file, which it will do for the current version update
 git commit -m "chore: bump version to $NEW_VERSION"
 
 # Push the commit to the branch
