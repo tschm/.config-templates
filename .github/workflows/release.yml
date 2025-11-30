@@ -247,7 +247,7 @@ jobs:
         with:
           configFile: .devcontainer/devcontainer.json
           push: always
-          imageName: ${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/devcontainer
+          imageName: ${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ github.repository }}/devcontainer
           imageTag: ${{ needs.tag.outputs.tag }}
 
   finalise-release:

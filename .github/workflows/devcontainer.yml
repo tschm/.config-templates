@@ -75,5 +75,5 @@ jobs:
         with:
           configFile: .devcontainer/devcontainer.json
           push: never
-          imageName: ${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/devcontainer
+          imageName: ${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ github.repository }}/devcontainer
           imageTag: ${{ github.ref_name }}-${{ github.sha }}
