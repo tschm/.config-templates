@@ -101,7 +101,6 @@ jobs:
             IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/$CUSTOM_IMAGE"
             echo "Using custom image name: $IMAGE_NAME"
           else
-            # Sanitize repository name to remove leading dots
             IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ github.event.repository.name }}/devcontainer"
           fi
           echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
