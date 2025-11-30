@@ -272,39 +272,24 @@ jobs:
           # Allow custom image name via DEVCONTAINER_IMAGE_NAME variable
           CUSTOM_IMAGE="${{ vars.DEVCONTAINER_IMAGE_NAME }}"
           if [ -n "$CUSTOM_IMAGE" ]; then
-            IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/$CUSTOM_IMAGE"
-            echo "Using custom image name: $IMAGE_NAME"
+            IMAGE_NAME="$CUSTOM_IMAGE"
+            echo "Using custom image name component: $IMAGE_NAME"
           else
-            # Sanitize repository name to remove leading dots
-            IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ github.event.repository.name }}/devcontainer"
+            REPO_NAME_LC=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+            IMAGE_NAME="$REPO_NAME_LC/devcontainer"
+            echo "Using default image name component: $IMAGE_NAME"
           fi
-          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
-      
-      - name: Validate Image Name
-        id: validate
-        run: |
-          IMAGE_NAME="${{ steps.image_name.outputs.image_name }}"
           
-          # Docker image names must:
-          # - be lowercase
-          # - each component separated by / must match [a-z0-9]+(?:[._-][a-z0-9]+)*
-          if echo "$IMAGE_NAME" | grep -qE '^([a-z0-9]+(?:[._-][a-z0-9]+)*)(/([a-z0-9]+(?:[._-][a-z0-9]+)*))*$'; then
-            echo "✅ Image name is valid: $IMAGE_NAME"
-          else
-            echo "::error::Invalid Docker image name: $IMAGE_NAME"
-            echo "::error::Each component must match [a-z0-9]+(?:[._-][a-z0-9]+)*"
-            echo "::error::Components must start and end with alphanumeric characters, containing only lowercase letters, digits, periods, underscores, and hyphens."
-            echo "::error::Please check your repository name, owner, or registry configuration."
-            echo "::error::Common issues: uppercase letters, special characters (!@#\$%^&*()), consecutive separators (--), leading/trailing separators"
+          # Validate the image component matches [a-z0-9]+([._-][a-z0-9]+)*
+          if ! echo "$IMAGE_NAME" | grep -qE '^[a-z0-9]+([._-][a-z0-9]+)*$'; then
+            echo "::error::Invalid image name component: $IMAGE_NAME"
+            echo "::error::Image name must match [a-z0-9]+([._-][a-z0-9]+)*"
             exit 1
-          fi    
-      
-      - name: Sanitize Image Tag
-        if: steps.check_publish.outputs.should_publish == 'true'
-        id: sanitized_tag
-        run: |
-          SANITIZED_TAG=$(echo "${{ needs.tag.outputs.tag }}" | tr '/' '-')
-          echo "sanitized_tag=$SANITIZED_TAG" >> $GITHUB_OUTPUT
+          fi
+          
+          IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/$IMAGE_NAME"
+          echo "✅ Final image name: $IMAGE_NAME"
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT    
 
       - name: Build and Publish Devcontainer Image
         if: steps.check_publish.outputs.should_publish == 'true'
@@ -313,7 +298,7 @@ jobs:
           configFile: .devcontainer/devcontainer.json
           push: always
           imageName: ${{ steps.image_name.outputs.image_name }}
-          imageTag: ${{ steps.sanitized_tag.outputs.sanitized_tag }}
+          imageTag: ${{ needs.tag.outputs.tag }}
 
   finalise-release:
     name: Finalise Release
