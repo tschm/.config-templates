@@ -57,9 +57,21 @@ jobs:
       - name: Get lowercase repository owner
         id: repo_owner
         run: echo "owner_lc=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+      
+      # Additional gate to skip build if no devcontainer.json exists
+      - name: Check devcontainer exists
+        id: check
+        run: |
+          if [ ! -f ".devcontainer/devcontainer.json" ]; then
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "::warning::No .devcontainer/devcontainer.json found, skipping build"
+          else
+            echo "exists=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Build Devcontainer Image
         uses: devcontainers/ci@v0.3
+        if: steps.check.outputs.exists == 'true'
         with:
           configFile: .devcontainer/devcontainer.json
           push: never
