@@ -65,25 +65,29 @@ Usage:
 Targets:
 
 Bootstrap
-  install-uv      ensure uv/uvx is installed
-  install-extras  run custom build script (if exists)
-  install         install
-  clean           clean
+  install-uv       ensure uv/uvx is installed
+  install-extras   run custom build script (if exists)
+  install          install
+  clean            clean
 
 Development and Testing
-  test            run all tests
-  marimo          fire up Marimo server
-  marimushka      export Marimo notebooks to HTML
-  deptry          run deptry if pyproject.toml exists
+  test             run all tests
+  marimo           fire up Marimo server
+  marimushka       export Marimo notebooks to HTML
+  deptry           run deptry if pyproject.toml exists
 
 Documentation
-  docs            create documentation with pdoc
-  book            compile the companion book
-  fmt             check the pre-commit hooks and the linting
-  all             Run everything
+  docs             create documentation with pdoc
+  book             compile the companion book
+  fmt              check the pre-commit hooks and the linting
+  all              Run everything
+
+Release
+  release          bump version and create release tag (usage: make release VERSION=1.2.3 or BUMP=patch [BRANCH=main])
+  release-dry-run  preview release changes without applying (usage: make release-dry-run VERSION=1.2.3 or BUMP=patch [BRANCH=main])
 
 Meta
-  help            Display this help message
+  help             Display this help message
 ```
 
 The [Makefile](Makefile) provides organized targets for bootstrapping, development, testing, and documentation tasks.
@@ -240,6 +244,18 @@ The dev container automatically runs the initialization script that:
 - Installs project dependencies
 - Sets up pre-commit hooks
 
+### Publishing Devcontainer Images
+
+The repository includes workflows for building and publishing devcontainer images:
+
+#### CI Validation
+
+The **DEVCONTAINER** workflow automatically validates that your devcontainer builds successfully:
+- Triggers on changes to `.devcontainer/**` files or the workflow itself
+- Builds the image without publishing (`push: never`)
+- Works on pushes to any branch and pull requests
+- Gracefully skips if no `.devcontainer/devcontainer.json` exists
+
 ### VS Code Dev Container SSH Agent Forwarding
 
 Dev containers launched locally via VS code
@@ -326,6 +342,76 @@ exclude: |
 - Setting up additional build dependencies
 - Downloading external resources or tools
 
+
+## 🚀 Releasing
+
+This template includes an automated release workflow that handles version bumping, tagging, and publishing.
+
+### Quick Release
+
+The easiest way to create a release is using the Makefile:
+
+```bash
+# Bump patch version (e.g., 1.2.3 → 1.2.4)
+make release BUMP=patch
+
+# Bump minor version (e.g., 1.2.3 → 1.3.0)
+make release BUMP=minor
+
+# Bump major version (e.g., 1.2.3 → 2.0.0)
+make release BUMP=major
+
+# Set specific version
+make release VERSION=1.2.3
+
+# Preview changes without applying (dry run)
+make release-dry-run BUMP=patch
+make release-dry-run VERSION=1.2.3
+```
+
+### What Happens During a Release
+
+When you run `make release`, the following happens automatically:
+
+1. **Version Update** - Updates the version in `pyproject.toml` using `uv`
+2. **Commit** - Creates a commit with message `chore: bump version to X.Y.Z`
+3. **Tag** - Creates a git tag `vX.Y.Z`
+4. **Push** - Pushes the commit and tag to GitHub
+5. **Workflow Trigger** - The tag push triggers the GitHub Actions release workflow
+
+### The Release Workflow
+
+The release workflow (`.github/workflows/release.yml`) then:
+
+1. **Validates** - Checks the tag format and ensures no duplicate releases
+2. **Builds** - Builds the Python package (if `pyproject.toml` exists)
+3. **Drafts** - Creates a draft GitHub release with artifacts
+4. **PyPI** - Publishes to PyPI (if not marked private)
+5. **Devcontainer** - Publishes devcontainer image (if `PUBLISH_DEVCONTAINER=true`)
+6. **Finalizes** - Publishes the GitHub release with links to PyPI and container images
+
+### Configuration Options
+
+**PyPI Publishing:**
+- Automatic if package is registered as a Trusted Publisher
+- Use `PYPI_REPOSITORY_URL` and `PYPI_TOKEN` for custom feeds
+- Mark as private with `Private :: Do Not Upload` in `pyproject.toml`
+
+**Devcontainer Publishing:**
+- Set repository variable `PUBLISH_DEVCONTAINER=true` to enable
+- Override registry with `DEVCONTAINER_REGISTRY` variable (defaults to ghcr.io)
+- Requires `.devcontainer/devcontainer.json` to exist
+- Image published as `{registry}/{owner}/{repository}/devcontainer:vX.Y.Z`
+
+### Advanced Options
+
+```bash
+# Release from a specific branch
+make release BUMP=patch BRANCH=main
+
+# Dry run to preview changes
+make release-dry-run VERSION=2.0.0 BRANCH=develop
+```
 
 ## 🤝 Contributing
 
