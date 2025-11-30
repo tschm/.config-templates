@@ -1,18 +1,13 @@
 # This file is part of the tschm/.config-templates repository
 # (https://github.com/tschm/.config-templates).
 #
-# Unified Devcontainer Workflow
+# Devcontainer CI Workflow
 #
-# This workflow handles both CI validation and release publishing of devcontainer images:
-#   - CI Mode: Builds devcontainer on push/PR when devcontainer files change (no publish)
-#   - Release Mode: Publishes devcontainer image when a release tag is pushed (if enabled)
+# This workflow validates that the devcontainer image builds successfully
+# when devcontainer-related files are changed. It does NOT publish the image.
 #
-# Release publishing only occurs when:
-#   - A v* tag is pushed AND
-#   - PUBLISH_DEVCONTAINER repository variable is set to "true" AND
-#   - .devcontainer directory exists
-#
-# The workflow automatically detects which mode to run in based on the trigger event.
+# Publishing only happens during releases via the release.yml workflow when
+# PUBLISH_DEVCONTAINER is set to true.
 
 name: DEVCONTAINER
 
@@ -22,112 +17,51 @@ on:
       - '**'
     paths:
       - ".devcontainer/**"
-      - ".github/workflows/_devcontainer.yml"
       - ".github/workflows/devcontainer.yml"
 
   pull_request:
     branches: [ main, master ]  
     paths:
       - ".devcontainer/**"
-      - ".github/workflows/_devcontainer.yml"
       - ".github/workflows/devcontainer.yml"
 
-  release:
-    types: [created, published]
-
 permissions:
-  contents: write  # Needed to update releases (release mode only)
-  packages: write  # Needed to publish devcontainer image
+  contents: read
+  packages: write
 
 jobs:
-  detect-mode:
-    name: Detect Workflow Mode
-    runs-on: ubuntu-latest
-    outputs:
-      is_release: ${{ steps.check.outputs.is_release }}
-      should_publish: ${{ steps.check.outputs.should_publish }}
-      tag: ${{ steps.check.outputs.tag }}
-      image_name: ${{ steps.image_name.outputs.name }}
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
-
-      - name: Detect Mode and Publishing Status
-        id: check
-        env:
-          PUBLISH_DEVCONTAINER: ${{ vars.PUBLISH_DEVCONTAINER }}
-        run: |
-          # Check if this is a release event
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "is_release=true" >> $GITHUB_OUTPUT
-            TAG="${{ github.event.release.tag_name }}"
-            echo "tag=$TAG" >> $GITHUB_OUTPUT
-            
-            # Check if we should publish on release
-            if [[ "$PUBLISH_DEVCONTAINER" == "true" ]] && [[ -d ".devcontainer" ]]; then
-              echo "should_publish=true" >> $GITHUB_OUTPUT
-              echo "🚀 Release mode: Will build and publish devcontainer image"
-            else
-              echo "should_publish=false" >> $GITHUB_OUTPUT
-              echo "⏭️  Release mode: Skipping (PUBLISH_DEVCONTAINER not true or .devcontainer missing)"
-            fi
-          else
-            echo "is_release=false" >> $GITHUB_OUTPUT
-            echo "should_publish=false" >> $GITHUB_OUTPUT
-            echo "🔨 CI mode: Will build devcontainer image (no publish)"
-          fi
-
-      - name: Calculate Image Name
-        id: image_name
-        run: |
-          REPO="${{ github.event.repository.name }}"
-          CLEAN="${REPO#.}"
-          echo "name=${CLEAN}/devcontainer" >> $GITHUB_OUTPUT
-
-  build-devcontainer:
+  build:
     name: Build Devcontainer Image
-    needs: detect-mode
-    uses: ./.github/workflows/_devcontainer.yml
-    with:
-      publish: ${{ needs.detect-mode.outputs.should_publish == 'true' }}
-      image_name: ${{ needs.detect-mode.outputs.image_name }}
-      registry: ghcr.io
-      image_tags: ${{ needs.detect-mode.outputs.is_release == 'true' && needs.detect-mode.outputs.tag || format('{0}-{1}', github.head_ref || github.ref_name, github.sha) }}
-    secrets: inherit
-
-  update-release:
-    name: Update GitHub Release
     runs-on: ubuntu-latest
-    needs: [detect-mode, build-devcontainer]
-    if: needs.detect-mode.outputs.should_publish == 'true'
     steps:
-      - name: Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
 
-      - name: Generate Devcontainer Link
-        id: devcontainer_link
+      - name: Set registry
+        id: registry
         run: |
-          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_NAME="${{ needs.detect-mode.outputs.image_name }}"
-          FULL_IMAGE="ghcr.io/$OWNER_LC/$IMAGE_NAME:${{ needs.detect-mode.outputs.tag }}"
-          {
-            echo "message<<EOF"
-            echo "### Devcontainer Image"
-            echo ""
-            echo "\`$FULL_IMAGE\`"
-            echo "EOF"
-          } >> $GITHUB_OUTPUT
+          REGISTRY="${{ vars.DEVCONTAINER_REGISTRY }}"
+          if [ -z "$REGISTRY" ]; then
+            REGISTRY="ghcr.io"
+          fi
+          echo "registry=$REGISTRY" >> $GITHUB_OUTPUT
 
-      - name: Update Release with Devcontainer Info
-        uses: softprops/action-gh-release@v2.4.2
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
         with:
-          tag_name: ${{ needs.detect-mode.outputs.tag }}
-          append_body: true
-          body: |
-            ${{ steps.devcontainer_link.outputs.message }}
+          registry: ${{ steps.registry.outputs.registry }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      # repository owner to lowercase for Docker image naming, as devcontainers/ci does not safeguard
+      - name: Get lowercase repository owner
+        id: repo_owner
+        run: echo "owner_lc=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Build Devcontainer Image
+        uses: devcontainers/ci@v0.3
+        with:
+          configFile: .devcontainer/devcontainer.json
+          push: never
+          imageName: ${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/devcontainer
+          imageTag: ${{ github.ref_name }}-${{ github.sha }}
