@@ -221,6 +221,7 @@ jobs:
     needs: [tag, build, draft-release]
     outputs:
       should_publish: ${{ steps.check_publish.outputs.should_publish }}
+      image_name: ${{ steps.image_name.outputs.image_name }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -263,6 +264,13 @@ jobs:
         if: steps.check_publish.outputs.should_publish == 'true'
         id: repo_owner
         run: echo "owner_lc=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+      
+      - name: Get Image Name
+        if: steps.check_publish.outputs.should_publish == 'true'
+        id: image_name
+        run: |
+          IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ github.event.repository.name }}/devcontainer"
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
 
       - name: Build and Publish Devcontainer Image
         if: steps.check_publish.outputs.should_publish == 'true'
@@ -270,7 +278,7 @@ jobs:
         with:
           configFile: .devcontainer/devcontainer.json
           push: always
-          imageName: ${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/${{ github.event.repository.name }}/devcontainer
+          imageName: ${{ steps.image_name.outputs.image_name }}
           imageTag: ${{ needs.tag.outputs.tag }}
 
   finalise-release:
@@ -295,7 +303,7 @@ jobs:
         if: needs.devcontainer.outputs.should_publish == 'true' && needs.devcontainer.result == 'success'
         run: |
           OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          FULL_IMAGE="ghcr.io/$OWNER_LC/devcontainer:${{ needs.tag.outputs.tag }}"
+          FULL_IMAGE="${{ needs.devcontainer.outputs.image_name }}:${{ needs.tag.outputs.tag }}"
           {
             echo "message<<EOF"
             echo "### Devcontainer Image"
