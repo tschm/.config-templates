@@ -1,34 +1,57 @@
 # This file is part of the tschm/.config-templates repository
 # (https://github.com/tschm/.config-templates).
 #
-# Manual Release Workflow for Python Package using Hatch and
-# Trusted Publisher (OIDC)
+# Release Workflow for Python Packages with Optional Devcontainer Publishing
 #
-# This workflow implements a secure, maintainable release pipeline
-# by separating concerns:
-#   - 🔍 Pre-flight checks (Tag/Release existence)
-#   - 🔖 Tagging the release (Git tag)
-#   - 🏗️ Building the package with Hatch
-#   - 🚀 Publishing to PyPI using OIDC (no passwords or secrets) or custom feed
-#   - 📦 Creating a GitHub Release with artifacts
-#   - 🐳 Publishing devcontainer image (optional, if PUBLISH_DEVCONTAINER is true)
+# This workflow implements a secure, maintainable release pipeline with distinct phases:
 #
-# Devcontainer publishing:
+# 📋 Pipeline Phases:
+#   1. 🔍 Validate Tag - Check tag format and ensure release doesn't already exist
+#   2. 🏗️  Build - Build Python package with Hatch (if pyproject.toml exists)
+#   3. 📝 Draft Release - Create draft GitHub release with build artifacts
+#   4. 🚀 Publish to PyPI - Publish package using OIDC or custom feed
+#   5. 🐳 Publish Devcontainer - Build and publish devcontainer image (conditional)
+#   6. ✅ Finalize Release - Publish the GitHub release with links
+#
+# 🐳 Devcontainer Publishing:
 #   - Only occurs when PUBLISH_DEVCONTAINER repository variable is set to "true"
-#   - Uses the release tag as the image tag
-#   - Image is always named 'devcontainer' in the repository owner's registry
+#   - Requires .devcontainer directory to exist
+#   - Uses the release tag (e.g., v1.2.3) as the image tag
+#   - Image name: {registry}/{owner}/{repository}/devcontainer
+#   - Registry defaults to ghcr.io (override with DEVCONTAINER_REGISTRY variable)
+#   - Config file: Always .devcontainer/devcontainer.json
+#   - Adds devcontainer image link to GitHub release notes
+#
+# 🚀 PyPI Publishing:
+#   - Skipped if no dist/ artifacts exist
+#   - Skipped if pyproject.toml contains "Private :: Do Not Upload"
+#   - Uses Trusted Publishing (OIDC) for PyPI (no stored credentials)
+#   - For custom feeds, use PYPI_REPOSITORY_URL and PYPI_TOKEN secrets
+#   - Adds PyPI/custom feed link to GitHub release notes
 #
 # 🔐 Security:
-#   - No PyPI credentials are stored; relies on Trusted Publishing via GitHub OIDC.
-#   - For custom feeds, secrets are used, default username is `__token__`, which is set in action by default anyway.
+#   - No PyPI credentials stored; relies on Trusted Publishing via GitHub OIDC
+#   - For custom feeds, PYPI_TOKEN secret is used with default username __token__
+#   - Container registry uses GITHUB_TOKEN for authentication
 #
 # 📄 Requirements:
-#   - `pyproject.toml` with a top-level `version = "..."`
-#   - Package is registered on PyPI as a Trusted Publisher with this repository
+#   - pyproject.toml with top-level version field (for Python packages)
+#   - Package registered on PyPI as Trusted Publisher (for PyPI publishing)
+#   - PUBLISH_DEVCONTAINER variable set to "true" (for devcontainer publishing)
+#   - .devcontainer/devcontainer.json file (for devcontainer publishing)
 #
-# ✅ To trigger:
-#   - Create and push a tag like `v1.2.3`
-#   - Example: `git tag v1.2.3 && git push origin v1.2.3`
+# ✅ To Trigger:
+#   Create and push a version tag:
+#     git tag v1.2.3
+#     git push origin v1.2.3
+#
+# 🎯 For repos without Python packages:
+#   The workflow gracefully skips Python-related steps if pyproject.toml doesn't exist.
+#
+# 🎯 For repos without devcontainers:
+#   The workflow gracefully skips devcontainer steps if PUBLISH_DEVCONTAINER is not
+#   set to "true" or .devcontainer directory doesn't exist.
+
 
 name: RELEASE
 
