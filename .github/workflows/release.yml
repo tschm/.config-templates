@@ -166,7 +166,7 @@ jobs:
         with:
           name: dist
           path: dist
-        # continue if you can't find the dist folder. Don't fail the job
+        # Continue if dist folder is not found. Don't fail the job.
         continue-on-error: true
 
       - name: Check if dist contains artifacts and not marked as private
