@@ -33,8 +33,6 @@
 
 
 name: DEVCONTAINER
-permissions:
-  contents: read
 
 on:
   push:
