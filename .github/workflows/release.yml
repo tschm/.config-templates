@@ -40,6 +40,7 @@ on:
 permissions:
   contents: write  # Needed to create releases
   id-token: write  # Needed for OIDC authentication with PyPI
+  packages: write  # Needed to publish devcontainer image
 
 jobs:
   tag:
