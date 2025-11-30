@@ -22,23 +22,15 @@
 #   - Package is registered on PyPI as a Trusted Publisher with this repository
 #
 # ✅ To trigger:
-#   - Go to the "Actions" tab
-#   - Run this workflow manually with a tag input like `v1.2.3`
+#   - Create and push a tag like `v1.2.3`
+#   - Example: `git tag v1.2.3 && git push origin v1.2.3`
 
 name: RELEASE
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Release tag (e.g. v1.2.3)'
-        required: true
-        type: string
-      release_devcontainer:
-        description: 'Release devcontainer image'
-        required: false
-        default: false
-        type: boolean
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: write  # Needed to create releases
@@ -47,24 +39,29 @@ permissions:
 
 jobs:
   tag:
-    name: Create Git Tag
+    name: Validate Tag
     runs-on: ubuntu-latest
     outputs:
-      devcontainer_exists: ${{ steps.check_devcontainer.outputs.exists }}
-      image_name: ${{ steps.image_name.outputs.name }}
+      publish_devcontainer: ${{ steps.publish_devcontainer.outputs.exists }}
+      tag: ${{ steps.set_tag.outputs.tag }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
 
-      - name: Validate Tag and Release
+      - name: Set Tag Variable
+        id: set_tag
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Validate Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.event.inputs.tag }}
+          TAG: ${{ steps.set_tag.outputs.tag }}
         run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "::error::Tag '$TAG' already exists. Please use a new tag."
-            exit 1
-          fi
           if gh release view "$TAG" >/dev/null 2>&1; then
             DRAFT_STATUS=$(gh release view "$TAG" --json isDraft --jq '.isDraft')
             if [ "$DRAFT_STATUS" != "true" ]; then
@@ -76,27 +73,16 @@ jobs:
           fi
 
       - name: Check for .devcontainer
-        id: check_devcontainer
+        id: publish_devcontainer
+        env:
+          # I want the user to explicitly enable publishing, not just rely on presence of folder
+          PUBLISH_DEVCONTAINER: ${{ vars.PUBLISH_DEVCONTAINER }}
         run: |
-          if [[ "${{ github.event.inputs.release_devcontainer }}" == "true" ]] && [[ -d ".devcontainer" ]]; then
+          if [[ "$PUBLISH_DEVCONTAINER" == "true" ]] && [[ -d ".devcontainer" ]]; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Calculate Image Name
-        id: image_name
-        run: |
-          REPO="${{ github.event.repository.name }}"
-          CLEAN="${REPO#.}"
-          echo "name=${CLEAN}/devcontainer" >> $GITHUB_OUTPUT
-
-      - name: Create Git Tag
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-          git tag ${{ github.event.inputs.tag }}
-          git push origin ${{ github.event.inputs.tag }}
 
   build:
     name: Build
@@ -107,20 +93,28 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.ref }}
 
       # Use the composite action to set up the project
       - name: Setup the project
         uses: ./.github/actions/setup-project
 
+      - name: Verify version matches tag
+        if: hashFiles('pyproject.toml') != ''
+        run: |
+          TAG_VERSION="${{ needs.tag.outputs.tag }}"
+          TAG_VERSION=${TAG_VERSION#v}
+          PROJECT_VERSION=$(uv version)
+          
+          if [[ "$PROJECT_VERSION" != "$TAG_VERSION" ]]; then
+            echo "::error::Version mismatch: pyproject.toml has '$PROJECT_VERSION' but tag is '$TAG_VERSION'"
+            exit 1
+          fi
+          echo "Version verified: $PROJECT_VERSION matches tag"
+
       - name: Build
         if: hashFiles('pyproject.toml') != ''
         run: |
-          version=${{ github.event.inputs.tag }}
-          version=${version#v}
-          echo "Setting version to $version"
-          sed -i.bak "s/^version = .*/version = \"$version\"/" pyproject.toml
-          rm pyproject.toml.bak
-
           printf "[INFO] Building package...\n"
           uvx hatch build
 
@@ -150,8 +144,8 @@ jobs:
       - name: Create GitHub Release with artifacts
         uses: softprops/action-gh-release@v2.4.2
         with:
-          tag_name: ${{ github.event.inputs.tag }}
-          name: ${{ github.event.inputs.tag }}
+          tag_name: ${{ needs.tag.outputs.tag }}
+          name: ${{ needs.tag.outputs.tag }}
           generate_release_notes: true
           files: "dist/**"
           draft: true
@@ -168,6 +162,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
 
       - name: Download dist artifact
         uses: actions/download-artifact@v6
@@ -202,31 +199,50 @@ jobs:
           repository-url: ${{ vars.PYPI_REPOSITORY_URL }}
           password: ${{ secrets.PYPI_TOKEN }}
 
+  calculate-image-name:
+    name: Calculate Image Name
+    runs-on: ubuntu-latest
+    needs: tag
+    if: needs.tag.outputs.publish_devcontainer == 'true'
+    outputs:
+      image_name: ${{ steps.image_name.outputs.name }}
+    steps:
+      - name: Calculate Image Name
+        id: image_name
+        run: |
+          REPO="${{ github.event.repository.name }}"
+          CLEAN="${REPO#.}"
+          echo "name=${CLEAN}/devcontainer" >> $GITHUB_OUTPUT
+
   publish-devcontainer:
     name: Publish Devcontainer
-    needs: [tag, build, draft-release]
-    if: needs.tag.outputs.devcontainer_exists == 'true'
+    needs: [tag, build, draft-release, calculate-image-name]
+    if: needs.tag.outputs.publish_devcontainer == 'true'
     uses: ./.github/workflows/_devcontainer.yml
     with:
       publish: true
-      image_name: ${{ needs.tag.outputs.image_name }}
+      image_name: ${{ needs.calculate-image-name.outputs.image_name }}
       registry: ghcr.io
-      image_tags: ${{ github.event.inputs.tag }}
+      image_tags: ${{ needs.tag.outputs.tag }}
     secrets: inherit
 
   finalise-release:
     name: Finalise Release
     runs-on: ubuntu-latest
-    needs: [tag, draft-release, pypi, publish-devcontainer]
+    needs: [tag, draft-release, pypi, calculate-image-name, publish-devcontainer]
     if: |
       always() &&
       needs.tag.result == 'success' &&
       needs.draft-release.result == 'success' &&
       (needs.pypi.result == 'success' || needs.pypi.result == 'skipped') &&
+      (needs.calculate-image-name.result == 'success' || needs.calculate-image-name.result == 'skipped') &&
       (needs.publish-devcontainer.result == 'success' || needs.publish-devcontainer.result == 'skipped')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
       
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -238,8 +254,8 @@ jobs:
         if: needs.publish-devcontainer.result == 'success'
         run: |
           OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_NAME="${{ needs.tag.outputs.image_name }}"
-          FULL_IMAGE="ghcr.io/$OWNER_LC/$IMAGE_NAME:${{ github.event.inputs.tag }}"
+          IMAGE_NAME="${{ needs.calculate-image-name.outputs.image_name }}"
+          FULL_IMAGE="ghcr.io/$OWNER_LC/$IMAGE_NAME:${{ needs.tag.outputs.tag }}"
           {
             echo "message<<EOF"
             echo "### Devcontainer Image"
@@ -253,7 +269,7 @@ jobs:
         if: needs.pypi.outputs.should_publish == 'true' && needs.pypi.result == 'success'
         run: |
           PACKAGE_NAME=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['name'])")
-          VERSION="${{ github.event.inputs.tag }}"
+          VERSION="${{ needs.tag.outputs.tag }}"
           VERSION=${VERSION#v}
           
           REPO_URL="${{ vars.PYPI_REPOSITORY_URL || '' }}"
@@ -276,7 +292,7 @@ jobs:
       - name: Publish Release
         uses: softprops/action-gh-release@v2.4.2
         with:
-          tag_name: ${{ github.event.inputs.tag }}
+          tag_name: ${{ needs.tag.outputs.tag }}
           draft: false
           append_body: true
           body: |
