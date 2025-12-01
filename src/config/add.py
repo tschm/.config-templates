@@ -14,5 +14,13 @@ def add(a, b):
 
     Returns:
         The arithmetic sum of ``a`` and ``b``.
+
+    Examples:
+        Basic usage:
+
+        >>> add(2, 3)
+        5
+        >>> add(-1, 4)
+        3
     """
     return a + b
