@@ -25,6 +25,7 @@ except Exception:
 
 @pytest.fixture(scope="session")
 def project_root() -> Path:
+    """Return the repository root (directory containing pyproject.toml)."""
     root = Path(__file__).parent.parent
     assert (root / "pyproject.toml").is_file()
     return root
@@ -38,13 +39,7 @@ def package_paths(project_root: Path) -> list[Path]:
         data = tomllib.load(f)
 
     packages = (
-        data
-        .get("tool", {})
-        .get("hatch", {})
-        .get("build", {})
-        .get("targets", {})
-        .get("wheel", {})
-        .get("packages", [])
+        data.get("tool", {}).get("hatch", {}).get("build", {}).get("targets", {}).get("wheel", {}).get("packages", [])
     )
 
     return [(project_root / pkg) for pkg in packages]
@@ -68,6 +63,7 @@ def _iter_modules_from_path(package_path: Path) -> Iterator[ModuleType]:
 
 
 def test_toml_file(package_paths):
+    """Run doctests for each package directory from pyproject.toml."""
     for path in package_paths:
         run_doctests_for_package(path)
 
@@ -93,10 +89,7 @@ def run_doctests_for_package(package_path: Path) -> None:
             failed_modules.append((module.__name__, results.failed, results.attempted))
 
     if failed_modules:
-        formatted = "\n".join(
-            f"  {name}: {failed}/{attempted} failed"
-            for name, failed, attempted in failed_modules
-        )
+        formatted = "\n".join(f"  {name}: {failed}/{attempted} failed" for name, failed, attempted in failed_modules)
         msg = (
             f"Doctest summary: {total_tests} tests across {len(modules)} modules\n"
             f"Failures: {total_failures}\n"
