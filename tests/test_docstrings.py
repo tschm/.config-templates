@@ -8,13 +8,9 @@ from __future__ import annotations
 
 import doctest
 import importlib
-import pkgutil
 import sys
-import tomllib
 import warnings
-from collections.abc import Iterator
 from pathlib import Path
-from types import ModuleType
 
 import pytest
 
@@ -27,71 +23,71 @@ def project_root() -> Path:
     return root
 
 
-@pytest.fixture(scope="session")
-def package_paths(project_root: Path) -> list[Path]:
-    """Return a list of package directories defined in pyproject.toml."""
-    toml_file = project_root / "pyproject.toml"
-    with toml_file.open("rb") as f:
-        data = tomllib.load(f)
+def _iter_modules_from_path(package_path: Path):
+    """Recursively find all Python modules in a directory."""
+    for path in package_path.rglob("*.py"):
+        if path.name == "__init__.py":
+            module_path = path.parent.relative_to(package_path.parent)
+        else:
+            module_path = path.relative_to(package_path.parent).with_suffix("")
 
-    packages = (
-        data.get("tool", {}).get("hatch", {}).get("build", {}).get("targets", {}).get("wheel", {}).get("packages", [])
-    )
+        # Convert path to module name
+        module_name = str(module_path).replace("/", ".")
 
-    return [(project_root / pkg) for pkg in packages]
-
-
-def _iter_modules_from_path(package_path: Path) -> Iterator[ModuleType]:
-    """Yield imported modules recursively from a package path."""
-    pkg_root = str(package_path.parent)
-    if pkg_root not in sys.path:
-        sys.path.insert(0, pkg_root)
-
-    package_name = package_path.name
-
-    # Walk through package via pkgutil
-    for _, name, _ in pkgutil.walk_packages([str(package_path)], prefix=f"{package_name}."):
         try:
-            module = importlib.import_module(name)
-            yield module
-        except ImportError as exc:
-            warnings.warn(f"Could not import {name}: {exc}", stacklevel=1)
+            yield importlib.import_module(module_name)
+        except ImportError as e:
+            warnings.warn(f"Could not import {module_name}: {e}")
 
 
-def test_toml_file(package_paths):
-    """Run doctests for each package directory from pyproject.toml."""
-    for path in package_paths:
-        run_doctests_for_package(path)
+def test_doctests(project_root: Path):
+    """Run doctests for each package directory under src/."""
+    src_path = project_root / "src"
 
+    if not src_path.exists():
+        warnings.warn(f"Source directory not found: {src_path}")
+        return
 
-def run_doctests_for_package(package_path: Path) -> None:
-    """Run doctests on all modules in a package."""
-    modules = list(_iter_modules_from_path(package_path))
+    # Add src to sys.path to allow imports
+    if str(src_path.parent) not in sys.path:
+        sys.path.insert(0, str(src_path.parent))
 
     total_tests = 0
     total_failures = 0
     failed_modules = []
 
-    for module in modules:
-        results = doctest.testmod(
-            module,
-            verbose=False,
-            optionflags=(doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE),
-        )
-        total_tests += results.attempted
+    # Find all packages in src
+    for package_dir in src_path.iterdir():
+        if package_dir.is_dir() and (package_dir / "__init__.py").exists():
+            # Import the package
+            package_name = package_dir.name
+            try:
+                modules = list(_iter_modules_from_path(package_dir))
 
-        if results.failed:
-            total_failures += results.failed
-            failed_modules.append((module.__name__, results.failed, results.attempted))
+                for module in modules:
+                    results = doctest.testmod(
+                        module,
+                        verbose=False,
+                        optionflags=(doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE),
+                    )
+                    total_tests += results.attempted
+
+                    if results.failed:
+                        total_failures += results.failed
+                        failed_modules.append((module.__name__, results.failed, results.attempted))
+
+            except ImportError as e:
+                warnings.warn(f"Could not import package {package_name}: {e}")
+                continue
 
     if failed_modules:
         formatted = "\n".join(f"  {name}: {failed}/{attempted} failed" for name, failed, attempted in failed_modules)
         msg = (
-            f"Doctest summary: {total_tests} tests across {len(modules)} modules\n"
+            f"Doctest summary: {total_tests} tests across {len(failed_modules)} module(s)\n"
             f"Failures: {total_failures}\n"
             f"Failed modules:\n{formatted}"
         )
         assert total_failures == 0, msg
 
     if total_tests == 0:
-        warnings.warn(f"No doctests were found in package {package_path.name}", stacklevel=1)
+        warnings.warn("No doctests were found in any module", stacklevel=1)
