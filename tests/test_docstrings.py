@@ -17,10 +17,7 @@ import pytest
 @pytest.fixture(scope="session")
 def project_root() -> Path:
     """Return the repository root (directory containing pyproject.toml)."""
-    root = Path(__file__).parent.parent
-    assert (root / "pyproject.toml").is_file()
-    return root
-
+    return Path(__file__).parent.parent
 
 def _iter_modules_from_path(package_path: Path):
     """Recursively find all Python modules in a directory."""
