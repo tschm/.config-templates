@@ -222,7 +222,7 @@ if [ -n "$DRY_RUN" ]; then
     printf "  5. Push commit and tag to origin\n"
     printf "  6. Trigger release workflow at: https://github.com/%s/actions\n" "$REPO_URL"
   else
-    printf "  5. (Skipped) Push commit and tag to origin (set push to enable)\n"
+    printf "  5. (Skipped) Push commit and tag to origin (use --push to enable)\n"
   fi
   printf "\n%b[DRY RUN] No changes made.%b\n" "$YELLOW" "$RESET"
   exit 0
@@ -268,7 +268,7 @@ if [ -n "$PUSH" ]; then
   printf "%b[INFO] Pushing commit to %s...%b\n" "$BLUE" "$BRANCH" "$RESET"
   git push origin "refs/heads/$BRANCH"
 else
-  printf "%b[INFO] Skipping push of commit (set push to enable)%b\n" "$BLUE" "$RESET"
+  printf "%b[INFO] Skipping push of commit (use --push to enable)%b\n" "$BLUE" "$RESET"
 fi
 
 # Create the tag
