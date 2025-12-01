@@ -19,9 +19,6 @@ from types import ModuleType
 import pytest
 
 
-
-
-
 @pytest.fixture(scope="session")
 def project_root() -> Path:
     """Return the repository root (directory containing pyproject.toml)."""
