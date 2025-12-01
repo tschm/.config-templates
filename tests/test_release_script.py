@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
 
 @pytest.fixture
-def git_repo(tmp_path):
+def git_repo(tmp_path, monkeypatch):
     """Sets up a remote bare repo and a local clone with necessary files."""
     remote_dir = tmp_path / "remote.git"
     local_dir = tmp_path / "local"
@@ -96,6 +96,8 @@ def git_repo(tmp_path):
     subprocess.run(["git", "clone", str(remote_dir), str(local_dir)], check=True)
 
     # 3. Setup local repo content
+    # Use monkeypatch to safely change cwd for the duration of the test
+    monkeypatch.chdir(local_dir)
 
     # Create pyproject.toml
     with open("pyproject.toml", "w") as f:
