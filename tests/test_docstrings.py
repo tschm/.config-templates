@@ -10,6 +10,7 @@ import doctest
 import importlib
 import pkgutil
 import sys
+import tomllib
 import warnings
 from collections.abc import Iterator
 from pathlib import Path
@@ -17,10 +18,8 @@ from types import ModuleType
 
 import pytest
 
-try:
-    import tomllib  # Python 3.11+
-except Exception:
-    tomllib = None
+
+
 
 
 @pytest.fixture(scope="session")
@@ -33,7 +32,14 @@ def project_root() -> Path:
 
 @pytest.fixture(scope="session")
 def package_paths(project_root: Path) -> list[Path]:
-    """Return a list of package directories defined in pyproject.toml."""
+    """Return a list of package directories defined in pyproject.toml.
+
+    Requires Python>=3.11 (tomllib) or the third-party 'tomli' package.
+    If neither is available, the test is skipped with a clear message.
+    """
+    if tomllib is None:
+        pytest.skip("toml parsing requires Python>=3.11 (tomllib) or 'tomli' installed")
+
     toml_file = project_root / "pyproject.toml"
     with toml_file.open("rb") as f:
         data = tomllib.load(f)
@@ -54,11 +60,11 @@ def _iter_modules_from_path(package_path: Path) -> Iterator[ModuleType]:
     package_name = package_path.name
 
     # Walk through package via pkgutil
-    for finder, name, ispkg in pkgutil.walk_packages([str(package_path)], prefix=f"{package_name}."):
+    for _, name, _ in pkgutil.walk_packages([str(package_path)], prefix=f"{package_name}."):
         try:
             module = importlib.import_module(name)
             yield module
-        except Exception as exc:
+        except ImportError as exc:
             warnings.warn(f"Could not import {name}: {exc}", stacklevel=1)
 
 
