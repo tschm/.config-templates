@@ -37,20 +37,19 @@ def _iter_modules_from_path(package_path: Path):
         try:
             yield importlib.import_module(module_name)
         except ImportError as e:
-            warnings.warn(f"Could not import {module_name}: {e}")
+            warnings.warn(f"Could not import {module_name}: {e}", stacklevel=2)
+            continue
 
 
-def test_doctests(project_root: Path):
+def test_doctests(project_root: Path, monkeypatch: pytest.MonkeyPatch):
     """Run doctests for each package directory under src/."""
     src_path = project_root / "src"
 
     if not src_path.exists():
-        warnings.warn(f"Source directory not found: {src_path}")
-        return
+        pytest.skip(f"Source directory not found: {src_path}")
 
-    # Add src to sys.path to allow imports
-    if str(src_path.parent) not in sys.path:
-        sys.path.insert(0, str(src_path.parent))
+    # Add src to sys.path with automatic cleanup
+    monkeypatch.syspath_prepend(str(src_path.parent))
 
     total_tests = 0
     total_failures = 0
@@ -77,7 +76,7 @@ def test_doctests(project_root: Path):
                         failed_modules.append((module.__name__, results.failed, results.attempted))
 
             except ImportError as e:
-                warnings.warn(f"Could not import package {package_name}: {e}")
+                warnings.warn(f"Could not import package {package_name}: {e}", stacklevel=2)
                 continue
 
     if failed_modules:
@@ -90,4 +89,4 @@ def test_doctests(project_root: Path):
         assert total_failures == 0, msg
 
     if total_tests == 0:
-        warnings.warn("No doctests were found in any module", stacklevel=1)
+        pytest.skip("No doctests were found in any module")
