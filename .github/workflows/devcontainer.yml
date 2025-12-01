@@ -98,7 +98,11 @@ jobs:
           # Check if custom name is provided, otherwise use default
           if [ -z "${{ vars.DEVCONTAINER_IMAGE_NAME }}" ]; then
             REPO_NAME_LC=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
-            IMAGE_NAME="$REPO_NAME_LC/devcontainer"
+            # Sanitize repo name: replace invalid characters with hyphens
+            # Docker image names must match [a-z0-9]+([._-][a-z0-9]+)*
+            # Replace leading dots and multiple consecutive separators
+            REPO_NAME_SANITIZED=$(echo "$REPO_NAME_LC" | sed 's/^[._-]*//; s/[._-][._-]*/-/g')
+            IMAGE_NAME="$REPO_NAME_SANITIZED/devcontainer"
             echo "Using default image name component: $IMAGE_NAME"
           else
             IMAGE_NAME="${{ vars.DEVCONTAINER_IMAGE_NAME }}"
