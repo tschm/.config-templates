@@ -167,8 +167,7 @@ def test_docstrings() -> None:
     # If there are failures, include details in the assertion message
     if failed_modules:
         failed_details = "\n".join(
-            f"  {mod_name}: {failures}/{attempted} failed"
-            for mod_name, failures, attempted in failed_modules
+            f"  {mod_name}: {failures}/{attempted} failed" for mod_name, failures, attempted in failed_modules
         )
         summary = (
             f"Doctest summary: {total_tests} tests in {len(modules)} modules\n"
