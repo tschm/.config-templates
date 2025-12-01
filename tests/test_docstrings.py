@@ -29,14 +29,7 @@ def project_root() -> Path:
 
 @pytest.fixture(scope="session")
 def package_paths(project_root: Path) -> list[Path]:
-    """Return a list of package directories defined in pyproject.toml.
-
-    Requires Python>=3.11 (tomllib) or the third-party 'tomli' package.
-    If neither is available, the test is skipped with a clear message.
-    """
-    if tomllib is None:
-        pytest.skip("toml parsing requires Python>=3.11 (tomllib) or 'tomli' installed")
-
+    """Return a list of package directories defined in pyproject.toml."""
     toml_file = project_root / "pyproject.toml"
     with toml_file.open("rb") as f:
         data = tomllib.load(f)
