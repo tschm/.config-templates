@@ -17,7 +17,7 @@ RESET := \033[0m
 .DEFAULT_GOAL := help
 
 # Declare phony targets (they don't produce files)
-.PHONY: install-uv install clean test marimo marimushka book fmt deptry docs help all
+.PHONY: install-uv install clean test marimo marimushka book fmt deptry docs release release-dry-run post-release help all
 
 UV_INSTALL_DIR := ./bin
 UV_BIN := ${UV_INSTALL_DIR}/uv
@@ -182,6 +182,17 @@ release-dry-run: install-uv ## preview release changes without applying (usage: 
 	  UV_BIN="${UV_BIN}" /bin/sh .github/scripts/release.sh --bump "$(BUMP)" $$ARGS; \
 	else \
 	  UV_BIN="${UV_BIN}" /bin/sh .github/scripts/release.sh "$(VERSION)" $$ARGS; \
+	fi
+
+post-release: install-uv ## perform post-release tasks (usage: make post-release)
+	@if [ -x ".github/scripts/post-release.sh" ]; then \
+		printf "${BLUE}[INFO] Running post-release script...${RESET}\n"; \
+		./.github/scripts/post-release.sh; \
+	elif [ -f ".github/scripts/post-release.sh" ]; then \
+		printf "${BLUE}[INFO] Running post-release script...${RESET}\n"; \
+		/bin/sh .github/scripts/post-release.sh; \
+	else \
+		printf "${BLUE}[INFO] No post-release script found, skipping...${RESET}\n"; \
 	fi
 
 ##@ Meta
