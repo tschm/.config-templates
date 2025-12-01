@@ -22,12 +22,14 @@ VERSION=""
 BUMP=""
 DRY_RUN=""
 BRANCH=""
+PUSH=""
 
 show_usage() {
   printf "Usage: %s [OPTIONS] VERSION|--bump BUMP_TYPE\n\n" "$0"
   printf "Options:\n"
   printf "  --bump TYPE    Bump version semantically (major, minor, patch, alpha, beta, rc, etc.)\n"
   printf "  --branch REF   Branch or ref to tag (default: current default branch)\n"
+  printf "  --push         Push changes and tag to remote (default: false)\n"
   printf "  --dry-run      Show what would be done without making changes\n"
   printf "  -h, --help     Show this help message\n\n"
   printf "Examples:\n"
@@ -44,6 +46,10 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run)
       DRY_RUN="--dry-run"
+      shift
+      ;;
+    --push)
+      PUSH="true"
       shift
       ;;
     --bump)
@@ -152,6 +158,12 @@ if ! git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
   exit 1
 fi
 
+# Check for ambiguous tag/branch names
+if git rev-parse --verify "refs/tags/$BRANCH" >/dev/null 2>&1; then
+  printf "%b[WARN] A tag named '%s' exists, which conflicts with the branch name.%b\n" "$YELLOW" "$BRANCH" "$RESET"
+  printf "%b[WARN] This creates ambiguity for git commands. We will use explicit refspecs to handle this.%b\n" "$YELLOW" "$RESET"
+fi
+
 # Get current version
 CURRENT_VERSION=$("$UV_BIN" version --short 2>/dev/null || echo "unknown")
 printf "%b[INFO] Current version: %s%b\n" "$BLUE" "$CURRENT_VERSION" "$RESET"
@@ -191,21 +203,10 @@ fi
 
 # Check for uncommitted changes
 if [ -n "$(git status --porcelain)" ]; then
-  printf "%b[WARN] You have uncommitted changes:%b\n" "$YELLOW" "$RESET"
+  printf "%b[ERROR] You have uncommitted changes:%b\n" "$RED" "$RESET"
   git status --short
-  printf "\n%b[WARN] These changes will be included in the release commit.%b\n" "$YELLOW" "$RESET"
-  if [ -z "$DRY_RUN" ]; then
-    printf "Continue? [y/N] "
-    read -r answer
-    case "$answer" in
-      [Yy]*)
-        ;;
-      *)
-        printf "%b[INFO] Aborted by user%b\n" "$YELLOW" "$RESET"
-        exit 1
-        ;;
-    esac
-  fi
+  printf "\n%b[ERROR] Please commit or stash your changes before releasing.%b\n" "$RED" "$RESET"
+  exit 1
 fi
 
 if [ -n "$DRY_RUN" ]; then
@@ -217,8 +218,12 @@ if [ -n "$DRY_RUN" ]; then
   printf "  2. Update version in pyproject.toml from %s to %s\n" "$CURRENT_VERSION" "$NEW_VERSION"
   printf "  3. Git commit: 'chore: bump version to %s'\n" "$NEW_VERSION"
   printf "  4. Create git tag: %s\n" "$TAG"
-  printf "  5. Push tag to origin\n"
-  printf "  6. Trigger release workflow at: https://github.com/%s/actions\n" "$REPO_URL"
+  if [ -n "$PUSH" ]; then
+    printf "  5. Push commit and tag to origin\n"
+    printf "  6. Trigger release workflow at: https://github.com/%s/actions\n" "$REPO_URL"
+  else
+    printf "  5. (Skipped) Push commit and tag to origin (use --push to enable)\n"
+  fi
   printf "\n%b[DRY RUN] No changes made.%b\n" "$YELLOW" "$RESET"
   exit 0
 fi
@@ -259,18 +264,30 @@ git add uv.lock  # In case uv modifies the lock file, which it will do for the c
 git commit -m "chore: bump version to $NEW_VERSION"
 
 # Push the commit to the branch
-printf "%b[INFO] Pushing commit to %s...%b\n" "$BLUE" "$BRANCH" "$RESET"
-git push origin "$BRANCH"
+if [ -n "$PUSH" ]; then
+  printf "%b[INFO] Pushing commit to %s...%b\n" "$BLUE" "$BRANCH" "$RESET"
+  git push origin "refs/heads/$BRANCH"
+else
+  printf "%b[INFO] Skipping push of commit (use --push to enable)%b\n" "$BLUE" "$RESET"
+fi
 
 # Create the tag
 printf "%b[INFO] Creating tag %s...%b\n" "$BLUE" "$TAG" "$RESET"
 git tag -a "$TAG" -m "Release $TAG"
 
 # Push the tag
-printf "%b[INFO] Pushing tag to origin...%b\n" "$BLUE" "$RESET"
-git push origin "$TAG"
+if [ -n "$PUSH" ]; then
+  printf "%b[INFO] Pushing tag to origin...%b\n" "$BLUE" "$RESET"
+  git push origin "refs/tags/$TAG"
 
-REPO_URL=$(git remote get-url origin | sed 's/.*github.com[:/]\(.*\)\.git/\1/')
-printf "\n%b[SUCCESS] Release tag %s created and pushed!%b\n" "$GREEN" "$TAG" "$RESET"
-printf "%b[INFO] The release workflow will now be triggered automatically.%b\n" "$BLUE" "$RESET"
-printf "%b[INFO] Monitor progress at: https://github.com/%s/actions%b\n" "$BLUE" "$REPO_URL" "$RESET"
+  REPO_URL=$(git remote get-url origin | sed 's/.*github.com[:/]\(.*\)\.git/\1/')
+  printf "\n%b[SUCCESS] Release tag %s created and pushed!%b\n" "$GREEN" "$TAG" "$RESET"
+  printf "%b[INFO] The release workflow will now be triggered automatically.%b\n" "$BLUE" "$RESET"
+  printf "%b[INFO] Monitor progress at: https://github.com/%s/actions%b\n" "$BLUE" "$REPO_URL" "$RESET"
+else
+  printf "%b[INFO] Skipping push of tag (use --push to enable)%b\n" "$BLUE" "$RESET"
+  printf "\n%b[SUCCESS] Version bumped and tag %s created locally.%b\n" "$GREEN" "$TAG" "$RESET"
+  printf "To publish this release, run:\n"
+  printf "  git push origin refs/heads/%s\n" "$BRANCH"
+  printf "  git push origin refs/tags/%s\n" "$TAG"
+fi
