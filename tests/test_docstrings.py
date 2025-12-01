@@ -19,6 +19,7 @@ def project_root() -> Path:
     """Return the repository root (directory containing pyproject.toml)."""
     return Path(__file__).parent.parent
 
+
 def _iter_modules_from_path(package_path: Path):
     """Recursively find all Python modules in a directory."""
     for path in package_path.rglob("*.py"):
