@@ -16,7 +16,7 @@ for modern Python projects.
 Save time and maintain consistency across your projects
 with these pre-configured templates.
 
-> Last updated: November 29, 2025
+> Last updated: December 01, 2025
 
 ## ✨ Features
 
