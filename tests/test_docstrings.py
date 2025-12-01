@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import doctest
 import importlib
-import sys
 import warnings
 from pathlib import Path
 
