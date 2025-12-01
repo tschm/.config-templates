@@ -164,18 +164,20 @@ def test_docstrings() -> None:
         if results.failed > 0:
             failed_modules.append((module.__name__, results.failed, results.attempted))
 
-    # Print summary
-    print(f"\nDoctest summary: {total_tests} tests in {len(modules)} modules")
-    print(f"Failures: {total_failures}")
-
+    # If there are failures, include details in the assertion message
     if failed_modules:
-        print("\nFailed modules:")
-        for mod_name, failures, attempted in failed_modules:
-            print(f"  {mod_name}: {failures}/{attempted} failed")
-
-    # Assert no failures
-    assert total_failures == 0, f"Doctest failures in: {[m[0] for m in failed_modules]}"
-
+        failed_details = "\n".join(
+            f"  {mod_name}: {failures}/{attempted} failed"
+            for mod_name, failures, attempted in failed_modules
+        )
+        summary = (
+            f"Doctest summary: {total_tests} tests in {len(modules)} modules\n"
+            f"Failures: {total_failures}\n"
+            f"Failed modules:\n{failed_details}"
+        )
+        assert total_failures == 0, summary
+    else:
+        assert total_failures == 0
     # raise a warning if no tests were found
     if total_tests == 0:
         warnings.warn("No doctests were found")
