@@ -15,8 +15,8 @@ import importlib
 import pkgutil
 import sys
 import warnings
-from pathlib import Path
 from collections.abc import Iterator
+from pathlib import Path
 from types import ModuleType
 
 
@@ -179,4 +179,3 @@ def test_docstrings() -> None:
     # raise a warning if no tests were found
     if total_tests == 0:
         warnings.warn("No doctests were found")
-
