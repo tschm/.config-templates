@@ -95,15 +95,14 @@ jobs:
         if: steps.check.outputs.exists == 'true'
         id: image_name
         run: |
-          # Allow custom image name via DEVCONTAINER_IMAGE_NAME variable
-          CUSTOM_IMAGE="${{ vars.DEVCONTAINER_IMAGE_NAME }}"
-          if [ -n "$CUSTOM_IMAGE" ]; then
-            IMAGE_NAME="$CUSTOM_IMAGE"
-            echo "Using custom image name component: $IMAGE_NAME"
-          else
+          # Check if custom name is provided, otherwise use default
+          if [ -z "${{ vars.DEVCONTAINER_IMAGE_NAME }}" ]; then
             REPO_NAME_LC=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
             IMAGE_NAME="$REPO_NAME_LC/devcontainer"
             echo "Using default image name component: $IMAGE_NAME"
+          else
+            IMAGE_NAME="${{ vars.DEVCONTAINER_IMAGE_NAME }}"
+            echo "Using custom image name component: $IMAGE_NAME"
           fi
           
           # Validate the image component matches [a-z0-9]+([._-][a-z0-9]+)* with optional / separators
