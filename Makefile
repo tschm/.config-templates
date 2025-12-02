@@ -150,65 +150,44 @@ all: fmt deptry book ## Run everything
 	echo "Run fmt, deptry, test and book"
 
 ##@ Release
-release: install-uv ## three-step release process (usage: make release BUMP=patch | make release commit | make release push | make release ALL=true BUMP=patch)
-	@COMMAND=""; \
-	if [ "$(filter commit,$(MAKECMDGOALS))" = "commit" ] || [ "$(COMMAND)" = "commit" ]; then \
-		COMMAND="commit"; \
-	elif [ "$(filter push,$(MAKECMDGOALS))" = "push" ] || [ "$(COMMAND)" = "push" ]; then \
-		COMMAND="push"; \
-	fi; \
-	\
-	if [ -n "$(ALL)" ] && [ "$(ALL)" = "true" ]; then \
-		if [ -z "$(VERSION)" ] && [ -z "$(BUMP)" ]; then \
-			printf "${RED}[ERROR] VERSION or BUMP is required for ALL mode.${RESET}\n"; \
-			printf "Examples:\n"; \
-			printf "  make release BUMP=patch ALL=true\n"; \
-			printf "  make release BUMP=minor ALL=true\n"; \
-			printf "  make release VERSION=1.2.3 ALL=true\n"; \
-			exit 1; \
-		fi; \
-		ARGS="--all"; \
-		if [ -n "$(BRANCH)" ]; then ARGS="$$ARGS --branch $(BRANCH)"; fi; \
-		if [ -n "$(BUMP)" ]; then \
-			ARGS="$$ARGS --bump $(BUMP)"; \
-		else \
-			ARGS="$$ARGS --version $(VERSION)"; \
-		fi; \
-		UV_BIN="${UV_BIN}" /bin/sh "${SCRIPTS_FOLDER}/release.sh" $$ARGS; \
-	elif [ "$$COMMAND" = "commit" ]; then \
-		UV_BIN="${UV_BIN}" /bin/sh "${SCRIPTS_FOLDER}/release.sh" commit; \
-	elif [ "$$COMMAND" = "push" ]; then \
-		UV_BIN="${UV_BIN}" /bin/sh "${SCRIPTS_FOLDER}/release.sh" push; \
-	else \
-		if [ -z "$(VERSION)" ] && [ -z "$(BUMP)" ]; then \
-			printf "${RED}[ERROR] VERSION or BUMP is required.${RESET}\n"; \
-			printf "Examples:\n"; \
-			printf "  ${BLUE}Step 1 - Bump version:${RESET}\n"; \
-			printf "    make release BUMP=patch\n"; \
-			printf "    make release BUMP=minor\n"; \
-			printf "    make release BUMP=major\n"; \
-			printf "    make release VERSION=1.2.3\n"; \
-			printf "  ${BLUE}Step 2 - Commit and tag:${RESET}\n"; \
-			printf "    make release commit\n"; \
-			printf "  ${BLUE}Step 3 - Push to remote:${RESET}\n"; \
-			printf "    make release push\n"; \
-			printf "  ${BLUE}All steps with prompts:${RESET}\n"; \
-			printf "    make release BUMP=patch ALL=true\n"; \
-			exit 1; \
-		fi; \
-		ARGS=""; \
-		if [ -n "$(BRANCH)" ]; then ARGS="$$ARGS --branch $(BRANCH)"; fi; \
-		if [ -n "$(BUMP)" ]; then \
-			ARGS="$$ARGS --bump $(BUMP)"; \
-		else \
-			ARGS="$$ARGS --version $(VERSION)"; \
-		fi; \
-		UV_BIN="${UV_BIN}" /bin/sh "${SCRIPTS_FOLDER}/release.sh" $$ARGS; \
+bump: install-uv ## bump version (usage: make bump TYPE=patch [COMMIT=true] [COMMIT_MSG="message"])
+	@if [ -z "$(VERSION)" ] && [ -z "$(TYPE)" ]; then \
+		printf "${RED}[ERROR] VERSION or TYPE is required.${RESET}\n"; \
+		printf "Examples:\n"; \
+		printf "  ${BLUE}Bump version (no commit):${RESET}\n"; \
+		printf "    make bump TYPE=patch\n"; \
+		printf "    make bump TYPE=minor\n"; \
+		printf "    make bump TYPE=major\n"; \
+		printf "    make bump VERSION=1.2.3\n"; \
+		printf "  ${BLUE}Bump and commit with default message:${RESET}\n"; \
+		printf "    make bump TYPE=patch COMMIT=true\n"; \
+		printf "  ${BLUE}Bump and commit with custom message:${RESET}\n"; \
+		printf "    make bump TYPE=minor COMMIT=true COMMIT_MSG='feat: new feature release'\n"; \
+		exit 1; \
 	fi
+	@ARGS="bump"; \
+	if [ -n "$(TYPE)" ]; then \
+		ARGS="$$ARGS --type $(TYPE)"; \
+	else \
+		ARGS="$$ARGS --version $(VERSION)"; \
+	fi; \
+	if [ -n "$(COMMIT)" ] && [ "$(COMMIT)" = "true" ]; then \
+		ARGS="$$ARGS --commit"; \
+		if [ -n "$(COMMIT_MSG)" ]; then \
+			ARGS="$$ARGS --message \"$(COMMIT_MSG)\""; \
+		fi; \
+	fi; \
+	UV_BIN="${UV_BIN}" /bin/sh "${SCRIPTS_FOLDER}/release.sh" $$ARGS
 
-# Support 'make release commit' and 'make release push' syntax
-commit push:
-	@:
+patch: ## alias bump via patch (usage: make patch [COMMIT=true] [COMMIT_MSG="message"])
+	@$(MAKE) bump TYPE=patch $(if $(COMMIT),COMMIT=$(COMMIT)) $(if $(COMMIT_MSG),COMMIT_MSG="$(COMMIT_MSG)")
+minor: ## alias bump via minor (usage: make minor [COMMIT=true] [COMMIT_MSG="message"])
+	@$(MAKE) bump TYPE=minor $(if $(COMMIT),COMMIT=$(COMMIT)) $(if $(COMMIT_MSG),COMMIT_MSG="$(COMMIT_MSG)")
+major: ## alias bump via major (usage: make major [COMMIT=true] [COMMIT_MSG="message"])
+	@$(MAKE) bump TYPE=major $(if $(COMMIT),COMMIT=$(COMMIT)) $(if $(COMMIT_MSG),COMMIT_MSG="$(COMMIT_MSG)")
+
+release: install-uv ## create tag and push to remote with prompts (usage: make release)
+	@UV_BIN="${UV_BIN}" /bin/sh "${SCRIPTS_FOLDER}/release.sh" release
 
 post-release: install-uv ## perform post-release tasks (usage: make post-release)
 	@if [ -x "${CUSTOM_SCRIPTS_FOLDER}/post-release.sh" ]; then \
