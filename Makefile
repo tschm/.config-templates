@@ -189,7 +189,7 @@ major: ## alias bump via major (usage: make major [COMMIT=true] [COMMIT_MSG="mes
 publish: ## bump version, commit, tag and push (usage: make publish TYPE=patch|minor|major [VERSION=x.y.z] [COMMIT_MSG="..."])
 	@printf "${YELLOW}[WARN] This will bump the version, commit changes, create a tag, and PUSH to remote.${RESET}\n"
 	@printf "${YELLOW}[WARN] Ensure you are on the correct branch and have pulled latest changes.${RESET}\n"
-	@$(MAKE) bump COMMIT=true
+	@$(MAKE) bump COMMIT=true $(if $(TYPE),TYPE=$(TYPE)) $(if $(VERSION),VERSION=$(VERSION)) $(if $(COMMIT_MSG),COMMIT_MSG="$(COMMIT_MSG)")
 	@$(MAKE) release
 
 release: install-uv ## create tag and push to remote with prompts (usage: make release)
