@@ -218,7 +218,7 @@ do_bump() {
   fi
 
   # Update version in pyproject.toml using uv
-  printf "%b[INFO] Updating version in pyproject.toml...%b\n" "$BLUE" "$RESET"
+  printf "%b[INFO] Updating pyproject.toml...%b\n" "$BLUE" "$RESET"
   if [ -n "$TYPE" ]; then
     if ! "$UV_BIN" version --bump "$TYPE" >/dev/null 2>&1; then
       printf "%b[ERROR] Failed to bump version using 'uv version --bump %s'%b\n" "$RED" "$TYPE" "$RESET"
@@ -257,8 +257,8 @@ do_bump() {
   else
     printf "%b[INFO] Version bumped but not committed%b\n" "$BLUE" "$RESET"
     printf "%b[INFO] Next steps:%b\n" "$BLUE" "$RESET"
-    printf "  1. Run 'make bump COMMIT=true' to commit with default message\n"
-    printf "  2. Or commit manually, then run 'make release' to create tag and push\n"
+    printf "  1. Commit changes: git commit -a -m 'chore: bump version to %s'\n" "$NEW_VERSION"
+    printf "  2. Run 'make release' to create tag and push\n"
   fi
 }
 
@@ -306,7 +306,7 @@ do_release() {
   fi
 
   # Check if branch is up-to-date with remote
-  printf "%b[INFO] Checking if branch is up-to-date with remote...%b\n" "$BLUE" "$RESET"
+  printf "%b[INFO] Checking remote status...%b\n" "$BLUE" "$RESET"
   git fetch origin >/dev/null 2>&1
   UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
   if [ -z "$UPSTREAM" ]; then
@@ -324,7 +324,7 @@ do_release() {
         exit 1
     elif [ "$REMOTE" = "$BASE" ]; then
         printf "%b[WARN] Your branch is ahead of '%s'.%b\n" "$YELLOW" "$UPSTREAM" "$RESET"
-        printf "Commits to be pushed:\n"
+        printf "Unpushed commits:\n"
         git log --oneline --graph --decorate "$UPSTREAM..HEAD"
         prompt_continue "Push changes to remote before releasing?"
         git push origin "$CURRENT_BRANCH"
@@ -360,7 +360,7 @@ do_release() {
 
   # Step 2: Push the tag to remote
   printf "\n%b=== Step 2: Push Tag to Remote ===%b\n" "$BLUE" "$RESET"
-  printf "This will push tag '%s' to origin, which will trigger the release workflow.\n" "$TAG"
+  printf "Pushing tag '%s' to origin will trigger the release workflow.\n" "$TAG"
   
   # Show what commits are in this tag
   LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
