@@ -324,6 +324,8 @@ do_release() {
         exit 1
     elif [ "$REMOTE" = "$BASE" ]; then
         printf "%b[WARN] Your branch is ahead of '%s'.%b\n" "$YELLOW" "$UPSTREAM" "$RESET"
+        printf "Commits to be pushed:\n"
+        git log --oneline --graph --decorate "$UPSTREAM..HEAD"
         prompt_continue "Push changes to remote before releasing?"
         git push origin "$CURRENT_BRANCH"
     else

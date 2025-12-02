@@ -341,6 +341,8 @@ def test_release_pushes_if_ahead_of_remote(git_repo):
 
     assert result.returncode == 0
     assert "Your branch is ahead" in result.stdout
+    assert "Commits to be pushed:" in result.stdout
+    assert "Local commit" in result.stdout
     assert "Push changes to remote before releasing?" in result.stdout
 
 
