@@ -33,7 +33,7 @@
                 // Marimo/Notebooks
                 "marimo-team.vscode-marimo",
                 "marimo-ai.marimo-vscode",
-                //Linting and Formatting
+                // Linting and Formatting
                 "charliermarsh.ruff",
                 "tamasfe.even-better-toml",
                 // AI Assistance
