@@ -82,8 +82,13 @@ Documentation
   all              Run everything
 
 Release
-  release          bump version and create release tag (usage: make release VERSION=1.2.3 or BUMP=patch [BRANCH=main])
-  release-dry-run  preview release changes without applying (usage: make release-dry-run VERSION=1.2.3 or BUMP=patch [BRANCH=main])
+  bump             bump version (usage: make bump TYPE=patch [COMMIT=true] [COMMIT_MSG="message"])
+  patch            alias bump via patch (usage: make patch [COMMIT=true] [COMMIT_MSG="message"])
+  minor            alias bump via minor (usage: make minor [COMMIT=true] [COMMIT_MSG="message"])
+  major            alias bump via major (usage: make major [COMMIT=true] [COMMIT_MSG="message"])
+  publish          bump version, commit, tag and push (usage: make publish TYPE=patch|minor|major [VERSION=x.y.z] [COMMIT_MSG="..."])
+  release          create tag and push to remote with prompts (usage: make release)
+  post-release     perform post-release tasks (usage: make post-release)
 
 Meta
   help             Display this help message
@@ -345,50 +350,82 @@ If you need repository-specific post-release tasks, place a `post-release.sh` sc
 
 ## 🚀 Releasing
 
-This template includes an automated release workflow that handles version bumping, tagging, and publishing.
+This template includes a robust release workflow that handles version bumping, tagging, and publishing.
 
-### Quick Release
+### The Release Process
 
-The easiest way to create a release is using the Makefile:
+The release process consists of two steps: **Bump** and **Release**.
+
+#### 1. Bump Version
+
+First, update the version in `pyproject.toml` and commit the changes.
 
 ```bash
 # Bump patch version (e.g., 1.2.3 → 1.2.4)
-make release BUMP=patch
+make bump TYPE=patch
 
 # Bump minor version (e.g., 1.2.3 → 1.3.0)
-make release BUMP=minor
+make bump TYPE=minor
 
 # Bump major version (e.g., 1.2.3 → 2.0.0)
-make release BUMP=major
+make bump TYPE=major
 
 # Set specific version
-make release VERSION=1.2.3
-
-# Preview changes without applying (dry run)
-make release-dry-run BUMP=patch
-make release-dry-run VERSION=1.2.3
+make bump VERSION=1.2.3
 ```
 
-### What Happens During a Release
+By default, `make bump` only updates the file. To commit automatically:
 
-When you run `make release`, the following happens automatically:
+```bash
+make bump TYPE=patch COMMIT=true
+# or with a custom message
+make bump TYPE=patch COMMIT=true COMMIT_MSG="feat: release 1.2.4"
+```
 
-1. **Version Update** - Updates the version in `pyproject.toml` using `uv`
-2. **Commit** - Creates a commit with message `chore: bump version to X.Y.Z`
-3. **Tag** - Creates a git tag `vX.Y.Z`
-4. **Push** - Pushes the commit and tag to GitHub
-5. **Workflow Trigger** - The tag push triggers the GitHub Actions release workflow
+Shortcuts are available for common bumps (these behave like `make bump`):
 
-### The Release Workflow
+```bash
+make patch  # equivalent to make bump TYPE=patch
+make minor  # equivalent to make bump TYPE=minor
+make major  # equivalent to make bump TYPE=major
+```
 
-The release workflow (`.github/workflows/release.yml`) then:
+#### 2. Release
 
-1. **Validates** - Checks the tag format and ensures no duplicate releases
-2. **Builds** - Builds the Python package (if `pyproject.toml` exists)
-3. **Drafts** - Creates a draft GitHub release with artifacts
-4. **PyPI** - Publishes to PyPI (if not marked private)
-5. **Devcontainer** - Publishes devcontainer image (if `PUBLISH_DEVCONTAINER=true`)
-6. **Finalizes** - Publishes the GitHub release with links to PyPI and container images
+Once the version is bumped and committed, run the release command:
+
+```bash
+make release
+```
+
+This command will:
+1.  Check if your branch is up-to-date with the remote.
+2.  If your local branch is ahead, it will show the unpushed commits and prompt you to push them.
+3.  Create a git tag (e.g., `v1.2.4`).
+4.  Push the tag to the remote, which triggers the GitHub Actions release workflow.
+
+### One-Step Publish
+
+For convenience, you can do everything in one go using `make publish`:
+
+```bash
+make publish TYPE=patch
+```
+
+This is equivalent to:
+1.  `make bump TYPE=patch COMMIT=true`
+2.  `make release`
+
+### What Happens After Release
+
+The release workflow (`.github/workflows/release.yml`) triggers on the tag push and:
+
+1.  **Validates** - Checks the tag format and ensures no duplicate releases
+2.  **Builds** - Builds the Python package (if `pyproject.toml` exists)
+3.  **Drafts** - Creates a draft GitHub release with artifacts
+4.  **PyPI** - Publishes to PyPI (if not marked private)
+5.  **Devcontainer** - Publishes devcontainer image (if `PUBLISH_DEVCONTAINER=true`)
+6.  **Finalizes** - Publishes the GitHub release with links to PyPI and container images
 
 ### Configuration Options
 
@@ -402,16 +439,6 @@ The release workflow (`.github/workflows/release.yml`) then:
 - Override registry with `DEVCONTAINER_REGISTRY` variable (defaults to ghcr.io)
 - Requires `.devcontainer/devcontainer.json` to exist
 - Image published as `{registry}/{owner}/{repository}/devcontainer:vX.Y.Z`
-
-### Advanced Options
-
-```bash
-# Release from a specific branch
-make release BUMP=patch BRANCH=main
-
-# Dry run to preview changes
-make release-dry-run VERSION=2.0.0 BRANCH=develop
-```
 
 ## 🤝 Contributing
 
