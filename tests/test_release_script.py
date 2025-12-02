@@ -1,4 +1,9 @@
-"""Tests for the release.sh script using a sandboxed git environment."""
+"""Tests for the release.sh script using a sandboxed git environment.
+
+The script exposes two commands: `bump` (updates pyproject.toml via `uv`) and
+`release` (creates and pushes tags). Tests call the script from a temporary
+clone and use a small mock `uv` to avoid external dependencies.
+"""
 
 import shutil
 import subprocess
@@ -13,7 +18,6 @@ RELEASE_SCRIPT_PATH = WORKSPACE_ROOT / ".github" / "scripts" / "release.sh"
 MOCK_UV_SCRIPT = """#!/usr/bin/env python3
 import sys
 import re
-import argparse
 
 def get_version():
     with open("pyproject.toml", "r") as f:
@@ -39,8 +43,8 @@ def bump_version(current, bump_type):
     return current
 
 def main():
-    # Minimal argument parsing to match release.sh usage
     args = sys.argv[1:]
+    # Expected invocations from release.sh start with 'version'
     if not args or args[0] != "version":
         sys.exit(1)
 
@@ -57,11 +61,6 @@ def main():
         print(bump_version(current, bump_type))
         return
 
-    # uv version <version> --dry-run
-    if "--dry-run" in args and "--bump" not in args:
-        # Just validation, return success
-        return
-
     # uv version --bump <type> (actual update)
     if "--bump" in args and "--dry-run" not in args:
         bump_idx = args.index("--bump") + 1
@@ -71,8 +70,12 @@ def main():
         set_version(new_ver)
         return
 
+    # uv version <version> --dry-run
+    if len(args) >= 2 and not args[1].startswith("-") and "--dry-run" in args:
+        # Just exit 0 if valid
+        return
+
     # uv version <version> (actual update)
-    # args: ['version', '1.2.3']
     if len(args) == 2 and not args[1].startswith("-"):
         set_version(args[1])
         return
@@ -95,7 +98,6 @@ def git_repo(tmp_path, monkeypatch):
     # 2. Clone to local
     subprocess.run(["git", "clone", str(remote_dir), str(local_dir)], check=True)
 
-    # 3. Setup local repo content
     # Use monkeypatch to safely change cwd for the duration of the test
     monkeypatch.chdir(local_dir)
 
@@ -132,90 +134,172 @@ def git_repo(tmp_path, monkeypatch):
     yield local_dir
 
 
-def test_release_bump_patch_local_only(git_repo):
-    """Test bumping patch version without pushing (default)."""
+@pytest.mark.parametrize(
+    "bump_type, expected_version",
+    [
+        ("patch", "0.1.1"),
+        ("minor", "0.2.0"),
+        ("major", "1.0.0"),
+    ],
+)
+def test_bump_updates_version_no_commit(git_repo, bump_type, expected_version):
+    """Running `bump --type <type>` updates pyproject.toml correctly."""
     script = git_repo / ".github" / "scripts" / "release.sh"
 
-    # Run release script
-    result = subprocess.run([str(script), "--bump", "patch"], cwd=git_repo, capture_output=True, text=True)
+    result = subprocess.run([str(script), "bump", "--type", bump_type], cwd=git_repo, capture_output=True, text=True)
 
     assert result.returncode == 0
-    assert "Updated version to 0.1.1" in result.stdout
-    assert "Skipping push of commit" in result.stdout
-    assert "Skipping push of tag" in result.stdout
+    assert f"Version bumped to {expected_version}" in result.stdout
 
-    # Verify tag exists locally
+    # Verify pyproject.toml updated
+    with open(git_repo / "pyproject.toml") as f:
+        assert f'version = "{expected_version}"' in f.read()
+
+    # Verify no tag created yet
     tags = subprocess.check_output(["git", "tag"], cwd=git_repo, text=True)
-    assert "v0.1.1" in tags
-
-    # Verify tag does NOT exist on remote
-    remote_tags = subprocess.check_output(["git", "ls-remote", "--tags", "origin"], cwd=git_repo, text=True)
-    assert "v0.1.1" not in remote_tags
+    assert f"v{expected_version}" not in tags
 
 
-def test_release_bump_patch_with_push(git_repo):
-    """Test bumping patch version WITH push."""
+def test_bump_commit_then_release_push(git_repo):
+    """Bump with commit, then run `release` to create and push the tag."""
     script = git_repo / ".github" / "scripts" / "release.sh"
 
-    # Run release script with --push
-    result = subprocess.run([str(script), "--bump", "patch", "--push"], cwd=git_repo, capture_output=True, text=True)
-
+    # Bump and commit
+    result = subprocess.run(
+        [str(script), "bump", "--type", "patch", "--commit"], cwd=git_repo, capture_output=True, text=True
+    )
     assert result.returncode == 0
-    assert "Updated version to 0.1.1" in result.stdout
-    assert "Pushing commit to master" in result.stdout
-    assert "Pushing tag to origin" in result.stdout
+    assert "Version committed" in result.stdout
+
+    # Release: confirm prompts with 'y' twice (create tag, then push)
+    result = subprocess.run([str(script), "release"], cwd=git_repo, input="y\ny\n", capture_output=True, text=True)
+    assert result.returncode == 0
+    assert "Tag 'v0.1.1' created locally" in result.stdout or "Release tag v0.1.1 pushed to remote!" in result.stdout
 
     # Verify tag exists on remote
     remote_tags = subprocess.check_output(["git", "ls-remote", "--tags", "origin"], cwd=git_repo, text=True)
     assert "v0.1.1" in remote_tags
 
 
-def test_release_dry_run(git_repo):
-    """Test dry run does not make changes."""
-    script = git_repo / ".github" / "scripts" / "release.sh"
-
-    result = subprocess.run([str(script), "--bump", "patch", "--dry-run"], cwd=git_repo, capture_output=True, text=True)
-
-    assert result.returncode == 0
-    assert "[DRY RUN]" in result.stdout
-
-    # Verify NO tag exists locally
-    tags = subprocess.check_output(["git", "tag"], cwd=git_repo, text=True)
-    assert "v0.1.1" not in tags
-
-    # Verify pyproject.toml not changed
-    with open(git_repo / "pyproject.toml") as f:
-        assert 'version = "0.1.0"' in f.read()
-
-
 def test_uncommitted_changes_failure(git_repo):
-    """Test script fails if there are uncommitted changes."""
+    """Script fails if there are uncommitted changes."""
     script = git_repo / ".github" / "scripts" / "release.sh"
 
-    # Create a dirty file
-    with open(git_repo / "dirty_file.txt", "w") as f:
-        f.write("dirty")
+    # Create a tracked file and commit it
+    tracked_file = git_repo / "tracked_file.txt"
+    tracked_file.touch()
+    subprocess.run(["git", "add", "tracked_file.txt"], cwd=git_repo, check=True)
+    subprocess.run(["git", "commit", "-m", "Add tracked file"], cwd=git_repo, check=True)
 
-    # We don't add it, but git status --porcelain will show it as untracked?
-    # Wait, git status --porcelain shows untracked files too.
-    # Let's modify a tracked file to be sure.
-    with open(git_repo / "pyproject.toml", "a") as f:
-        f.write("\n# comment")
+    # Modify tracked file to create uncommitted change
+    with open(tracked_file, "a") as f:
+        f.write("\n# change")
 
-    result = subprocess.run([str(script), "--bump", "patch"], cwd=git_repo, capture_output=True, text=True)
+    result = subprocess.run([str(script), "bump", "--type", "patch"], cwd=git_repo, capture_output=True, text=True)
 
     assert result.returncode == 1
     assert "You have uncommitted changes" in result.stdout
 
 
-def test_ambiguous_tag_warning(git_repo):
-    """Test warning when a tag matches the branch name."""
+def test_release_fails_if_local_tag_exists(git_repo):
+    """If the target tag already exists locally, release should warn and abort if user says no."""
     script = git_repo / ".github" / "scripts" / "release.sh"
 
-    # Create a tag named 'master' (since default branch is master in our test setup)
-    subprocess.run(["git", "tag", "master"], cwd=git_repo, check=True)
+    # Create a local tag that matches current version
+    subprocess.run(["git", "tag", "v0.1.0"], cwd=git_repo, check=True)
 
-    result = subprocess.run([str(script), "--bump", "patch", "--dry-run"], cwd=git_repo, capture_output=True, text=True)
+    # Input 'n' to abort
+    result = subprocess.run([str(script), "release"], cwd=git_repo, input="n\n", capture_output=True, text=True)
 
     assert result.returncode == 0
-    assert "conflicts with the branch name" in result.stdout
+    assert "Tag 'v0.1.0' already exists locally" in result.stdout
+    assert "Aborted by user" in result.stdout
+
+
+@pytest.mark.parametrize("version", ["1.2.3", "2.0.0", "0.5.0"])
+def test_bump_explicit_version(git_repo, version):
+    """Bump with explicit version."""
+    script = git_repo / ".github" / "scripts" / "release.sh"
+
+    result = subprocess.run([str(script), "bump", "--version", version], cwd=git_repo, capture_output=True, text=True)
+
+    assert result.returncode == 0
+    assert f"Version bumped to {version}" in result.stdout
+    with open(git_repo / "pyproject.toml") as f:
+        assert f'version = "{version}"' in f.read()
+
+
+def test_bump_custom_commit_message(git_repo):
+    """Bump with custom commit message."""
+    script = git_repo / ".github" / "scripts" / "release.sh"
+
+    result = subprocess.run(
+        [str(script), "bump", "--type", "patch", "--commit", "--message", "Custom message"],
+        cwd=git_repo,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert "Version committed with message: 'Custom message'" in result.stdout
+
+    last_commit = subprocess.check_output(["git", "log", "-1", "--pretty=%B"], cwd=git_repo, text=True)
+    assert "Custom message" in last_commit
+
+
+def test_bump_fails_existing_tag(git_repo):
+    """Bump fails if tag already exists."""
+    script = git_repo / ".github" / "scripts" / "release.sh"
+
+    # Create tag v0.1.1
+    subprocess.run(["git", "tag", "v0.1.1"], cwd=git_repo, check=True)
+
+    # Try to bump to 0.1.1 (patch bump from 0.1.0)
+    result = subprocess.run([str(script), "bump", "--type", "patch"], cwd=git_repo, capture_output=True, text=True)
+
+    assert result.returncode == 1
+    assert "Tag 'v0.1.1' already exists locally" in result.stdout
+
+
+def test_release_fails_if_remote_tag_exists(git_repo):
+    """Release fails if tag exists on remote."""
+    script = git_repo / ".github" / "scripts" / "release.sh"
+
+    # Create tag locally and push to remote
+    subprocess.run(["git", "tag", "v0.1.0"], cwd=git_repo, check=True)
+    subprocess.run(["git", "push", "origin", "v0.1.0"], cwd=git_repo, check=True)
+
+    result = subprocess.run([str(script), "release"], cwd=git_repo, input="y\n", capture_output=True, text=True)
+
+    assert result.returncode == 1
+    assert "already exists on remote" in result.stdout
+
+
+def test_release_uncommitted_changes_failure(git_repo):
+    """Release fails if there are uncommitted changes (even pyproject.toml)."""
+    script = git_repo / ".github" / "scripts" / "release.sh"
+
+    # Modify pyproject.toml (which is allowed in bump but NOT in release)
+    with open(git_repo / "pyproject.toml", "a") as f:
+        f.write("\n# comment")
+
+    result = subprocess.run([str(script), "release"], cwd=git_repo, capture_output=True, text=True)
+
+    assert result.returncode == 1
+    assert "You have uncommitted changes" in result.stdout
+
+
+def test_warn_on_non_default_branch(git_repo):
+    """Script warns if not on default branch."""
+    script = git_repo / ".github" / "scripts" / "release.sh"
+
+    # Create and switch to new branch
+    subprocess.run(["git", "checkout", "-b", "feature"], cwd=git_repo, check=True)
+
+    # Run bump (input 'y' to proceed)
+    result = subprocess.run(
+        [str(script), "bump", "--type", "patch"], cwd=git_repo, input="y\n", capture_output=True, text=True
+    )
+
+    assert result.returncode == 0
+    assert "You are on branch 'feature' but the default branch is 'master'" in result.stdout
