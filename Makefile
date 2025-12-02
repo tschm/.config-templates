@@ -149,7 +149,7 @@ fmt: install-uv ## check the pre-commit hooks and the linting
 all: fmt deptry book ## Run everything
 	echo "Run fmt, deptry, test and book"
 
-##@ Release
+##@ Releasing and Versioning
 bump: install-uv ## bump version (usage: make bump TYPE=patch [COMMIT=true] [COMMIT_MSG="message"])
 	@if [ -z "$(VERSION)" ] && [ -z "$(TYPE)" ]; then \
 		printf "${RED}[ERROR] VERSION or TYPE is required.${RESET}\n"; \
@@ -185,6 +185,12 @@ minor: ## alias bump via minor (usage: make minor [COMMIT=true] [COMMIT_MSG="mes
 	@$(MAKE) bump TYPE=minor $(if $(COMMIT),COMMIT=$(COMMIT)) $(if $(COMMIT_MSG),COMMIT_MSG="$(COMMIT_MSG)")
 major: ## alias bump via major (usage: make major [COMMIT=true] [COMMIT_MSG="message"])
 	@$(MAKE) bump TYPE=major $(if $(COMMIT),COMMIT=$(COMMIT)) $(if $(COMMIT_MSG),COMMIT_MSG="$(COMMIT_MSG)")
+
+publish: ## bump version, commit, tag and push (usage: make publish TYPE=patch|minor|major [VERSION=x.y.z] [COMMIT_MSG="..."])
+	@printf "${YELLOW}[WARN] This will bump the version, commit changes, create a tag, and PUSH to remote.${RESET}\n"
+	@printf "${YELLOW}[WARN] Ensure you are on the correct branch and have pulled latest changes.${RESET}\n"
+	@$(MAKE) bump COMMIT=true
+	@$(MAKE) release
 
 release: install-uv ## create tag and push to remote with prompts (usage: make release)
 	@UV_BIN="${UV_BIN}" /bin/sh "${SCRIPTS_FOLDER}/release.sh" release
