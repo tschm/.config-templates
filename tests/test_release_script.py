@@ -355,6 +355,10 @@ def test_release_fails_if_behind_remote(git_repo):
     other_clone = git_repo.parent / "other_clone"
     subprocess.run(["git", "clone", str(git_repo.parent / "remote.git"), str(other_clone)], check=True)
 
+    # Configure git user for other_clone (needed in CI)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=other_clone, check=True)
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=other_clone, check=True)
+
     # Commit and push from other clone
     with open(other_clone / "other.txt", "w") as f:
         f.write("content")
