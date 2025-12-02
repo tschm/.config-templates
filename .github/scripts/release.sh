@@ -209,12 +209,11 @@ do_bump() {
     exit 1
   fi
 
-  # Check for uncommitted changes (excluding pyproject.toml and uv.lock which we'll update)
-  UNCOMMITTED=$(git status --porcelain | grep -v "^ M pyproject.toml" | grep -v "^ M uv.lock" || true)
-  if [ -n "$UNCOMMITTED" ]; then
+  # Check for uncommitted changes
+  if [ -n "$(git status --porcelain)" ]; then
     printf "%b[ERROR] You have uncommitted changes:%b\n" "$RED" "$RESET"
-    echo "$UNCOMMITTED"
-    printf "\n%b[ERROR] Please commit or stash your changes before releasing.%b\n" "$RED" "$RESET"
+    git status --short
+    printf "\n%b[ERROR] Please commit or stash your changes before bumping version.%b\n" "$RED" "$RESET"
     exit 1
   fi
 

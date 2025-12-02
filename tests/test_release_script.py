@@ -303,3 +303,17 @@ def test_warn_on_non_default_branch(git_repo):
 
     assert result.returncode == 0
     assert "You are on branch 'feature' but the default branch is 'master'" in result.stdout
+
+
+def test_bump_fails_if_pyproject_toml_dirty(git_repo):
+    """Bump fails if pyproject.toml has uncommitted changes."""
+    script = git_repo / ".github" / "scripts" / "release.sh"
+
+    # Modify pyproject.toml
+    with open(git_repo / "pyproject.toml", "a") as f:
+        f.write("\n# dirty")
+
+    result = subprocess.run([str(script), "bump", "--type", "patch"], cwd=git_repo, capture_output=True, text=True)
+
+    assert result.returncode == 1
+    assert "You have uncommitted changes" in result.stdout
