@@ -299,8 +299,7 @@ The project includes a hook for installing additional system dependencies and cu
 
 ### Using build-extras.sh
 
-Create a file `.github/scripts/build-extras.sh` in your repository to install system packages or dependencies:
-
+Create a file `.github/scripts/customisations/build-extras.sh` in your repository to install system packages or dependencies (this repository uses a dedicated `customisations` folder for repo-specific scripts):
 ```bash
 #!/bin/bash
 set -euo pipefail
@@ -314,22 +313,22 @@ sudo apt-get install -y graphviz
 
 ### When it Runs
 
-The `build-extras.sh` script is automatically invoked during:
+The `build-extras.sh` script (from `.github/scripts/customisations`) is automatically invoked during:
 - `make install` - Initial project setup
 - `make test` - Before running tests
 - `make book` - Before building documentation
 - `make docs` - Before generating API documentation
 
-This ensures custom dependencies are available whenever needed throughout the build lifecycle.
+This ensures custom dependencies are available whenever needed throughout the build lifecycle. The `Makefile` intentionally only checks the `.github/scripts/customisations` folder for repository-specific hooks such as `build-extras.sh` and `post-release.sh`.
 
 ### Important: Exclude from Template Updates
 
-If you customize this file, add it to the exclude list in your `action.yml` configuration to prevent it from being overwritten during template updates:
-
+If you customize this file, add it to the exclude list in your `action.yml` configuration to prevent it from being overwritten during template updates. Use the `customisations` path to avoid clobbering:
 ```yaml
 exclude: |
-  .github/scripts/build-extras.sh
+  .github/scripts/customisations/build-extras.sh
 ```
+
 
 ### Common Use Cases
 
@@ -338,6 +337,10 @@ exclude: |
 - Installing system libraries for specialized tools
 - Setting up additional build dependencies
 - Downloading external resources or tools
+
+### Post-release scripts
+
+If you need repository-specific post-release tasks, place a `post-release.sh` script in `.github/scripts/customisations/post-release.sh`. The `Makefile` will only look in the `customisations` folder for that hook.
 
 
 ## 🚀 Releasing
