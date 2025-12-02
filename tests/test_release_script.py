@@ -164,15 +164,19 @@ def test_bump_commit_then_release_push(git_repo):
     """Bump with commit, then run `release` to create and push the tag."""
     script = git_repo / ".github" / "scripts" / "release.sh"
 
-    # Bump and commit
+    # Bump and commit (does NOT push)
     result = subprocess.run(
         [str(script), "bump", "--type", "patch", "--commit"], cwd=git_repo, capture_output=True, text=True
     )
     assert result.returncode == 0
     assert "Version committed" in result.stdout
+    assert "Changes pushed to remote" not in result.stdout
 
-    # Release: confirm prompts with 'y' twice (create tag, then push)
-    result = subprocess.run([str(script), "release"], cwd=git_repo, input="y\ny\n", capture_output=True, text=True)
+    # Release:
+    # 1. Prompts to push changes (because we are ahead) -> y
+    # 2. Prompts to create tag -> y
+    # 3. Prompts to push tag -> y
+    result = subprocess.run([str(script), "release"], cwd=git_repo, input="y\ny\ny\n", capture_output=True, text=True)
     assert result.returncode == 0
     assert "Tag 'v0.1.1' created locally" in result.stdout or "Release tag v0.1.1 pushed to remote!" in result.stdout
 
@@ -317,3 +321,47 @@ def test_bump_fails_if_pyproject_toml_dirty(git_repo):
 
     assert result.returncode == 1
     assert "You have uncommitted changes" in result.stdout
+
+
+def test_release_pushes_if_ahead_of_remote(git_repo):
+    """Release prompts to push if local branch is ahead of remote."""
+    script = git_repo / ".github" / "scripts" / "release.sh"
+
+    # Create a commit locally that isn't on remote
+    tracked_file = git_repo / "file.txt"
+    tracked_file.touch()
+    subprocess.run(["git", "add", "file.txt"], cwd=git_repo, check=True)
+    subprocess.run(["git", "commit", "-m", "Local commit"], cwd=git_repo, check=True)
+
+    # Run release
+    # 1. Prompts to push -> y
+    # 2. Prompts to create tag -> y
+    # 3. Prompts to push tag -> y
+    result = subprocess.run([str(script), "release"], cwd=git_repo, input="y\ny\ny\n", capture_output=True, text=True)
+
+    assert result.returncode == 0
+    assert "Your branch is ahead" in result.stdout
+    assert "Push changes to remote before releasing?" in result.stdout
+
+
+def test_release_fails_if_behind_remote(git_repo):
+    """Release fails if local branch is behind remote."""
+    script = git_repo / ".github" / "scripts" / "release.sh"
+
+    # Create a commit on remote that isn't local
+    # We need to clone another repo to push to remote
+    other_clone = git_repo.parent / "other_clone"
+    subprocess.run(["git", "clone", str(git_repo.parent / "remote.git"), str(other_clone)], check=True)
+
+    # Commit and push from other clone
+    with open(other_clone / "other.txt", "w") as f:
+        f.write("content")
+    subprocess.run(["git", "add", "other.txt"], cwd=other_clone, check=True)
+    subprocess.run(["git", "commit", "-m", "Remote commit"], cwd=other_clone, check=True)
+    subprocess.run(["git", "push"], cwd=other_clone, check=True)
+
+    # Run release (it will fetch and see it's behind)
+    result = subprocess.run([str(script), "release"], cwd=git_repo, capture_output=True, text=True)
+
+    assert result.returncode == 1
+    assert "Your branch is behind" in result.stdout

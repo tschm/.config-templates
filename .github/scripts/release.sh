@@ -305,6 +305,33 @@ do_release() {
     exit 1
   fi
 
+  # Check if branch is up-to-date with remote
+  printf "%b[INFO] Checking if branch is up-to-date with remote...%b\n" "$BLUE" "$RESET"
+  git fetch origin >/dev/null 2>&1
+  UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+  if [ -z "$UPSTREAM" ]; then
+    printf "%b[ERROR] No upstream branch configured for %s%b\n" "$RED" "$CURRENT_BRANCH" "$RESET"
+    exit 1
+  fi
+  
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+  BASE=$(git merge-base @ "$UPSTREAM")
+  
+  if [ "$LOCAL" != "$REMOTE" ]; then
+    if [ "$LOCAL" = "$BASE" ]; then
+        printf "%b[ERROR] Your branch is behind '%s'. Please pull changes.%b\n" "$RED" "$UPSTREAM" "$RESET"
+        exit 1
+    elif [ "$REMOTE" = "$BASE" ]; then
+        printf "%b[WARN] Your branch is ahead of '%s'.%b\n" "$YELLOW" "$UPSTREAM" "$RESET"
+        prompt_continue "Push changes to remote before releasing?"
+        git push origin "$CURRENT_BRANCH"
+    else
+        printf "%b[ERROR] Your branch has diverged from '%s'. Please reconcile.%b\n" "$RED" "$UPSTREAM" "$RESET"
+        exit 1
+    fi
+  fi
+
   # Check if tag already exists locally
   if git rev-parse "$TAG" >/dev/null 2>&1; then
     printf "%b[WARN] Tag '%s' already exists locally%b\n" "$YELLOW" "$TAG" "$RESET"
