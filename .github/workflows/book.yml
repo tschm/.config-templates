@@ -43,6 +43,9 @@ jobs:
       # Use the composite action to set up the project
       - name: Setup the project
         uses: ./.github/actions/setup-project
+        # Pass PYTHON_DEFAULT_VERSION variable if set, otherwise use action's default (3.12)
+        with:
+          python-version: ${{ vars.PYTHON_DEFAULT_VERSION || '' }}
 
       - name: "Make the book"
         run: |

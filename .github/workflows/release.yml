@@ -113,6 +113,9 @@ jobs:
       # Use the composite action to set up the project
       - name: Setup the project
         uses: ./.github/actions/setup-project
+        # Pass PYTHON_DEFAULT_VERSION variable if set, otherwise use action's default (3.12)
+        with:
+          python-version: ${{ vars.PYTHON_DEFAULT_VERSION || '' }}
 
       - name: Verify version matches tag
         if: hashFiles('pyproject.toml') != ''
@@ -318,7 +321,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.14'
+          # Use PYTHON_DEFAULT_VERSION variable if set, otherwise default to '3.14'
+          python-version: ${{ vars.PYTHON_DEFAULT_VERSION || '3.14' }}
 
       - name: Generate Devcontainer Link
         id: devcontainer_link
