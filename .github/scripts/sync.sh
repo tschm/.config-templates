@@ -82,7 +82,6 @@ INCLUDE_LIST=""
 EXCLUDE_LIST=""
 
 # Simple YAML parser
-current_key=""
 in_multiline=""
 
 while IFS= read -r line || [ -n "$line" ]; do
