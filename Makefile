@@ -212,7 +212,7 @@ post-release: install-uv ## perform post-release tasks (usage: make post-release
 	fi
 
 ##@ Meta
-sync: ## sync template files from .config-templates repository
+sync: ## sync with template repository as defined in .github/template.yml
 	@/bin/sh "${SCRIPTS_FOLDER}/sync.sh"
 
 help: ## Display this help message
