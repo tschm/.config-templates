@@ -29,8 +29,5 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          # Use PYTHON_DEFAULT_VERSION variable if set, otherwise default to '3.14'
-          python-version: ${{ vars.PYTHON_DEFAULT_VERSION || '3.14' }}
+      - uses: ./.github/actions/setup-project
       - uses: pre-commit/action@v3.0.1
