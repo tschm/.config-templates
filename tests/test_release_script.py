@@ -161,10 +161,12 @@ Expire-Date: 0
         env={**os.environ, "GNUPGHOME": str(gnupg_home)},
     )
     # Parse key ID from output (format: "pub   rsa2048/KEYID ...")
+    key_id = None
     for line in result.stdout.split("\n"):
         if line.strip().startswith("pub"):
             key_id = line.split("/")[1].split()[0]
             break
+    assert key_id is not None, "Failed to parse GPG key ID from output"
 
     # Commit and push initial state
     subprocess.run(["git", "config", "user.email", "test@example.com"], check=True)
@@ -241,16 +243,14 @@ def test_release_creates_signed_tag(git_repo):
     assert "Tag 'v0.1.0' created locally" in result.stdout
 
     # Verify the tag is signed using git tag -v
+    # git tag -v returns 0 only for valid signed tags with verified signatures
     verify_result = subprocess.run(
         ["git", "tag", "-v", "v0.1.0"],
         cwd=git_repo,
         capture_output=True,
         text=True,
     )
-    # git tag -v returns 0 for valid signed tags
-    assert verify_result.returncode == 0
-    # Check stderr for GPG signature verification message
-    assert "Good signature" in verify_result.stderr or "gpg: Signature made" in verify_result.stderr
+    assert verify_result.returncode == 0, f"Tag signature verification failed: {verify_result.stderr}"
 
 
 def test_uncommitted_changes_failure(git_repo):
