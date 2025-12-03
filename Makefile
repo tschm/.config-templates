@@ -17,7 +17,7 @@ RESET := \033[0m
 .DEFAULT_GOAL := help
 
 # Declare phony targets (they don't produce files)
-.PHONY: install-uv install clean test marimo marimushka book fmt deptry docs release release-dry-run post-release help all
+.PHONY: install-uv install clean test marimo marimushka book fmt deptry docs release release-dry-run post-release sync help all
 
 UV_INSTALL_DIR := ./bin
 UV_BIN := ${UV_INSTALL_DIR}/uv
@@ -212,6 +212,9 @@ post-release: install-uv ## perform post-release tasks (usage: make post-release
 	fi
 
 ##@ Meta
+sync: ## sync template files from .config-templates repository
+	@/bin/sh "${SCRIPTS_FOLDER}/sync.sh"
+
 help: ## Display this help message
 	+@printf "$(BOLD)Usage:$(RESET)\n"
 	+@printf "  make $(BLUE)<target>$(RESET)\n\n"
