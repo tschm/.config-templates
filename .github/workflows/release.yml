@@ -113,9 +113,6 @@ jobs:
       # Use the composite action to set up the project
       - name: Setup the project
         uses: ./.github/actions/setup-project
-        # Pass PYTHON_DEFAULT_VERSION variable if set, otherwise use action's default (3.12)
-        with:
-          python-version: ${{ vars.PYTHON_DEFAULT_VERSION || '' }}
 
       - name: Verify version matches tag
         if: hashFiles('pyproject.toml') != ''
@@ -123,7 +120,7 @@ jobs:
           TAG_VERSION="${{ needs.tag.outputs.tag }}"
           TAG_VERSION=${TAG_VERSION#v}
           PROJECT_VERSION=$(uv version --short)
-          
+
           if [[ "$PROJECT_VERSION" != "$TAG_VERSION" ]]; then
             echo "::error::Version mismatch: pyproject.toml has '$PROJECT_VERSION' but tag is '$TAG_VERSION'"
             exit 1
@@ -267,7 +264,7 @@ jobs:
         if: steps.check_publish.outputs.should_publish == 'true'
         id: repo_owner
         run: echo "owner_lc=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
-      
+
       - name: Get Image Name
         if: steps.check_publish.outputs.should_publish == 'true'
         id: image_name
@@ -285,17 +282,17 @@ jobs:
             IMAGE_NAME="${{ vars.DEVCONTAINER_IMAGE_NAME }}"
             echo "Using custom image name component: $IMAGE_NAME"
           fi
-          
+
           # Validate the image component matches [a-z0-9]+([._-][a-z0-9]+)* with optional / separators
           if ! echo "$IMAGE_NAME" | grep -qE '^[a-z0-9]+([._-][a-z0-9]+)*(/[a-z0-9]+([._-][a-z0-9]+)*)*$'; then
             echo "::error::Invalid image name component: $IMAGE_NAME"
             echo "::error::Each component must match [a-z0-9]+([._-][a-z0-9]+)* separated by /"
             exit 1
           fi
-          
+
           IMAGE_NAME="${{ steps.registry.outputs.registry }}/${{ steps.repo_owner.outputs.owner_lc }}/$IMAGE_NAME"
           echo "✅ Final image name: $IMAGE_NAME"
-          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT    
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
 
       - name: Build and Publish Devcontainer Image
         if: steps.check_publish.outputs.should_publish == 'true'
@@ -317,7 +314,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.ref }}
-      
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
