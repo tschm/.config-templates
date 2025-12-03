@@ -6,10 +6,12 @@
 # Ignore Everything
 **
 
+# but don't ignore those files/folders
 !pyproject.toml
 !uv.lock
 !README.md
 !src/
 
+# In those folders make sure those files are not included
 **/__pycache__
 **/*.pyc
