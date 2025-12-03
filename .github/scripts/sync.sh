@@ -89,10 +89,10 @@ while IFS= read -r line || [ -n "$line" ]; do
   case "$line" in
     \#*|"") continue ;;
   esac
-  
+
   # Check if line starts with spaces by looking at first character
   first_char=$(printf '%s' "$line" | cut -c1)
-  
+
   if [ "$first_char" = " " ] || [ "$first_char" = "$(printf '\t')" ]; then
     # This is indented content (part of a multiline block)
     if [ -n "$in_multiline" ]; then
@@ -168,6 +168,12 @@ fi
 mkdir -p "$TEMP_DIR"
 trap 'rm -rf "$TEMP_DIR"' EXIT INT TERM
 
+# Backup this script to avoid being overwritten during sync
+SELF_SCRIPT=".github/scripts/sync.sh"
+if [ -f "$SELF_SCRIPT" ]; then
+  cp "$SELF_SCRIPT" "$TEMP_DIR/sync.sh.bak"
+fi
+
 # Clone the template repository
 printf "\n%b[INFO] Cloning template repository...%b\n" "$BLUE" "$RESET"
 REPO_URL="https://github.com/${TEMPLATE_REPO}.git"
@@ -186,7 +192,7 @@ skipped_count=0
 # Use here-document instead of pipeline to avoid subshell
 while IFS= read -r item || [ -n "$item" ]; do
   [ -z "$item" ] && continue
-  
+
   # Check if this item is in the exclude list
   is_excluded=""
   if [ -n "$EXCLUDE_LIST" ]; then
@@ -200,25 +206,33 @@ while IFS= read -r item || [ -n "$item" ]; do
 $EXCLUDE_LIST
 EOF_EXCLUDE
   fi
-  
+
   if [ -n "$is_excluded" ]; then
     printf "  %b[SKIP]%b %s (excluded)\n" "$YELLOW" "$RESET" "$item"
     skipped_count=$((skipped_count + 1))
     continue
   fi
-  
+
   src_path="$TEMP_DIR/template/$item"
   dest_path="./$item"
-  
+
   if [ -e "$src_path" ]; then
     # Create parent directory if needed
     dest_dir=$(dirname "$dest_path")
     mkdir -p "$dest_dir"
-    
+
     # Copy the file or directory
     if [ -d "$src_path" ]; then
-      cp -r "$src_path" "$dest_path"
-      printf "  %b[SYNC]%b %s (directory)\n" "$GREEN" "$RESET" "$item"
+      # Ensure destination directory exists
+      mkdir -p "$dest_path"
+      # Copy contents of the source directory into the destination directory
+      # to avoid nesting (e.g., .github/.github or tests/tests)
+      cp -R "$src_path"/. "$dest_path"/
+      # If we just synced the .github directory, restore this script immediately to avoid mid-run overwrite issues
+      if [ "$item" = ".github" ] && [ -f "$TEMP_DIR/sync.sh.bak" ]; then
+        cp "$TEMP_DIR/sync.sh.bak" "$SELF_SCRIPT"
+      fi
+      printf "  %b[SYNC]%b %s (directory contents)\n" "$GREEN" "$RESET" "$item"
     else
       cp "$src_path" "$dest_path"
       printf "  %b[SYNC]%b %s\n" "$GREEN" "$RESET" "$item"
