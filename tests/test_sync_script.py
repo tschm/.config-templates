@@ -6,11 +6,8 @@ particularly for nested files within directories.
 
 from __future__ import annotations
 
-import shutil
 import subprocess
 from pathlib import Path
-
-import pytest
 
 
 def create_test_structure(base_path: Path) -> Path:
@@ -55,33 +52,30 @@ def test_directory_copy_excludes_nested_files(tmp_path: Path):
     # Create source directory with files
     source = tmp_path / "source"
     create_test_structure(source)
-    
+
     # Create destination directory
     dest = tmp_path / "dest"
     dest.mkdir()
-    
+
     # Define exclusions list (as it would appear in template.yml)
-    exclude_list = [
-        ".github/workflows/docker.yml",
-        ".github/workflows/devcontainer.yml",
-        "ruff.toml",
-    ]
-    
+
     # Simulate the sync operation from sync.sh lines 225-240
     # This is the buggy behavior - it copies everything recursively
     src_path = source / ".github"
     dest_path = dest / ".github"
     dest_path.mkdir(parents=True)
-    
+
     # This is what the current script does (copies everything)
     subprocess.run(["cp", "-R", f"{src_path}/.", f"{dest_path}/"], check=True)
-    
+
     # Current behavior (BUG): excluded files should NOT be present but they are
-    assert (dest / ".github" / "workflows" / "docker.yml").exists(), \
+    assert (dest / ".github" / "workflows" / "docker.yml").exists(), (
         "This test shows the bug - docker.yml is copied despite exclusion"
-    assert (dest / ".github" / "workflows" / "devcontainer.yml").exists(), \
+    )
+    assert (dest / ".github" / "workflows" / "devcontainer.yml").exists(), (
         "This test shows the bug - devcontainer.yml is copied despite exclusion"
-    
+    )
+
     # Files that should be copied
     assert (dest / ".github" / "workflows" / "ci.yml").exists()
     assert (dest / ".github" / "workflows" / "release.yml").exists()
@@ -95,40 +89,40 @@ def test_sync_script_with_exclusions_integration(tmp_path: Path):
     # Create template directory
     template_dir = tmp_path / "template_for_test"
     create_test_structure(template_dir)
-    
+
     # Create target directory with sync script
     target_dir = tmp_path / "target"
     target_dir.mkdir()
-    
+
     project_root = Path(__file__).parent.parent
-    
+
     # Create a test-specific sync script that reads from local directory
     # instead of cloning from GitHub
     test_script = target_dir / "test_sync.sh"
-    
+
     sync_content = (project_root / ".github" / "scripts" / "sync.sh").read_text()
-    
+
     # Modify to use local template directory
     test_sync_content = sync_content.replace(
-        '# Clone the template repository\n'
+        "# Clone the template repository\n"
         'printf "\\n%b[INFO] Cloning template repository...%b\\n" "$BLUE" "$RESET"\n'
         'REPO_URL="https://github.com/${TEMPLATE_REPO}.git"\n'
-        '\n'
+        "\n"
         'if ! git clone --depth 1 --branch "$TEMPLATE_BRANCH" "$REPO_URL" "$TEMP_DIR/template" 2>/dev/null; then\n'
         '  printf "%b[ERROR] Failed to clone template repository from %s%b\\n" "$RED" "$REPO_URL" "$RESET"\n'
-        '  exit 1\n'
-        'fi',
+        "  exit 1\n"
+        "fi",
         f'''# Clone the template repository
 printf "\\n%b[INFO] Using local template directory...%b\\n" "$BLUE" "$RESET"
 mkdir -p "$TEMP_DIR/template"
-cp -R "{template_dir}"/. "$TEMP_DIR/template"/ || exit 1'''
+cp -R "{template_dir}"/. "$TEMP_DIR/template"/ || exit 1''',
     )
-    
+
     test_script.write_text(test_sync_content)
-    
-    # Create .github directory in target  
+
+    # Create .github directory in target
     (target_dir / ".github").mkdir()
-    
+
     # Create template.yml with exclusions
     template_yml = target_dir / ".github" / "template.yml"
     template_yml.write_text("""template-repository: "dummy/repo"
@@ -143,9 +137,8 @@ exclude: |
   .github/workflows/docker.yml
   .github/workflows/devcontainer.yml
   ruff.toml
-"""
-    )
-    
+""")
+
     # Run the test sync script
     result = subprocess.run(
         ["/bin/sh", str(test_script)],
@@ -153,25 +146,24 @@ exclude: |
         capture_output=True,
         text=True,
     )
-    
+
     print("STDOUT:", result.stdout)
     print("STDERR:", result.stderr)
-    
+
     assert result.returncode == 0, f"Sync failed: {result.stderr}"
-    
+
     # Verify excluded files are NOT present (this will fail before fix)
-    assert not (target_dir / ".github" / "workflows" / "docker.yml").exists(), \
+    assert not (target_dir / ".github" / "workflows" / "docker.yml").exists(), (
         "docker.yml should be excluded but was copied"
-    assert not (target_dir / ".github" / "workflows" / "devcontainer.yml").exists(), \
+    )
+    assert not (target_dir / ".github" / "workflows" / "devcontainer.yml").exists(), (
         "devcontainer.yml should be excluded but was copied"
-    assert not (target_dir / "ruff.toml").exists(), \
-        "ruff.toml should be excluded but was copied"
-    
+    )
+    assert not (target_dir / "ruff.toml").exists(), "ruff.toml should be excluded but was copied"
+
     # Verify non-excluded files ARE present
-    assert (target_dir / ".github" / "workflows" / "ci.yml").exists(), \
-        "ci.yml should be copied"
-    assert (target_dir / ".github" / "workflows" / "release.yml").exists(), \
-        "release.yml should be copied"
+    assert (target_dir / ".github" / "workflows" / "ci.yml").exists(), "ci.yml should be copied"
+    assert (target_dir / ".github" / "workflows" / "release.yml").exists(), "release.yml should be copied"
     assert (target_dir / ".editorconfig").exists()
     assert (target_dir / ".gitignore").exists()
     assert (target_dir / "Makefile").exists()
