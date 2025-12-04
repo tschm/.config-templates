@@ -119,10 +119,171 @@ def git_repo(tmp_path, monkeypatch):
     # Create bin/uv mock
     bin_dir = local_dir / "bin"
     bin_dir.mkdir()
+
+    # Capture path to the real git before we modify PATH
+    real_git = shutil.which("git")
+
     uv_path = bin_dir / "uv"
     with open(uv_path, "w") as f:
         f.write(MOCK_UV_SCRIPT)
     uv_path.chmod(0o755)
+
+    # Create bin/gpg mock and add bin to PATH
+    gpg_path = bin_dir / "gpg"
+    with open(gpg_path, "w") as f:
+        f.write(
+            """#!/bin/sh
+# Minimal mock of gpg for tests
+# Supports: --batch --gen-key, --list-keys --keyid-format long <email>
+# For other invocations (e.g., signing/verification via git), emit success status lines.
+
+# Detect output file target if provided via -o<file>, -o <file>, --output <file>, or --output=<file>
+OUTPUT_FILE=""
+STATUS_FD=""
+prev=""
+for arg in "$@"; do
+  case "$arg" in
+    -o)
+      prev="-o"
+      ;;
+    --output)
+      prev="--output"
+      ;;
+    -o*)
+      OUTPUT_FILE="${arg#-o}"
+      prev=""
+      ;;
+    --output=*)
+      OUTPUT_FILE="${arg#--output=}"
+      prev=""
+      ;;
+    --status-fd=*)
+      STATUS_FD="${arg#--status-fd=}"
+      ;;
+    --status-fd)
+      prev="--status-fd"
+      ;;
+    [0-9])
+      if [ "$prev" = "--status-fd" ]; then
+        STATUS_FD="$arg"
+        prev=""
+      fi
+      ;;
+    *)
+      if [ "$prev" = "-o" ] || [ "$prev" = "--output" ]; then
+        OUTPUT_FILE="$arg"
+        prev=""
+      fi
+      ;;
+  esac
+done
+
+# Helper to emit status lines to desired fd (default 2)
+emit_status() {
+  line="$1"
+  fd="$STATUS_FD"
+  [ -z "$fd" ] && fd=2
+  # write to stdout or stderr based on fd
+  if [ "$fd" = "1" ]; then
+    echo "$line"
+  else
+    echo "$line" 1>&2
+  fi
+}
+
+# Detect if this looks like a verification call (gpgv style: no --verify, just files)
+VERIFY_MODE=0
+for arg in "$@"; do
+  # treat any existing non-option argument as a verification target
+  if [ -n "$arg" ] && [ "${arg#-}" = "$arg" ] && [ -f "$arg" ]; then
+    VERIFY_MODE=1
+  fi
+done
+
+case " $* " in
+  *" --list-keys "*)
+    # Print a line that the test parser can extract a KEYID from
+    echo "pub   rsa2048/TESTKEYID 2025-01-01 [SC]"
+    echo "uid           [ultimate] Test User <test@example.com>"
+    exit 0
+    ;;
+  *" --gen-key "*)
+    # Accept key generation without doing anything
+    exit 0
+    ;;
+  *" --verify "*)
+    # Pretend verification is successful
+    # Emit both human-readable and machine-readable status lines
+    emit_status "[GNUPG:] GOODSIG TESTKEYID Test User <test@example.com>"
+    emit_status "[GNUPG:] VALIDSIG TESTKEYID"
+    echo "gpg: Signature made Thu Jan  1 00:00:00 1970 UTC using RSA key TESTKEYID" 1>&2
+    echo "gpg: Good signature from 'Test User <test@example.com>'" 1>&2
+    exit 0
+    ;;
+  *)
+    if [ $VERIFY_MODE -eq 1 ]; then
+      # gpgv-style verification (tag -v). Report success and exit 0
+      emit_status "[GNUPG:] GOODSIG TESTKEYID Test User <test@example.com>"
+      emit_status "[GNUPG:] VALIDSIG TESTKEYID"
+      echo "gpgv: Signature made Thu Jan  1 00:00:00 1970 UTC using RSA key TESTKEYID" 1>&2
+      echo "gpgv: Good signature from 'Test User <test@example.com>'" 1>&2
+      exit 0
+    fi
+    # Assume signing request from git; emit a fake detached signature
+    # Emit GnuPG status lines so git considers the signing successful
+    emit_status "[GNUPG:] NEWSIG"
+    emit_status "[GNUPG:] SIG_CREATED D 1 00 TESTKEYID 0000000000"
+    if [ -n "$OUTPUT_FILE" ]; then
+      cat > "$OUTPUT_FILE" <<'EOF'
+-----BEGIN PGP SIGNATURE-----
+
+wsBcBAABCAAQBQJkFakeCRBURVNUS0VZSUQACgkQVEVTVEtFWUQAbc8IAI9w
+ZHVtbXktc2lnbmF0dXJlLWRhdGEK=ABCD
+=ABCD
+-----END PGP SIGNATURE-----
+EOF
+    else
+      cat <<'EOF'
+-----BEGIN PGP SIGNATURE-----
+
+wsBcBAABCAAQBQJkFakeCRBURVNUS0VZSUQACgkQVEVTVEtFWUQAbc8IAI9w
+ZHVtbXktc2lnbmF0dXJlLWRhdGEK=ABCD
+=ABCD
+-----END PGP SIGNATURE-----
+EOF
+    fi
+    exit 0
+    ;;
+ esac
+"""
+        )
+    gpg_path.chmod(0o755)
+
+    # Also provide a gpgv shim that delegates to our gpg mock (git may use gpgv for verification)
+    gpgv_path = bin_dir / "gpgv"
+    with open(gpgv_path, "w") as f:
+        f.write("""#!/bin/sh
+exec "$(dirname "$0")/gpg" "$@"
+""")
+    gpgv_path.chmod(0o755)
+
+    # Ensure our bin comes first on PATH so 'gpg' and 'uv' resolve to mocks
+    monkeypatch.setenv("PATH", f"{bin_dir}:{os.environ.get('PATH', '')}")
+
+    # Provide a git shim to make `git tag -v` succeed in this mocked environment
+    git_wrapper = bin_dir / "git"
+    with open(git_wrapper, "w") as f:
+        f.write(f"""#!/bin/sh
+REAL_GIT="{real_git}"
+# If this is a verification call, delegate to real git but do not fail the exit code
+if [ "$1" = "tag" ] && [ "$2" = "-v" ]; then
+  "$REAL_GIT" "$@"
+  # Always succeed in tests to avoid dependency on real crypto
+  exit 0
+fi
+exec "$REAL_GIT" "$@"
+""")
+    git_wrapper.chmod(0o755)
 
     # Copy release script
     script_dir = local_dir / ".github" / "scripts"
