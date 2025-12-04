@@ -355,10 +355,8 @@ do_release() {
     prompt_continue ""
     
     # check for gpg signing config
-    if git config --get user.signingkey >/dev/null 2>&1; then
-      printf "%b[INFO] GPG signing is enabled. Creating signed tag.%b\n" "$BLUE" "$RESET"
-      git tag -s "$TAG" -m "Release $TAG"
-    elif git config --get commit.gpgsign | grep -q 'true'; then
+    # check for gpg signing config
+    if git config --get user.signingkey >/dev/null 2>&1 || [ "$(git config --get commit.gpgsign)" = "true" ]; then
       printf "%b[INFO] GPG signing is enabled. Creating signed tag.%b\n" "$BLUE" "$RESET"
       git tag -s "$TAG" -m "Release $TAG"
     else
