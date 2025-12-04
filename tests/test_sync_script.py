@@ -42,9 +42,8 @@ def create_test_structure(base_path: Path) -> Path:
     tests_dir = base_path / "tests"
     tests_dir.mkdir()
     (tests_dir / "test_example.py").write_text("# Test file\n")
-    
-    return base_path
 
+    return base_path
 
 
 def test_directory_copy_excludes_nested_files(tmp_path: Path):

@@ -234,7 +234,7 @@ while IFS= read -r item || [ -n "$item" ]; do
       # Copy contents of the source directory into the destination directory
       # to avoid nesting (e.g., .github/.github or tests/tests)
       cp -R "$src_path"/. "$dest_path"/
-      
+
       # Remove excluded files from the copied directory
       if [ -n "$EXCLUDE_LIST" ]; then
         while IFS= read -r exclude_item || [ -n "$exclude_item" ]; do
@@ -255,7 +255,7 @@ while IFS= read -r item || [ -n "$item" ]; do
 $EXCLUDE_LIST
 EOF_EXCLUDE_NESTED
       fi
-      
+
       # If we just synced the .github directory, restore this script immediately to avoid mid-run overwrite issues
       if [ "$item" = ".github" ] && [ -f "$TEMP_DIR/sync.sh.bak" ]; then
         cp "$TEMP_DIR/sync.sh.bak" "$SELF_SCRIPT"
