@@ -113,7 +113,9 @@ jobs:
       # Use the composite action to set up the project
       - name: Setup the project
         uses: ./.github/actions/setup-project
-
+        with:
+          python-version: ${{ vars.PYTHON_DEFAULT_VERSION || '3.14' }}
+  
       - name: Verify version matches tag
         if: hashFiles('pyproject.toml') != ''
         run: |
