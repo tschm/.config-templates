@@ -130,6 +130,29 @@ This repository includes the following configuration templates:
 - **.github/workflows/** - GitHub Actions workflow templates
 - **Makefile** - Simple make commands for common operations
 
+## ⚙️ Workflow Configuration
+
+The GitHub Actions workflows can be customized using repository variables:
+
+### Python Version Control
+
+Control which Python versions are used in your workflows:
+
+- **`PYTHON_MAX_VERSION`** - Maximum Python version for CI testing matrix
+  - Default: `'3.14'` (tests on 3.11, 3.12, 3.13, 3.14)
+  - Set to `'3.13'` to test on 3.11, 3.12, 3.13 only
+  - Set to `'3.12'` to test on 3.11, 3.12 only
+  - Set to `'3.11'` to test on 3.11 only
+
+- **`PYTHON_DEFAULT_VERSION`** - Default Python version for release, pre-commit, book, and marimo workflows
+  - Default: `'3.14'`
+  - Set to `'3.12'` or `'3.13'` if dependencies are not compatible with newer versions
+
+**To set these variables:**
+1. Go to your repository Settings → Secrets and variables → Actions → Variables tab
+2. Click "New repository variable"
+3. Add `PYTHON_MAX_VERSION` and/or `PYTHON_DEFAULT_VERSION` with your desired values
+
 ## 🧩 Usage Examples
 
 You can inject the templates into your project
@@ -428,6 +451,15 @@ The release workflow (`.github/workflows/release.yml`) triggers on the tag push 
 6.  **Finalizes** - Publishes the GitHub release with links to PyPI and container images
 
 ### Configuration Options
+
+**Python Version Configuration:**
+- Set repository variable `PYTHON_MAX_VERSION` to control maximum Python version in CI tests
+  - Options: `'3.11'`, `'3.12'`, `'3.13'`, or `'3.14'` (default)
+  - Example: Set to `'3.13'` to test on Python 3.11, 3.12, and 3.13 only
+- Set repository variable `PYTHON_DEFAULT_VERSION` to control default Python version in workflows
+  - Options: `'3.11'`, `'3.12'`, `'3.13'`, or `'3.14'` (default)
+  - Example: Set to `'3.12'` if dependencies are not compatible with Python 3.14
+  - Used in release, pre-commit, book, and marimo workflows
 
 **PyPI Publishing:**
 - Automatic if package is registered as a Trusted Publisher
