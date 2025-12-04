@@ -129,7 +129,7 @@ This repository includes the following configuration templates:
 
 - **ruff.toml** - Configuration for the Ruff linter and formatter
 - **.devcontainer/** - Development container configuration
-- **.github/** - GitHub actions, scripts and workflow templates
+- **.github/** - GitHub Actions, scripts and workflow templates
 - **Makefile** - Simple make commands for common operations
 
 ## ⚙️ Workflow Configuration
