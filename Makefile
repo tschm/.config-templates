@@ -230,5 +230,20 @@ customisations: ## list available customisation scripts
 	fi
 
 # debugger tools
+custom-%: ## run a custom script (usage: make custom-scriptname)
+	@SCRIPT="${CUSTOM_SCRIPTS_FOLDER}/$*.sh"; \
+	if [ -x "$$SCRIPT" ]; then \
+		printf "${BLUE}[INFO] Running custom script $$SCRIPT...${RESET}\n"; \
+		"$$SCRIPT"; \
+	elif [ -f "$$SCRIPT" ]; then \
+		printf "${BLUE}[INFO] Running custom script $$SCRIPT with /bin/sh...${RESET}\n"; \
+		/bin/sh "$$SCRIPT"; \
+	else \
+		printf "${RED}[ERROR] Custom script '$$SCRIPT' not found.${RESET}\n"; \
+		printf "Available scripts:\n"; \
+		ls -1 "${CUSTOM_SCRIPTS_FOLDER}"/*.sh 2>/dev/null | xargs -n1 basename | sed 's/\.sh$$//' | sed 's/^/  - /'; \
+		exit 1; \
+	fi
+
 print-% :
 	@echo $* = $($*)
