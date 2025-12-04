@@ -26,7 +26,7 @@ description: 'Setup the project'
 inputs:
   python-version:
     description: 'Python version to use'
-    required: false
+    required: true
 
 outputs:
   pyproject_exists:
