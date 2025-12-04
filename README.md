@@ -129,7 +129,7 @@ This repository includes the following configuration templates:
 
 - **ruff.toml** - Configuration for the Ruff linter and formatter
 - **.devcontainer/** - Development container configuration
-- **.github/workflows/** - GitHub Actions workflow templates
+- **.github/** - GitHub Actions, scripts and workflow templates
 - **Makefile** - Simple make commands for common operations
 
 ## ⚙️ Workflow Configuration
@@ -151,6 +151,7 @@ Control which Python versions are used in your workflows:
   - Set to `'3.12'` or `'3.13'` if dependencies are not compatible with newer versions
 
 **To set these variables:**
+
 1. Go to your repository Settings → Secrets and variables → Actions → Variables tab
 2. Click "New repository variable"
 3. Add `PYTHON_MAX_VERSION` and/or `PYTHON_DEFAULT_VERSION` with your desired values
