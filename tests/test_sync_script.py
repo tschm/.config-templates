@@ -48,7 +48,7 @@ def create_test_structure(base_path: Path) -> Path:
 
 def test_directory_copy_excludes_nested_files(tmp_path: Path):
     """Test the core logic of directory copy with file exclusions.
-    
+
     This test simulates what the sync script does when copying directories
     and verifies that excluded nested files are not copied.
     """
@@ -89,7 +89,7 @@ def test_directory_copy_excludes_nested_files(tmp_path: Path):
 
 def test_sync_script_with_exclusions_integration(tmp_path: Path):
     """Integration test that verifies sync.sh properly excludes nested files.
-    
+
     This test will fail with the current implementation and pass after the fix.
     """
     # Create template directory
