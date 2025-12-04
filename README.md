@@ -81,7 +81,7 @@ Documentation
   fmt              check the pre-commit hooks and the linting
   all              Run everything
 
-Release
+Releasing and Versioning
   bump             bump version (usage: make bump TYPE=patch [COMMIT=true] [COMMIT_MSG="message"])
   patch            alias bump via patch (usage: make patch [COMMIT=true] [COMMIT_MSG="message"])
   minor            alias bump via minor (usage: make minor [COMMIT=true] [COMMIT_MSG="message"])
@@ -91,7 +91,9 @@ Release
   post-release     perform post-release tasks (usage: make post-release)
 
 Meta
+  sync             sync with template repository as defined in .github/template.yml
   help             Display this help message
+  customisations   list available customisation scripts
 ```
 
 The [Makefile](Makefile) provides organized targets for bootstrapping, development, testing, and documentation tasks.
