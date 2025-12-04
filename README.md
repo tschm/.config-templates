@@ -134,7 +134,7 @@ This repository includes the following configuration templates:
 
 ## ⚙️ Workflow Configuration
 
-The GitHub workflows can be customized using repository variables:
+The GitHub Actions workflows can be customized using repository variables:
 
 ### Python Version Control
 
