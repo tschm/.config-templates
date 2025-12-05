@@ -79,8 +79,8 @@ jobs:
       - name: Setup the project
         uses: ./.github/actions/setup-project
         with:
-          python-version: ${{ vars.PYTHON_DEFAULT_VERSION || '3.14' }}
-        
+          python-version: $(python ./.github/workflows/scripts/version_max.py)
+
       # Execute the notebook with the appropriate runner based on its content
       - name: Run notebook
         run: |

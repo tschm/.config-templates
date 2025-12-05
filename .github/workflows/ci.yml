@@ -24,23 +24,37 @@ on:
     branches: [ main, master ]
 
 jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.versions.outputs.list }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - id: versions
+        run: |
+          JSON=$(python ./.github/workflows/scripts/version_matrix.py)
+          echo "list=$JSON" >> "$GITHUB_OUTPUT"
+
+      - name: check
+        run: |
+          echo ${{ steps.versions.outputs.list }}
+
   test:
-    # if: github.repository != 'tschm/.config-templates'
+    needs: generate-matrix
+
     # The type of runner that the job will run on
-    runs-on: ${{ matrix.os }}
+    runs-on: [ubuntu-latest]
 
     strategy:
       matrix:
-        # mongo container action only supported on Linux
-        os: [ubuntu-latest]
-        # Python version matrix - configurable via PYTHON_MAX_VERSION variable
-        # Set PYTHON_MAX_VERSION to '3.13' or '3.12' to exclude newer versions
-        python-version: ${{ vars.PYTHON_MAX_VERSION == '3.13' && fromJSON('["3.11", "3.12", "3.13"]') ||
-                            vars.PYTHON_MAX_VERSION == '3.12' && fromJSON('["3.11", "3.12"]') ||
-                            vars.PYTHON_MAX_VERSION == '3.11' && fromJSON('["3.11"]') || fromJSON('["3.11", "3.12", "3.13", "3.14"]') }}
+        python-version: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - id: versions
+        run: echo "list=$(python scripts/version_matrix.py)" >> $GITHUB_OUTPUT
+
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
@@ -61,3 +75,4 @@ jobs:
           fi
           uv pip install pytest
           uv run pytest tests
+
