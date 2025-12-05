@@ -310,10 +310,15 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref }}
 
+      - name: Get Python version
+        id: get-python
+        run: |
+          echo "python-version=$(python ./.github/workflows/scripts/version_max.py)" >> "$GITHUB_OUTPUT"
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: $(python ./.github/workflows/scripts/version_max.py)
+          python-version: ${{ steps.get-python.outputs.python-version }}
 
       - name: Generate Devcontainer Link
         id: devcontainer_link
