@@ -9,6 +9,7 @@ changes.
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 import shutil
@@ -16,6 +17,8 @@ import subprocess
 from pathlib import Path
 
 import pytest
+
+logger = logging.getLogger(__name__)
 
 
 def strip_ansi(text: str) -> str:
@@ -31,6 +34,7 @@ def setup_tmp_makefile(tmp_path: Path):
     We rely on `make -n` so that no real commands are executed.
     """
     project_root = Path(__file__).parent.parent
+    logger.debug("Setting up temporary Makefile test dir: %s", tmp_path)
 
     # Copy the Makefile into the temporary working directory
     shutil.copy(project_root / "Makefile", tmp_path / "Makefile")
@@ -38,10 +42,12 @@ def setup_tmp_makefile(tmp_path: Path):
     # Move into tmp directory for isolation
     old_cwd = Path.cwd()
     os.chdir(tmp_path)
+    logger.debug("Changed working directory to %s", tmp_path)
     try:
         yield
     finally:
         os.chdir(old_cwd)
+        logger.debug("Restored working directory to %s", old_cwd)
 
 
 def run_make(args: list[str] | None = None, check: bool = True, dry_run: bool = True) -> subprocess.CompletedProcess:
@@ -55,10 +61,15 @@ def run_make(args: list[str] | None = None, check: bool = True, dry_run: bool = 
     cmd = ["make"]
     if args:
         cmd.extend(args)
-    # Use -s to reduce noise
-    flags = "-sn" if dry_run else "-s"
-    cmd.insert(1, flags)
+    # Use -s to reduce noise, -n to avoid executing commands
+    cmd.insert(1, "-sn")
+    logger.info("Running command: %s", " ".join(cmd))
     result = subprocess.run(cmd, capture_output=True, text=True)  # noqa: S603
+    logger.debug("make exited with code %d", result.returncode)
+    if result.stdout:
+        logger.debug("make stdout (truncated to 500 chars):\n%s", result.stdout[:500])
+    if result.stderr:
+        logger.debug("make stderr (truncated to 500 chars):\n%s", result.stderr[:500])
     if check and result.returncode != 0:
         msg = f"make failed with code {result.returncode}:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
         raise AssertionError(msg)
