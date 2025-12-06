@@ -48,3 +48,12 @@ packages = ["src/config"]
 [tool.deptry]
 # see https://deptry.com/usage/#pep-621-dev-dependency-groups
 pep621_dev_dependency_groups = ["dev"]
+
+[tool.pytest.ini_options]
+# Show test logs on the console so the messages are visible
+log_cli = true
+# Use INFO to show high-signal messages; switch to DEBUG locally if you want more detail
+log_cli_level = "DEBUG"
+log_cli_format = "%(asctime)s %(levelname)s %(name)s: %(message)s"
+log_cli_date_format = "%H:%M:%S"
+addopts = "-ra"
