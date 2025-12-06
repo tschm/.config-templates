@@ -156,10 +156,10 @@ all: fmt deptry book ## Run everything
 
 ##@ Releasing and Versioning
 bump: install-uv ## bump version
-	@UV_BIN="${UV_BIN}" /bin/sh "${SCRIPTS_FOLDER}/bump.sh" bump
+	@UV_BIN="${UV_BIN}" /bin/sh "${SCRIPTS_FOLDER}/bump.sh"
 
 release: install-uv ## create tag and push to remote with prompts
-	@UV_BIN="${UV_BIN}" /bin/sh "${SCRIPTS_FOLDER}/release.sh" release
+	@UV_BIN="${UV_BIN}" /bin/sh "${SCRIPTS_FOLDER}/release.sh"
 
 post-release: install-uv ## perform post-release tasks
 	@if [ -x "${CUSTOM_SCRIPTS_FOLDER}/post-release.sh" ]; then \
