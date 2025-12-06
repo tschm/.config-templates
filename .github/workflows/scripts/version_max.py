@@ -44,4 +44,7 @@ def max_supported_version() -> str:
 
 
 if __name__ == "__main__":
-    print(max_supported_version())
+    if PYPROJECT.exists():
+        print(max_supported_version())
+    else:
+        print("3.13")
