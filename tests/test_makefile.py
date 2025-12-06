@@ -10,11 +10,18 @@ changes.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
 
 import pytest
+
+
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape sequences from text."""
+    ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+    return ansi_escape.sub("", text)
 
 
 @pytest.fixture(autouse=True)
@@ -37,18 +44,20 @@ def setup_tmp_makefile(tmp_path: Path):
         os.chdir(old_cwd)
 
 
-def run_make(args: list[str] | None = None, check: bool = True) -> subprocess.CompletedProcess:
+def run_make(args: list[str] | None = None, check: bool = True, dry_run: bool = True) -> subprocess.CompletedProcess:
     """Run `make` with optional arguments and return the completed process.
 
     Args:
         args: Additional arguments for make
         check: If True, raise on non-zero return code
+        dry_run: If True, use -n to avoid executing commands
     """
     cmd = ["make"]
     if args:
         cmd.extend(args)
-    # Use -s to reduce noise, -n to avoid executing commands
-    cmd.insert(1, "-sn")
+    # Use -s to reduce noise
+    flags = "-sn" if dry_run else "-s"
+    cmd.insert(1, flags)
     result = subprocess.run(cmd, capture_output=True, text=True)  # noqa: S603
     if check and result.returncode != 0:
         msg = f"make failed with code {result.returncode}:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
@@ -113,36 +122,36 @@ class TestMakefile:
 
     def test_uv_no_modify_path_is_exported(self):
         """`UV_NO_MODIFY_PATH` should be set to `1` in the Makefile."""
-        proc = run_make(["print-UV_NO_MODIFY_PATH"])
-        out = proc.stdout
-        assert "UV_NO_MODIFY_PATH = 1" in out
+        proc = run_make(["print-UV_NO_MODIFY_PATH"], dry_run=False)
+        out = strip_ansi(proc.stdout)
+        assert "Value of UV_NO_MODIFY_PATH:\n1" in out
 
     def test_uv_install_dir_is_bin(self):
         """`UV_INSTALL_DIR` should point to `./bin`."""
-        proc = run_make(["print-UV_INSTALL_DIR"])
-        out = proc.stdout
-        assert "UV_INSTALL_DIR = ./bin" in out
+        proc = run_make(["print-UV_INSTALL_DIR"], dry_run=False)
+        out = strip_ansi(proc.stdout)
+        assert "Value of UV_INSTALL_DIR:\n./bin" in out
 
     def test_uv_bin_is_bin_uv(self):
         """`UV_BIN` should point to `./bin/uv`."""
-        proc = run_make(["print-UV_BIN"])
-        out = proc.stdout
-        assert "UV_BIN = ./bin/uv" in out
+        proc = run_make(["print-UV_BIN"], dry_run=False)
+        out = strip_ansi(proc.stdout)
+        assert "Value of UV_BIN:\n./bin/uv" in out
 
     def test_uvx_bin_is_bin_uvx(self):
         """`UVX_BIN` should point to `./bin/uvx`."""
-        proc = run_make(["print-UVX_BIN"])
-        out = proc.stdout
-        assert "UVX_BIN = ./bin/uvx" in out
+        proc = run_make(["print-UVX_BIN"], dry_run=False)
+        out = strip_ansi(proc.stdout)
+        assert "Value of UVX_BIN:\n./bin/uvx" in out
 
     def test_script_folder_is_github_scripts(self):
         """`SCRIPTS_FOLDER` should point to `.github/scripts`."""
-        proc = run_make(["print-SCRIPTS_FOLDER"])
-        out = proc.stdout
-        assert "SCRIPTS_FOLDER = .github/scripts" in out
+        proc = run_make(["print-SCRIPTS_FOLDER"], dry_run=False)
+        out = strip_ansi(proc.stdout)
+        assert "Value of SCRIPTS_FOLDER:\n.github/scripts" in out
 
     def test_custom_scripts_folder_is_set(self):
         """`CUSTOM_SCRIPTS_FOLDER` should point to `.github/scripts/customisations`."""
-        proc = run_make(["print-CUSTOM_SCRIPTS_FOLDER"])
-        out = proc.stdout
-        assert "CUSTOM_SCRIPTS_FOLDER = .github/scripts/customisations" in out
+        proc = run_make(["print-CUSTOM_SCRIPTS_FOLDER"], dry_run=False)
+        out = strip_ansi(proc.stdout)
+        assert "Value of CUSTOM_SCRIPTS_FOLDER:\n.github/scripts/customisations" in out
