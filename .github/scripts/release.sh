@@ -1,12 +1,11 @@
 #!/bin/sh
-# Version bump and tag creation script for releases
-# - Two-command release process: bump (with optional commit), release (tag + push with prompts)
-# - Validates the version format using uv
-# - Updates pyproject.toml with the new version using uv
-# - Creates a git tag and pushes it to trigger the release workflow
+# Release script
+# - Creates a git tag based on the current version in pyproject.toml
+# - Pushes the tag to remote to trigger the release workflow
+# - Performs checks (branch, upstream status, clean working tree)
 #
 # This script is POSIX-sh compatible and follows the style of other scripts
-# in this repository. It uses uv to manage version updates.
+# in this repository. It uses uv to read the current version.
 
 set -e
 
