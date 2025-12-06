@@ -5,12 +5,15 @@ The script exposes two commands: `bump` (updates pyproject.toml via `uv`) and
 clone and use a small mock `uv` to avoid external dependencies.
 """
 
+import logging
 import os
 import shutil
 import subprocess
 from pathlib import Path
 
 import pytest
+
+logger = logging.getLogger(__name__)
 
 # Path to the release script in the actual workspace
 WORKSPACE_ROOT = Path(__file__).parent.parent
@@ -93,11 +96,15 @@ def git_repo(tmp_path, monkeypatch):
     local_dir = tmp_path / "local"
     gnupg_home = tmp_path / "gnupg"
 
+    logger.info("Initializing test git environment. remote=%s local=%s", remote_dir, local_dir)
+
     # 1. Create bare remote
     remote_dir.mkdir()
     subprocess.run(["git", "init", "--bare", str(remote_dir)], check=True)
+    logger.debug("Initialized bare remote repository at %s", remote_dir)
     # Ensure the remote's default HEAD points to master for predictable behavior
     subprocess.run(["git", "symbolic-ref", "HEAD", "refs/heads/master"], cwd=remote_dir, check=True)
+    logger.debug("Set remote HEAD to refs/heads/master")
 
     # 2. Clone to local
     subprocess.run(["git", "clone", str(remote_dir), str(local_dir)], check=True)
