@@ -51,4 +51,3 @@ if __name__ == "__main__":
         print(json.dumps(max_supported_version()))
     else:
         print(json.dumps("3.13"))
-
