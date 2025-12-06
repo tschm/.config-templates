@@ -62,7 +62,8 @@ def run_make(args: list[str] | None = None, check: bool = True, dry_run: bool = 
     if args:
         cmd.extend(args)
     # Use -s to reduce noise, -n to avoid executing commands
-    cmd.insert(1, "-sn")
+    flags = "-sn" if dry_run else "-s"
+    cmd.insert(1, flags)
     logger.info("Running command: %s", " ".join(cmd))
     result = subprocess.run(cmd, capture_output=True, text=True)  # noqa: S603
     logger.debug("make exited with code %d", result.returncode)
