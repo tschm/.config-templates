@@ -1,7 +1,6 @@
 """Pytest configuration and fixtures for setting up a mock git repository with versioning and GPG signing."""
 
 import os
-import pathlib
 import shutil
 import subprocess
 
@@ -184,12 +183,3 @@ exit 0
     subprocess.run(["git", "push", "origin", "master"], check=True)
 
     yield local_dir
-
-
-@pytest.fixture(scope="session")
-def root():
-    """Return the repository root directory as a pathlib.Path.
-
-    Used by tests to locate files and scripts relative to the project root.
-    """
-    return pathlib.Path(__file__).parent.parent.parent

@@ -9,6 +9,8 @@ import re
 import subprocess
 import sys
 
+import pytest
+
 logger = logging.getLogger(__name__)
 
 # Regex for Python code blocks
@@ -44,3 +46,32 @@ def test_readme_runs(root):
     logger.info("README code executed successfully; comparing output to expected result")
     assert stdout.strip() == expected.strip()
     logger.info("README code output matches expected result")
+
+
+class TestReadmeTestEdgeCases:
+    """Edge cases for README code block testing."""
+
+    def test_readme_file_exists_at_root(self, root):
+        """README.md should exist at repository root."""
+        readme = root / "README.md"
+        assert readme.exists()
+        assert readme.is_file()
+
+    def test_readme_is_readable(self, root):
+        """README.md should be readable with UTF-8 encoding."""
+        readme = root / "README.md"
+        content = readme.read_text(encoding="utf-8")
+        assert len(content) > 0
+        assert isinstance(content, str)
+
+    def test_readme_code_is_syntactically_valid(self, root):
+        """Python code blocks in README should be syntactically valid."""
+        readme = root / "README.md"
+        content = readme.read_text(encoding="utf-8")
+        code_blocks = re.findall(r"\`\`\`python\n(.*?)\`\`\`", content, re.DOTALL)
+
+        for i, code in enumerate(code_blocks):
+            try:
+                compile(code, f"<readme_block_{i}>", "exec")
+            except SyntaxError as e:
+                pytest.fail(f"Code block {i} has syntax error: {e}")
