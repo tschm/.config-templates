@@ -17,7 +17,7 @@ for modern Python projects.
 Save time and maintain consistency across your projects
 with these pre-configured templates.
 
-> Last updated: December 01, 2025
+![Last Updated](https://img.shields.io/github/last-commit/tschm/.config-templates/main?label=Last%20updated&color=blue)
 
 ## ✨ Features
 
