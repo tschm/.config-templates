@@ -70,8 +70,8 @@ class TestRootFixture:
     def test_root_uses_pathlib_module(self, root):
         """Root fixture should use pathlib.Path from pathlib module."""
         import pathlib
-        assert isinstance(root, pathlib.Path)
 
+        assert isinstance(root, pathlib.Path)
 
     def test_root_supports_pathlib_operations(self, root):
         """Root should support all standard pathlib operations."""
