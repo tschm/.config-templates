@@ -1,6 +1,13 @@
+"""Shared pytest fixtures for the test suite.
+
+Provides the 'root' fixture that returns the repository root as a pathlib.Path,
+enabling tests to locate files and scripts relative to the project root.
+"""
+
 import pathlib
 
 import pytest
+
 
 @pytest.fixture(scope="session")
 def root():
