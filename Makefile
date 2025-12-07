@@ -145,7 +145,7 @@ docs: install ## create documentation with pdoc
 	    DOCFORMAT="$(DOCFORMAT)"; \
 	    if [ -z "$$DOCFORMAT" ]; then \
 	      if [ -f "ruff.toml" ]; then \
-	        DOCFORMAT=$$(grep 'convention.*=' ruff.toml | head -n 1 | cut -d '=' -f 2 | tr -d ' "'); \
+	        DOCFORMAT=$$(${UV_BIN} run python -c "import tomllib; print(tomllib.load(open('ruff.toml', 'rb')).get('lint', {}).get('pydocstyle', {}).get('convention', ''))"); \
 	      fi; \
 	      if [ -z "$$DOCFORMAT" ]; then \
 	        DOCFORMAT="google"; \
