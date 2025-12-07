@@ -327,6 +327,37 @@ This tells SSH clients on non-macOS platforms to ignore the `UseKeychain` direct
 
 **Reference**: [Stack Overflow solution](https://stackoverflow.com/questions/75613632/trying-to-ssh-to-my-server-from-the-terminal-ends-with-error-line-x-bad-configu/75616369#75616369)
 
+---
+
+#### Marimo server not accessible in GitHub Codespaces
+
+**Symptom**: After starting a GitHub Codespace, the Marimo server doesn't seem to be running or accessible.
+
+**Solution**: Check the following:
+
+1. **Wait for initialization**: The Marimo server starts automatically after the container is created. This may take 1-2 minutes. You should see a port forwarding notification for port 8080.
+
+2. **Check server logs**: View the Marimo server logs to see if it started successfully:
+   ```bash
+   cat /tmp/marimo.log
+   ```
+
+3. **Check if Marimo is running**: Look for the Marimo process:
+   ```bash
+   ps aux | grep marimo
+   ```
+
+4. **Manually restart Marimo**: If needed, you can restart the server:
+   ```bash
+   pkill -f marimo  # Stop any running instance
+   .devcontainer/start-marimo.sh  # Start a new instance
+   ```
+
+5. **Use the Makefile**: Alternatively, use the make command to start Marimo interactively:
+   ```bash
+   make marimo
+   ```
+
 
 ## 🔧 Custom Build Extras
 
