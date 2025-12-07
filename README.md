@@ -272,6 +272,9 @@ The dev container automatically runs the initialization script that:
 - Configures the Python virtual environment
 - Installs project dependencies
 - Sets up pre-commit hooks
+- Starts Marimo server on port 8080 for interactive notebooks
+
+Once the container is ready, the Marimo server will be accessible at `http://localhost:8080` and you'll receive a notification when the port is forwarded.
 
 ### Publishing Devcontainer Images
 

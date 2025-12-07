@@ -7,4 +7,4 @@ source "${script_dir}/setup-uv.sh"
 
 echo "🚀 Generic Python .devcontainer environment ready!"
 echo "🔧 Pre-commit hooks installed for code quality"
-echo "Marimo installed"
+echo "📊 Marimo installed - server will start automatically"
