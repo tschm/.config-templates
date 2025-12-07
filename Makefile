@@ -63,7 +63,7 @@ install-extras: ## run custom build script (if exists)
 install: install-uv install-extras ## install
 	# Create the virtual environment only if it doesn't exist
 	@if [ ! -d ".venv" ]; then \
-	  ${UV_BIN} venv --python 3.12 || { printf "${RED}[ERROR] Failed to create virtual environment${RESET}\n"; exit 1; }; \
+	  ${UV_BIN} venv || { printf "${RED}[ERROR] Failed to create virtual environment${RESET}\n"; exit 1; }; \
 	else \
 	  printf "${BLUE}[INFO] Using existing virtual environment at .venv, skipping creation${RESET}\n"; \
 	fi
