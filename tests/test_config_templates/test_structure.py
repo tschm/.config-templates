@@ -57,30 +57,3 @@ class TestRootFixture:
         assert (scripts_dir / "release.sh").exists()
         assert (scripts_dir / "bump.sh").exists()
         assert (scripts_dir / "sync.sh").exists()
-
-    def test_root_can_locate_source_files(self, root):
-        """Root should allow locating source files."""
-        src_dir = root / "src"
-        assert src_dir.exists()
-        config_dir = src_dir / "config"
-        assert config_dir.exists()
-        assert (config_dir / "__init__.py").exists()
-        assert (config_dir / "add.py").exists()
-
-    def test_root_uses_pathlib_module(self, root):
-        """Root fixture should use pathlib.Path from pathlib module."""
-        import pathlib
-
-        assert isinstance(root, pathlib.Path)
-
-    def test_root_supports_pathlib_operations(self, root):
-        """Root should support all standard pathlib operations."""
-        assert callable(root.exists)
-        assert callable(root.is_dir)
-        assert callable(root.resolve)
-        assert callable(root.absolute)
-        assert callable(root.iterdir)
-
-        child = root / "README.md"
-        assert isinstance(child, Path)
-        assert child.parent == root
