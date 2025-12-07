@@ -10,6 +10,7 @@
 [![Book](https://github.com/tschm/.config-templates/workflows/BOOK/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3ABOOK)
 [![Marimo](https://github.com/tschm/.config-templates/workflows/Marimo/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3AMarimo)
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/tschm/.config-templates)
 
 A collection of reusable configuration templates
 for modern Python projects.
