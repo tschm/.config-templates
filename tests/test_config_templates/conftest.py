@@ -76,6 +76,7 @@ if __name__ == "__main__":
     main()
 """
 
+
 @pytest.fixture(scope="session")
 def root():
     """Return the repository root directory as a pathlib.Path.
@@ -83,6 +84,7 @@ def root():
     Used by tests to locate files and scripts relative to the project root.
     """
     return pathlib.Path(__file__).parent.parent.parent
+
 
 @pytest.fixture
 def git_repo(root, tmp_path, monkeypatch):

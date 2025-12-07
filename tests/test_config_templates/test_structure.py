@@ -1,3 +1,10 @@
+"""Tests for the root pytest fixture that yields the repository root Path.
+
+This module ensures the fixture resolves to the true project root and that
+expected files/directories exist, enabling other tests to locate resources
+reliably.
+"""
+
 from pathlib import Path
 
 
@@ -63,6 +70,7 @@ class TestRootFixture:
     def test_root_uses_pathlib_module(self, root):
         """Root fixture should use pathlib.Path from pathlib module."""
         import pathlib
+
         assert isinstance(root, pathlib.Path)
         assert type(root).__module__ == "pathlib"
 

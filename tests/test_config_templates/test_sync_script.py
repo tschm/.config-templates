@@ -194,6 +194,7 @@ class TestSyncScriptRootFixture:
     def test_sync_script_is_executable(self, root):
         """Sync script should be executable."""
         import os
+
         sync_script = root / ".github" / "scripts" / "sync.sh"
         assert os.access(sync_script, os.X_OK)
 
