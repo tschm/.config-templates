@@ -180,3 +180,36 @@ exclude: |
     assert (target_dir / ".gitignore").exists()
     assert (target_dir / "Makefile").exists()
     assert (target_dir / "tests" / "test_example.py").exists()
+
+
+class TestSyncScriptRootFixture:
+    """Tests for root fixture usage in sync script tests."""
+
+    def test_sync_script_exists_at_root(self, root):
+        """Sync script should exist at expected location."""
+        sync_script = root / ".github" / "scripts" / "sync.sh"
+        assert sync_script.exists()
+        assert sync_script.is_file()
+
+    def test_sync_script_is_executable(self, root):
+        """Sync script should be executable."""
+        import os
+        sync_script = root / ".github" / "scripts" / "sync.sh"
+        assert os.access(sync_script, os.X_OK)
+
+    def test_sync_script_is_readable(self, root):
+        """Sync script should be readable."""
+        sync_script = root / ".github" / "scripts" / "sync.sh"
+        content = sync_script.read_text()
+        assert len(content) > 0
+        assert content.startswith("#!/")
+
+    def test_sync_script_contains_expected_logic(self, root):
+        """Sync script should contain key functionality."""
+        sync_script = root / ".github" / "scripts" / "sync.sh"
+        content = sync_script.read_text()
+
+        # Check for key features
+        assert "template.yml" in content
+        assert "include" in content.lower()
+        assert "exclude" in content.lower()
