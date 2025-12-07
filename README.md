@@ -102,7 +102,7 @@ The [Makefile](Makefile) provides organized targets for bootstrapping, developme
 ## Testing your documentation
 
 Any README.md file will be scanned for Python code blocks.
-If any are found, they will be tested in [tests/test_readme.py](tests/test_readme.py).
+If any are found, they will be tested in [test_readme.py](tests/test_config_templates/test_readme.py).
 
 ```python
 # Some generic Python code block
@@ -114,7 +114,7 @@ print(round(math.cos(math.pi/4.0), 2))
 ```
 
 For each code block, we define a block of expected output.
-If the output matches the expected output, a [test](tests/test_readme.py) passes,
+If the output matches the expected output, a [test](tests/test_config_templates/test_readme.py) passes,
 Otherwise, it fails.
 
 ```result
