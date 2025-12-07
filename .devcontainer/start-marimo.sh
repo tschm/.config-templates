@@ -12,18 +12,18 @@ MARIMO_PORT=8080
 # This should be enough for the onCreateCommand to complete
 MAX_WAIT=30
 
-# Wait for venv to be ready
-count=0
-while [ ! -f "$MARIMO_BIN" ] && [ $count -lt $MAX_WAIT ]; do
-    echo "Waiting for marimo to be installed..."
-    sleep 1
-    count=$((count + 1))
-done
-
-if [ ! -f "$MARIMO_BIN" ]; then
-    echo "Error: Marimo not found at $MARIMO_BIN after ${MAX_WAIT}s timeout"
-    exit 1
-fi
+## Wait for venv to be ready
+#count=0
+#while [ ! -f "$MARIMO_BIN" ] && [ $count -lt $MAX_WAIT ]; do
+#    echo "Waiting for marimo to be installed..."
+#    sleep 1
+#    count=$((count + 1))
+#done
+#
+#if [ ! -f "$MARIMO_BIN" ]; then
+#    echo "Error: Marimo not found at $MARIMO_BIN after ${MAX_WAIT}s timeout"
+#    exit 1
+#fi
 
 # Start Marimo server in the background
 echo "Starting Marimo server on port $MARIMO_PORT..."
