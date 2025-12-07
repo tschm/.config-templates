@@ -10,7 +10,6 @@ import subprocess
 from pathlib import Path
 
 
-
 def create_test_structure(logger, base_path: Path) -> Path:
     """Create a template directory structure for testing."""
     logger.debug("Creating test structure under %s", base_path)

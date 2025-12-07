@@ -46,10 +46,13 @@ def setup_tmp_makefile(logger, root, tmp_path: Path):
         logger.debug("Restored working directory to %s", old_cwd)
 
 
-def run_make(logger, args: list[str] | None = None, check: bool = True, dry_run: bool = True) -> subprocess.CompletedProcess:
+def run_make(
+    logger, args: list[str] | None = None, check: bool = True, dry_run: bool = True
+) -> subprocess.CompletedProcess:
     """Run `make` with optional arguments and return the completed process.
 
     Args:
+        logger: Logger used to emit diagnostic messages during the run
         args: Additional arguments for make
         check: If True, raise on non-zero return code
         dry_run: If True, use -n to avoid executing commands
@@ -136,31 +139,31 @@ class TestMakefile:
 
     def test_uv_install_dir_is_bin(self, logger):
         """`UV_INSTALL_DIR` should point to `./bin`."""
-        proc = run_make(logger,["print-UV_INSTALL_DIR"], dry_run=False)
+        proc = run_make(logger, ["print-UV_INSTALL_DIR"], dry_run=False)
         out = strip_ansi(proc.stdout)
         assert "Value of UV_INSTALL_DIR:\n./bin" in out
 
     def test_uv_bin_is_bin_uv(self, logger):
         """`UV_BIN` should point to `./bin/uv`."""
-        proc = run_make(logger,["print-UV_BIN"], dry_run=False)
+        proc = run_make(logger, ["print-UV_BIN"], dry_run=False)
         out = strip_ansi(proc.stdout)
         assert "Value of UV_BIN:\n./bin/uv" in out
 
     def test_uvx_bin_is_bin_uvx(self, logger):
         """`UVX_BIN` should point to `./bin/uvx`."""
-        proc = run_make(logger,["print-UVX_BIN"], dry_run=False)
+        proc = run_make(logger, ["print-UVX_BIN"], dry_run=False)
         out = strip_ansi(proc.stdout)
         assert "Value of UVX_BIN:\n./bin/uvx" in out
 
     def test_script_folder_is_github_scripts(self, logger):
         """`SCRIPTS_FOLDER` should point to `.github/scripts`."""
-        proc = run_make(logger,["print-SCRIPTS_FOLDER"], dry_run=False)
+        proc = run_make(logger, ["print-SCRIPTS_FOLDER"], dry_run=False)
         out = strip_ansi(proc.stdout)
         assert "Value of SCRIPTS_FOLDER:\n.github/scripts" in out
 
     def test_custom_scripts_folder_is_set(self, logger):
         """`CUSTOM_SCRIPTS_FOLDER` should point to `.github/scripts/customisations`."""
-        proc = run_make(logger,["print-CUSTOM_SCRIPTS_FOLDER"], dry_run=False)
+        proc = run_make(logger, ["print-CUSTOM_SCRIPTS_FOLDER"], dry_run=False)
         out = strip_ansi(proc.stdout)
         assert "Value of CUSTOM_SCRIPTS_FOLDER:\n.github/scripts/customisations" in out
 
