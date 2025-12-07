@@ -3,7 +3,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python versions](https://img.shields.io/badge/Python-3.11%20•%203.12%20•%203.13%20•%203.14-blue?logo=python)](https://www.python.org/)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg?logo=ruff)](https://github.com/astral-sh/ruff)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/tschm/.config-templates)
 
 [![CI Status](https://github.com/tschm/.config-templates/workflows/CI/badge.svg)](https://github.com/tschm/.config-templates/actions)
 [![Pre-commit](https://github.com/tschm/.config-templates/workflows/PRE-COMMIT/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3APRE-COMMIT)
@@ -11,6 +10,7 @@
 [![Book](https://github.com/tschm/.config-templates/workflows/BOOK/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3ABOOK)
 [![Marimo](https://github.com/tschm/.config-templates/workflows/Marimo/badge.svg)](https://github.com/tschm/.config-templates/actions?query=workflow%3AMarimo)
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/tschm/.config-templates)
 
 A collection of reusable configuration templates
 for modern Python projects.
