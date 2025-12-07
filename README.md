@@ -125,6 +125,7 @@ Hello, World!
 This repository includes the following configuration templates:
 
 - **ruff.toml** - Configuration for the Ruff linter and formatter
+- **pytest.ini** - Configuration for the pytest testing framework
 - **.devcontainer/** - Development container configuration
 - **.github/** - GitHub Actions, scripts and workflow templates
 - **Makefile** - Simple make commands for common operations
