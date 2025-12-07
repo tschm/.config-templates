@@ -17,7 +17,7 @@ for modern Python projects.
 Save time and maintain consistency across your projects
 with these pre-configured templates.
 
-> Last updated: December 01, 2025
+![Last Updated](https://img.shields.io/github/last-commit/tschm/.config-templates/main?label=Last%20updated&color=blue)
 
 ## ✨ Features
 
@@ -83,13 +83,9 @@ Documentation
   all              Run everything
 
 Releasing and Versioning
-  bump             bump version (usage: make bump TYPE=patch [COMMIT=true] [COMMIT_MSG="message"])
-  patch            alias bump via patch (usage: make patch [COMMIT=true] [COMMIT_MSG="message"])
-  minor            alias bump via minor (usage: make minor [COMMIT=true] [COMMIT_MSG="message"])
-  major            alias bump via major (usage: make major [COMMIT=true] [COMMIT_MSG="message"])
-  publish          bump version, commit, tag and push (usage: make publish TYPE=patch|minor|major [VERSION=x.y.z] [COMMIT_MSG="..."])
-  release          create tag and push to remote with prompts (usage: make release)
-  post-release     perform post-release tasks (usage: make post-release)
+  bump             bump version
+  release          create tag and push to remote with prompts
+  post-release     perform post-release tasks
 
 Meta
   sync             sync with template repository as defined in .github/template.yml
@@ -102,7 +98,7 @@ The [Makefile](Makefile) provides organized targets for bootstrapping, developme
 ## Testing your documentation
 
 Any README.md file will be scanned for Python code blocks.
-If any are found, they will be tested in [tests/test_readme.py](tests/test_readme.py).
+If any are found, they will be tested in [test_readme.py](tests/test_config_templates/test_readme.py).
 
 ```python
 # Some generic Python code block
@@ -114,7 +110,7 @@ print(round(math.cos(math.pi/4.0), 2))
 ```
 
 For each code block, we define a block of expected output.
-If the output matches the expected output, a [test](tests/test_readme.py) passes,
+If the output matches the expected output, a [test](tests/test_config_templates/test_readme.py) passes,
 Otherwise, it fails.
 
 ```result
@@ -129,6 +125,7 @@ Hello, World!
 This repository includes the following configuration templates:
 
 - **ruff.toml** - Configuration for the Ruff linter and formatter
+- **pytest.ini** - Configuration for the pytest testing framework
 - **.devcontainer/** - Development container configuration
 - **.github/** - GitHub Actions, scripts and workflow templates
 - **Makefile** - Simple make commands for common operations
@@ -415,41 +412,27 @@ This template includes a robust release workflow that handles version bumping, t
 
 ### The Release Process
 
-The release process consists of two steps: **Bump** and **Release**.
+The release process consists of two interactive steps: **Bump** and **Release**.
 
 #### 1. Bump Version
 
-First, update the version in `pyproject.toml` and commit the changes.
+First, update the version in `pyproject.toml`:
 
 ```bash
-# Bump patch version (e.g., 1.2.3 → 1.2.4)
-make bump TYPE=patch
-
-# Bump minor version (e.g., 1.2.3 → 1.3.0)
-make bump TYPE=minor
-
-# Bump major version (e.g., 1.2.3 → 2.0.0)
-make bump TYPE=major
-
-# Set specific version
-make bump VERSION=1.2.3
+make bump
 ```
 
-By default, `make bump` only updates the file. To commit automatically:
+This command will interactively guide you through:
+1. Selecting a bump type (patch, minor, major) or entering a specific version
+2. Warning you if you're not on the default branch
+3. Showing the current and new version
+4. Prompting whether to commit the changes
+5. Prompting whether to push the changes
 
-```bash
-make bump TYPE=patch COMMIT=true
-# or with a custom message
-make bump TYPE=patch COMMIT=true COMMIT_MSG="feat: release 1.2.4"
-```
-
-Shortcuts are available for common bumps (these behave like `make bump`):
-
-```bash
-make patch  # equivalent to make bump TYPE=patch
-make minor  # equivalent to make bump TYPE=minor
-make major  # equivalent to make bump TYPE=major
-```
+The script ensures safety by:
+- Checking for uncommitted changes before bumping
+- Validating that the tag doesn't already exist
+- Verifying the version format
 
 #### 2. Release
 
@@ -459,23 +442,17 @@ Once the version is bumped and committed, run the release command:
 make release
 ```
 
-This command will:
-1.  Check if your branch is up-to-date with the remote.
-2.  If your local branch is ahead, it will show the unpushed commits and prompt you to push them.
-3.  Create a git tag (e.g., `v1.2.4`).
-4.  Push the tag to the remote, which triggers the GitHub Actions release workflow.
+This command will interactively guide you through:
+1. Checking if your branch is up-to-date with the remote
+2. If your local branch is ahead, showing the unpushed commits and prompting you to push them
+3. Creating a git tag (e.g., `v1.2.4`)
+4. Pushing the tag to the remote, which triggers the GitHub Actions release workflow
 
-### One-Step Publish
-
-For convenience, you can do everything in one go using `make publish`:
-
-```bash
-make publish TYPE=patch
-```
-
-This is equivalent to:
-1.  `make bump TYPE=patch COMMIT=true`
-2.  `make release`
+The script provides safety checks by:
+- Warning if you're not on the default branch
+- Verifying no uncommitted changes exist
+- Checking if the tag already exists locally or on remote
+- Showing the number of commits since the last tag
 
 ### What Happens After Release
 
