@@ -189,7 +189,7 @@ is_file_excluded() {
   if [ -z "$EXCLUDE_LIST" ]; then
     return 1  # Not excluded (false)
   fi
-  
+
   while IFS= read -r exclude_item || [ -n "$exclude_item" ]; do
     [ -z "$exclude_item" ] && continue
     if [ "$file_path" = "$exclude_item" ]; then
@@ -198,7 +198,7 @@ is_file_excluded() {
   done <<EOF_EXCLUDE_CHECK
 $EXCLUDE_LIST
 EOF_EXCLUDE_CHECK
-  
+
   return 1  # Not excluded (false)
 }
 
@@ -207,6 +207,9 @@ printf "%b[INFO] Syncing files...%b\n" "$BLUE" "$RESET"
 
 synced_count=0
 skipped_count=0
+# Track whether .github (containing this script) was synced and whether a direct self update was requested
+synced_dotgithub="false"
+deferred_self_update="false"
 
 # Use here-document instead of pipeline to avoid subshell
 while IFS= read -r item || [ -n "$item" ]; do
@@ -216,6 +219,13 @@ while IFS= read -r item || [ -n "$item" ]; do
   if is_file_excluded "$item"; then
     printf "  %b[SKIP]%b %s (excluded)\n" "$YELLOW" "$RESET" "$item"
     skipped_count=$((skipped_count + 1))
+    continue
+  fi
+
+  # Defer updating this script to the very end to avoid mid-run overwrite
+  if [ "$item" = ".github/scripts/sync.sh" ]; then
+    deferred_self_update="true"
+    printf "  %b[DEFER]%b %s (will update at end)\n" "$YELLOW" "$RESET" "$item"
     continue
   fi
 
@@ -234,6 +244,10 @@ while IFS= read -r item || [ -n "$item" ]; do
       # Copy contents of the source directory into the destination directory
       # to avoid nesting (e.g., .github/.github or tests/tests)
       cp -R "$src_path"/. "$dest_path"/
+      # Mark if we synced the .github directory so we can safely update sync.sh at the end
+      if [ "$item" = ".github" ]; then
+        synced_dotgithub="true"
+      fi
 
       # Remove excluded files from the copied directory
       if [ -n "$EXCLUDE_LIST" ]; then
@@ -273,6 +287,18 @@ EOF_EXCLUDE_NESTED
 done <<EOF_INCLUDE
 $INCLUDE_LIST
 EOF_INCLUDE
+
+# Finalize self-update of sync.sh if applicable
+TEMPLATE_SELF_SH="$TEMP_DIR/template/.github/scripts/sync.sh"
+if [ -f "$TEMPLATE_SELF_SH" ] && { [ "$deferred_self_update" = "true" ] || [ "$synced_dotgithub" = "true" ]; }; then
+  if is_file_excluded ".github/scripts/sync.sh"; then
+    printf "  %b[SKIP]%b .github/scripts/sync.sh (excluded from final update)\n" "$YELLOW" "$RESET"
+  else
+    cp "$TEMPLATE_SELF_SH" "$SELF_SCRIPT"
+    chmod +x "$SELF_SCRIPT" 2>/dev/null || true
+    printf "  %b[SYNC]%b .github/scripts/sync.sh (finalized)\n" "$GREEN" "$RESET"
+  fi
+fi
 
 printf "\n%b[INFO] Sync complete!%b\n" "$GREEN" "$RESET"
 printf "  Synced: %d files/directories\n" "$synced_count"
