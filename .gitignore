@@ -31,6 +31,7 @@ tests/test_release_script.py
 tests/test_sync_script.py
 tests/test_docstrings.py
 tests/test_bump_script.py
+tests/conftest.py
 
 # Distribution / packaging
 .Python
