@@ -28,16 +28,15 @@ def strip_ansi(text: str) -> str:
 
 
 @pytest.fixture(autouse=True)
-def setup_tmp_makefile(tmp_path: Path):
+def setup_tmp_makefile(root, tmp_path: Path):
     """Copy only the Makefile into a temp directory and chdir there.
 
     We rely on `make -n` so that no real commands are executed.
     """
-    project_root = Path(__file__).parent.parent
     logger.debug("Setting up temporary Makefile test dir: %s", tmp_path)
 
     # Copy the Makefile into the temporary working directory
-    shutil.copy(project_root / "Makefile", tmp_path / "Makefile")
+    shutil.copy(root / "Makefile", tmp_path / "Makefile")
 
     # Move into tmp directory for isolation
     old_cwd = Path.cwd()

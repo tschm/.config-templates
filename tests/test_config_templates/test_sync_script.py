@@ -86,7 +86,7 @@ def test_directory_copy_excludes_nested_files(tmp_path: Path):
     assert (dest / ".github" / "workflows" / "release.yml").exists()
 
 
-def test_sync_script_with_exclusions_integration(tmp_path: Path):
+def test_sync_script_with_exclusions_integration(root, tmp_path: Path):
     """Integration test that verifies sync.sh properly excludes nested files.
 
     This test will fail with the current implementation and pass after the fix.
@@ -99,13 +99,11 @@ def test_sync_script_with_exclusions_integration(tmp_path: Path):
     target_dir = tmp_path / "target"
     target_dir.mkdir()
 
-    project_root = Path(__file__).parent.parent
-
     # Create a test-specific sync script that reads from local directory
     # instead of cloning from GitHub
     test_script = target_dir / "test_sync.sh"
 
-    sync_content = (project_root / ".github" / "scripts" / "sync.sh").read_text()
+    sync_content = (root / ".github" / "scripts" / "sync.sh").read_text()
 
     # Modify to use local template directory
     test_sync_content = sync_content.replace(

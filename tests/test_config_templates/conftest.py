@@ -1,14 +1,11 @@
 """Pytest configuration and fixtures for setting up a mock git repository with versioning and GPG signing."""
 
 import os
+import pathlib
 import shutil
 import subprocess
-from pathlib import Path
 
 import pytest
-
-# Path to the workspace root
-WORKSPACE_ROOT = Path(__file__).parent.parent
 
 MOCK_UV_SCRIPT = """#!/usr/bin/env python3
 import sys
@@ -81,7 +78,7 @@ if __name__ == "__main__":
 
 
 @pytest.fixture
-def git_repo(tmp_path, monkeypatch):
+def git_repo(root, tmp_path, monkeypatch):
     """Sets up a remote bare repo and a local clone with necessary files."""
     remote_dir = tmp_path / "remote.git"
     local_dir = tmp_path / "local"
@@ -169,8 +166,8 @@ exit 0
     script_dir = local_dir / ".github" / "scripts"
     script_dir.mkdir(parents=True)
 
-    shutil.copy(WORKSPACE_ROOT / ".github" / "scripts" / "release.sh", script_dir / "release.sh")
-    shutil.copy(WORKSPACE_ROOT / ".github" / "scripts" / "bump.sh", script_dir / "bump.sh")
+    shutil.copy(root / ".github" / "scripts" / "release.sh", script_dir / "release.sh")
+    shutil.copy(root / ".github" / "scripts" / "bump.sh", script_dir / "bump.sh")
 
     (script_dir / "release.sh").chmod(0o755)
     (script_dir / "bump.sh").chmod(0o755)
@@ -187,3 +184,7 @@ exit 0
     subprocess.run(["git", "push", "origin", "master"], check=True)
 
     yield local_dir
+
+@pytest.fixture(scope="session")
+def root():
+    return pathlib.Path(__file__).parent.parent.parent
