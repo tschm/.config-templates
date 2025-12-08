@@ -95,6 +95,45 @@ Meta
 
 The [Makefile](Makefile) provides organized targets for bootstrapping, development, testing, and documentation tasks.
 
+## 📊 Marimo Notebooks
+
+This project supports [Marimo](https://marimo.io/) notebooks. You can run the Marimo server using:
+
+```bash
+make marimo
+```
+
+### Configuration
+
+To ensure Marimo can import the local package (`src/config`), the following configuration is added to `pyproject.toml`:
+
+```toml
+[tool.marimo.runtime]
+pythonpath = ["src"]
+```
+
+### Dependency Management
+
+Marimo notebooks can define their own dependencies using inline script metadata. This allows notebooks to be self-contained and reproducible.
+
+To use the current package (`config-templates`) within a notebook, you can define it as a dependency and point `uv` to the local path. Add the following block at the top of your `.py` notebook file:
+
+```python
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "marimo",
+#     "pandas",
+#     "config-templates",
+# ]
+#
+# [tool.uv.sources]
+# config-templates = { path = "../.." }
+# ///
+```
+
+Adjust the `path` in `[tool.uv.sources]` relative to the notebook's location.
+
 ## Testing your documentation
 
 Any README.md file will be scanned for Python code blocks.
