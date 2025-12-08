@@ -1,4 +1,5 @@
 """Pytest configuration and fixtures for setting up a mock git repository with versioning and GPG signing."""
+
 import logging
 import os
 import pathlib
@@ -76,6 +77,7 @@ if __name__ == "__main__":
     main()
 """
 
+
 @pytest.fixture(scope="session")
 def root():
     """Return the repository root directory as a pathlib.Path.
@@ -93,6 +95,7 @@ def logger():
         logging.Logger: Logger configured for the test session.
     """
     return logging.getLogger(__name__)
+
 
 @pytest.fixture
 def git_repo(root, tmp_path, monkeypatch):
