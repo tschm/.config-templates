@@ -11,13 +11,23 @@ or by running this file directly.
 # dependencies = [
 #     "marimo",
 #     "pandas",
+#     "config-templates",
 # ]
+#
+# [tool.uv.sources]
+# config-templates = { path = "../.." }
 # ///
 
 import marimo
 
 __generated_with = "0.17.7"
 app = marimo.App(width="medium")
+
+@app.cell
+def _():
+    from config import add
+
+    return (add,)
 
 @app.cell
 def _():
