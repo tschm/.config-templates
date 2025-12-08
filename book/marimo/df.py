@@ -11,11 +11,7 @@ or by running this file directly.
 # dependencies = [
 #     "marimo",
 #     "pandas",
-#     "config-templates",
 # ]
-#
-# [tool.uv.sources]
-# config-templates = { path = "../.." }
 # ///
 
 import marimo
