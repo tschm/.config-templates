@@ -5,6 +5,7 @@
 set -e
 
 MARIMO_FOLDER=${MARIMO_FOLDER:-book/marimo}
+MARIMUSHKA_OUTPUT=${MARIMUSHKA_OUTPUT:-_marimushka}
 UV_BIN=${UV_BIN:-./bin/uv}
 UVX_BIN=${UVX_BIN:-./bin/uvx}
 
@@ -20,25 +21,20 @@ if [ ! -d "$MARIMO_FOLDER" ]; then
 fi
 
 # Ensure output directory exists
-mkdir -p _marimushka
+mkdir -p "$MARIMUSHKA_OUTPUT"
 
 # Discover .py files (top-level only) using globbing; handle no-match case
 set -- "$MARIMO_FOLDER"/*.py
 if [ "$1" = "$MARIMO_FOLDER/*.py" ]; then
   printf "%b[WARN] No Python files found in '%s'.%b\n" "$YELLOW" "$MARIMO_FOLDER" "$RESET"
   # Create a minimal index.html indicating no notebooks
-  mkdir -p _marimushka
-  printf '<html><head><title>Marimo Notebooks</title></head><body><h1>Marimo Notebooks</h1><p>No notebooks found.</p></body></html>' > _marimushka/index.html
+  printf '<html><head><title>Marimo Notebooks</title></head><body><h1>Marimo Notebooks</h1><p>No notebooks found.</p></body></html>' > "$MARIMUSHKA_OUTPUT/index.html"
   exit 0
 fi
 
-# Add src to PYTHONPATH so marimo can find the config package
-if [ -d "src" ]; then
-  export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
-fi
 
 # Run marimushka export
-"$UVX_BIN" marimushka export --notebooks "$MARIMO_FOLDER" --output _marimushka
+"$UVX_BIN" marimushka export --notebooks "$MARIMO_FOLDER" --output "$MARIMUSHKA_OUTPUT"
 
 # Ensure GitHub Pages does not process with Jekyll
-: > _marimushka/.nojekyll
+: > "$MARIMUSHKA_OUTPUT/.nojekyll"
