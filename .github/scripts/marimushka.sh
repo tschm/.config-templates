@@ -33,8 +33,21 @@ if [ "$1" = "$MARIMO_FOLDER/*.py" ]; then
 fi
 
 
+CURRENT_DIR=$(pwd)
+OUTPUT_DIR="$CURRENT_DIR/$MARIMUSHKA_OUTPUT"
+
+# Resolve UVX_BIN to absolute path if it's a relative path (contains / but doesn't start with /)
+case "$UVX_BIN" in
+  /*) ;;
+  */*) UVX_BIN="$CURRENT_DIR/$UVX_BIN" ;;
+  *) ;;
+esac
+
+# Change to the notebook directory to ensure relative paths in notebooks work correctly
+cd "$MARIMO_FOLDER"
+
 # Run marimushka export
-"$UVX_BIN" marimushka export --notebooks "$MARIMO_FOLDER" --output "$MARIMUSHKA_OUTPUT"
+"$UVX_BIN" marimushka export --notebooks "." --output "$OUTPUT_DIR"
 
 # Ensure GitHub Pages does not process with Jekyll
-: > "$MARIMUSHKA_OUTPUT/.nojekyll"
+: > "$OUTPUT_DIR/.nojekyll"
