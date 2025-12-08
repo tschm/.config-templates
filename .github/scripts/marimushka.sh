@@ -32,11 +32,6 @@ if [ "$1" = "$MARIMO_FOLDER/*.py" ]; then
   exit 0
 fi
 
-# Add src to PYTHONPATH so marimo can find the config package
-if [ -d "src" ]; then
-  export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
-fi
-
 # Run marimushka export
 "$UVX_BIN" marimushka export --notebooks "$MARIMO_FOLDER" --output _marimushka
 
