@@ -84,15 +84,15 @@ if [ $awk_status -eq 2 ]; then
     rm -f "$TEMP_FILE" "$HELP_TEMP"
     exit 0
 elif [ $awk_status -ne 0 ]; then
-    # Other awk error
+    # Other awk error - this is a genuine error that should be reported
     rm -f "$TEMP_FILE" "$HELP_TEMP"
-    echo "WARNING: Failed to update README.md - skipping update" >&2
-    exit 0
+    echo "ERROR: Failed to update README.md due to awk error" >&2
+    exit 1
 else
     # Replace the original README with the updated version
     mv "$TEMP_FILE" "$README_FILE"
     echo "README.md updated with current 'make help' output"
 fi
 
-# Clean up temporary help file
+# Clean up temporary help file (safety net for successful path)
 rm -f "$HELP_TEMP"
