@@ -42,3 +42,12 @@ repos:
     rev: v0.24.1
     hooks:
       - id: validate-pyproject
+
+  - repo: local
+    hooks:
+      - id: update-readme-help
+        name: Update README with Makefile help output
+        entry: bash .github/scripts/update-readme-help.sh
+        language: system
+        files: '^(Makefile|README\.md)$'
+        pass_filenames: false
