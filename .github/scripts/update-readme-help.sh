@@ -26,11 +26,13 @@ make help 2>/dev/null | \
 awk -v helpfile="$HELP_TEMP" '
 BEGIN {
     in_help_block = 0
+    pattern_found = 0
 }
 
 # Detect start of help output block
 /^Run `make help` to see all available targets:$/ {
     print
+    pattern_found = 1
     getline
     if ($0 == "") {
         print
@@ -63,7 +65,21 @@ in_help_block == 1 {
 {
     print
 }
+
+END {
+    if (pattern_found == 0) {
+        print "ERROR: Could not find help section marker in README.md" > "/dev/stderr"
+        exit 1
+    }
+}
 ' "$README_FILE" > "$TEMP_FILE"
+
+# Check if awk succeeded
+if [ $? -ne 0 ]; then
+    rm -f "$TEMP_FILE" "$HELP_TEMP"
+    echo "ERROR: Failed to update README.md" >&2
+    exit 1
+fi
 
 # Replace the original README with the updated version
 mv "$TEMP_FILE" "$README_FILE"
