@@ -94,9 +94,11 @@ runs:
 
     - name: "Sync the virtual environment for ${{ github.repository }} if pyproject.toml exists"
       shell: bash
-      env:
-        UV_EXTRA_INDEX_URL: ${{ inputs.uv-extra-index-url }}
       run: |
+        if [[ -n "${{ inputs.uv-extra-index-url }}" ]]; then
+          export UV_EXTRA_INDEX_URL="${{ inputs.uv-extra-index-url }}"
+        fi
+
         if [ -f "pyproject.toml" ]; then
           uv sync --all-extras
         else
