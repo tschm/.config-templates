@@ -136,4 +136,3 @@ class TestGitRepoFixture:
         bin_dir = str(git_repo / "bin")
         assert bin_dir in path_env
         assert path_env.startswith(bin_dir)
-
