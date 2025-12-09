@@ -23,6 +23,8 @@ make help 2>/dev/null | \
 
 # Create the new README with updated help output
 # Using a temporary file to avoid awk escaping issues
+# Temporarily disable exit-on-error to handle pattern not found gracefully
+set +e
 awk -v helpfile="$HELP_TEMP" '
 BEGIN {
     in_help_block = 0
@@ -68,23 +70,29 @@ in_help_block == 1 {
 
 END {
     if (pattern_found == 0) {
-        print "ERROR: Could not find help section marker in README.md" > "/dev/stderr"
-        exit 1
+        print "INFO: No help section marker found in README.md - skipping update" > "/dev/stderr"
+        exit 2
     }
 }
 ' "$README_FILE" > "$TEMP_FILE"
 
-# Check if awk succeeded
-if [ $? -ne 0 ]; then
+# Check if awk succeeded or pattern was not found
+awk_status=$?
+set -e
+if [ $awk_status -eq 2 ]; then
+    # Pattern not found - clean up and exit gracefully (this is not an error)
     rm -f "$TEMP_FILE" "$HELP_TEMP"
-    echo "ERROR: Failed to update README.md" >&2
-    exit 1
+    exit 0
+elif [ $awk_status -ne 0 ]; then
+    # Other awk error
+    rm -f "$TEMP_FILE" "$HELP_TEMP"
+    echo "WARNING: Failed to update README.md - skipping update" >&2
+    exit 0
+else
+    # Replace the original README with the updated version
+    mv "$TEMP_FILE" "$README_FILE"
+    echo "README.md updated with current 'make help' output"
 fi
-
-# Replace the original README with the updated version
-mv "$TEMP_FILE" "$README_FILE"
 
 # Clean up temporary help file
 rm -f "$HELP_TEMP"
-
-echo "README.md updated with current 'make help' output"
