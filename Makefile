@@ -17,7 +17,7 @@ RESET := \033[0m
 .DEFAULT_GOAL := help
 
 # Declare phony targets (they don't produce files)
-.PHONY: install-uv install clean test marimo marimushka book fmt deptry docs release release-dry-run post-release sync help all
+.PHONY: install-uv install clean test marimo marimushka book fmt deptry docs release release-dry-run post-release sync help all update-readme
 
 UV_INSTALL_DIR := ./bin
 UV_BIN := ${UV_INSTALL_DIR}/uv
@@ -208,6 +208,9 @@ customisations: ## list available customisation scripts
 	else \
 		printf "${YELLOW}[INFO] No customisations found in ${CUSTOM_SCRIPTS_FOLDER}${RESET}\n"; \
 	fi
+
+update-readme: ## update README.md with current Makefile help output
+	@/bin/sh "${SCRIPTS_FOLDER}/update-readme-help.sh"
 
 # debugger tools
 custom-%: ## run a custom script (usage: make custom-scriptname)

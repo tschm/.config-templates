@@ -91,9 +91,14 @@ Meta
   sync             sync with template repository as defined in .github/template.yml
   help             Display this help message
   customisations   list available customisation scripts
+  update-readme    update README.md with current Makefile help output
 ```
 
 The [Makefile](Makefile) provides organized targets for bootstrapping, development, testing, and documentation tasks.
+
+> **Note:** The help output above is automatically generated from the Makefile.
+> When you modify Makefile targets or descriptions, run `make update-readme` to update this section,
+> or the pre-commit hook will update it automatically when you commit changes to the Makefile.
 
 ## 📊 Marimo Notebooks
 
