@@ -47,7 +47,7 @@ repos:
     hooks:
       - id: update-readme-help
         name: Update README with Makefile help output
-        entry: bash .github/scripts/update-readme-help.sh
+        entry: /bin/sh .github/scripts/update-readme-help.sh
         language: system
-        files: '^(Makefile|README\.md)$'
+        files: '^Makefile$'
         pass_filenames: false

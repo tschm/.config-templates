@@ -210,7 +210,7 @@ customisations: ## list available customisation scripts
 	fi
 
 update-readme: ## update README.md with current Makefile help output
-	@/bin/bash "${SCRIPTS_FOLDER}/update-readme-help.sh"
+	@/bin/sh "${SCRIPTS_FOLDER}/update-readme-help.sh"
 
 # debugger tools
 custom-%: ## run a custom script (usage: make custom-scriptname)
