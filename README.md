@@ -96,6 +96,10 @@ Meta
 
 The [Makefile](Makefile) provides organized targets for bootstrapping, development, testing, and documentation tasks.
 
+> **Note:** The help output above is automatically generated from the Makefile.
+> When you modify Makefile targets or descriptions, run `make update-readme` to update this section,
+> or the pre-commit hook will update it automatically when you commit changes to the Makefile.
+
 ## 📊 Marimo Notebooks
 
 This project supports [Marimo](https://marimo.io/) notebooks. You can run the Marimo server using:
