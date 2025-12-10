@@ -51,3 +51,7 @@ pep621_dev_dependency_groups = ["dev"]
 
 [tool.marimo.runtime]
 pythonpath = ["src"]
+
+# --- uv integration ---------------------------------------------------------
+[tool.uv.sources]
+config = { path = ".", editable = true }
