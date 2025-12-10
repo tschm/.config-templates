@@ -1,7 +1,7 @@
-"""Marimo app notebook demonstrating the config.add function.
+"""Marimo app notebook demonstrating the config-templates.add function.
 
 This module is an auto-generated Marimo notebook. It imports the add helper
-from the config package and evaluates a few simple cells. The module is used
+from the config-templates package and evaluates a few simple cells. The module is used
 for documentation/book integration and can be launched with `python -m marimo`
 or by running this file directly.
 """
@@ -11,11 +11,8 @@ or by running this file directly.
 # dependencies = [
 #     "marimo",
 #     "pandas",
-#     "config-templates",
+#     "config-templates"
 # ]
-#
-# [tool.uv.sources]
-# config-templates = { path = "../..", editable = true }
 # ///
 
 import marimo
@@ -26,7 +23,7 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    from config import add
+    from config-templates import add
 
     return (add,)
 

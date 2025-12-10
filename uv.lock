@@ -46,7 +46,7 @@ wheels = [
 ]
 
 [[package]]
-name = "config-templates"
+name = "config"
 version = "0.10.0"
 source = { editable = "." }
 
