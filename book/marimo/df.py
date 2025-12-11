@@ -6,18 +6,6 @@ for documentation/book integration and can be launched with `python -m marimo`
 or by running this file directly.
 """
 
-# /// script
-# requires-python = ">=3.11"
-# dependencies = [
-#     "marimo",
-#     "pandas",
-#     "config-templates",
-# ]
-#
-# [tool.uv.sources]
-# config-templates = { path = "../..", editable = true }
-# ///
-
 import marimo
 
 __generated_with = "0.17.7"
