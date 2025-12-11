@@ -46,7 +46,7 @@ wheels = [
 ]
 
 [[package]]
-name = "config"
+name = "configx"
 version = "0.10.0"
 source = { editable = "." }
 
