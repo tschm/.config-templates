@@ -87,7 +87,7 @@ install: install-uv install-extras ## install
 clean: ## clean
 	@printf "${BLUE}Cleaning project...${RESET}\n"
 	# do not clean .env files
-	@git clean -d -X -f -e .env -e '.env.*'
+	@git clean -d -X -f
 	@rm -rf dist build *.egg-info .coverage .pytest_cache
 	@printf "${BLUE}Removing local branches with no remote counterpart...${RESET}\n"
 	@git fetch --prune
