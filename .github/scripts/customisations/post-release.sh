@@ -1,6 +1,6 @@
 #!/bin/bash
-# This file is part of the tschm/.config-templates repository
-# (https://github.com/tschm/.config-templates).
+# This file is part of the tschm/rhiza repository
+# (https://github.com/tschm/rhiza).
 #
 # Optional hook script for post-release actions
 #

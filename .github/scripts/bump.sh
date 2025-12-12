@@ -1,4 +1,7 @@
 #!/bin/sh
+# This file is part of the tschm/rhiza repository
+# (https://github.com/tschm/rhiza).
+#
 # Version bump script
 # - Bumps version in pyproject.toml using uv
 # - Optionally commits the changes

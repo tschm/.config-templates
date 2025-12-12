@@ -1,4 +1,7 @@
 #!/bin/sh
+# This file is part of the tschm/rhiza repository
+# (https://github.com/tschm/rhiza).
+#
 # Export Marimo notebooks in ${MARIMO_FOLDER} to HTML under _marimushka
 # This replicates the previous Makefile logic for maintainability and reuse.
 

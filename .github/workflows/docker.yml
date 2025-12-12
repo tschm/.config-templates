@@ -1,3 +1,6 @@
+# This file is part of the tschm/rhiza repository
+# (https://github.com/tschm/rhiza).
+#
 # GitHub Actions workflow: Lint Dockerfile with hadolint and build the image
 #
 # This workflow runs on pushes and pull requests. It performs two main tasks:

@@ -1,4 +1,7 @@
 #!/bin/sh
+# This file is part of the tschm/rhiza repository
+# (https://github.com/tschm/rhiza).
+#
 # Release script
 # - Creates a git tag based on the current version in pyproject.toml
 # - Pushes the tag to remote to trigger the release workflow
@@ -141,11 +144,11 @@ do_release() {
     printf "%b[ERROR] No upstream branch configured for %s%b\n" "$RED" "$CURRENT_BRANCH" "$RESET"
     exit 1
   fi
-  
+
   LOCAL=$(git rev-parse @)
   REMOTE=$(git rev-parse "$UPSTREAM")
   BASE=$(git merge-base @ "$UPSTREAM")
-  
+
   if [ "$LOCAL" != "$REMOTE" ]; then
     if [ "$LOCAL" = "$BASE" ]; then
         printf "%b[ERROR] Your branch is behind '%s'. Please pull changes.%b\n" "$RED" "$UPSTREAM" "$RESET"
@@ -181,7 +184,7 @@ do_release() {
     printf "\n%b=== Step 1: Create Tag ===%b\n" "$BLUE" "$RESET"
     printf "Creating tag '%s' for version %s\n" "$TAG" "$CURRENT_VERSION"
     prompt_continue ""
-    
+
     # check for gpg signing config
     if git config --get user.signingkey >/dev/null 2>&1 || [ "$(git config --get commit.gpgsign)" = "true" ]; then
       printf "%b[INFO] GPG signing is enabled. Creating signed tag.%b\n" "$BLUE" "$RESET"
@@ -196,18 +199,18 @@ do_release() {
   # Step 2: Push the tag to remote
   printf "\n%b=== Step 2: Push Tag to Remote ===%b\n" "$BLUE" "$RESET"
   printf "Pushing tag '%s' to origin will trigger the release workflow.\n" "$TAG"
-  
+
   # Show what commits are in this tag
   LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
   if [ -n "$LAST_TAG" ] && [ "$LAST_TAG" != "$TAG" ]; then
     COMMIT_COUNT=$(git rev-list "$LAST_TAG..$TAG" --count 2>/dev/null || echo "0")
     printf "Commits since %s: %s\n" "$LAST_TAG" "$COMMIT_COUNT"
   fi
-  
+
   prompt_continue ""
-  
+
   git push origin "refs/tags/$TAG"
-  
+
   REPO_URL=$(git remote get-url origin | sed 's/.*github.com[:/]\(.*\)\.git/\1/')
   printf "\n%b[SUCCESS] Release tag %s pushed to remote!%b\n" "$GREEN" "$TAG" "$RESET"
   printf "%b[INFO] The release workflow will now be triggered automatically.%b\n" "$BLUE" "$RESET"

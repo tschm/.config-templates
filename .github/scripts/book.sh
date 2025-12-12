@@ -1,4 +1,7 @@
 #!/bin/sh
+# This file is part of the tschm/rhiza repository
+# (https://github.com/tschm/rhiza).
+#
 # Assemble the combined documentation site into _book
 # - Copies API docs (pdoc), coverage, test report, and marimushka exports
 # - Generates a links.json consumed by minibook

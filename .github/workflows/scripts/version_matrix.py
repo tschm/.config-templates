@@ -2,6 +2,9 @@
 """Emit the list of supported Python versions from pyproject.toml.
 
 This helper is used in GitHub Actions to compute the test matrix.
+
+This file is part of the tschm/rhiza repository
+(https://github.com/tschm/rhiza).
 """
 
 import json

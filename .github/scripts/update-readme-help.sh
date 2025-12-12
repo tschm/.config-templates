@@ -1,4 +1,7 @@
 #!/bin/sh
+# This file is part of the tschm/rhiza repository
+# (https://github.com/tschm/rhiza).
+#
 # Script to update README.md with the current output from `make help`
 #
 # This script replaces the hardcoded Makefile help output in README.md

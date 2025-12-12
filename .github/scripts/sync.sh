@@ -1,11 +1,14 @@
 #!/bin/sh
+# This file is part of the tschm/rhiza repository
+# (https://github.com/tschm/rhiza).
+#
 # Sync configuration files from template repository
 # - Reads configuration from .github/template.yml
 # - Downloads specified files from the template repository
 # - Copies them to the current repository
 #
 # This script is POSIX-sh compatible and provides manual sync capability
-# for repositories that use tschm/.config-templates as a template.
+# for repositories that use tschm/rhiza as a template.
 
 set -e
 
