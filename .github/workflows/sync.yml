@@ -36,6 +36,6 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
           source: ".github/template.yml"
-          branch: "template-updates"
-          commit-message: "chore: sync template files"
+          branch: "rhiza updates"
+          commit-message: "chore: sync rhiza"
           automerge: false
