@@ -15,6 +15,13 @@
         "SSH_AUTH_SOCK": "${localEnv:SSH_AUTH_SOCK}"
     },
     "forwardPorts": [8080],
+    "portsAttributes": {
+        "8080": {
+            "label": "Marimo Server",
+            "onAutoForward": "notify"
+        }
+    },
+    "postCreateCommand": ".devcontainer/start-marimo.sh",
     "customizations": {
         "vscode": {
             "settings": {
