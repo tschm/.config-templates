@@ -1,6 +1,3 @@
-## Makefile for tschm/.config-templates
-# (https://github.com/tschm/.config-templates)
-#
 # Purpose: Developer tasks using uv/uvx (install, test, docs, marimushka, book).
 # Lines with `##` after a target are parsed into help text,
 # and lines starting with `##@` create section headers in the help output.
