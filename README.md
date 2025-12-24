@@ -1,5 +1,10 @@
 # 🛠️ Config Templates
 
+> [!WARNING]
+> **This repository has been archived and moved to [https://github.com/Jebel-Quant/rhiza](https://github.com/Jebel-Quant/rhiza)**
+> 
+> All further development and updates will take place in the new repository. Please update your references and workflows accordingly.
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python versions](https://img.shields.io/badge/Python-3.11%20•%203.12%20•%203.13%20•%203.14-blue?logo=python)](https://www.python.org/)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg?logo=ruff)](https://github.com/astral-sh/ruff)
