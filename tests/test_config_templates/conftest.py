@@ -1,5 +1,9 @@
-"""Pytest configuration and fixtures for setting up a mock git repository with versioning."""
+"""Pytest configuration and fixtures for setting up a mock git repository with versioning.
 
+Security Notes:
+- S101 (assert usage): Asserts are appropriate in test code for validating conditions
+- S603/S607 (subprocess usage): Any subprocess calls use controlled inputs in test environments
+"""
 import logging
 import os
 import pathlib
